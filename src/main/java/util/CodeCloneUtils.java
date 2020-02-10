@@ -107,4 +107,21 @@ public final class CodeCloneUtils {
 
         return null;
     }
+
+    public static boolean changeInLiteral(String[] first, String[] second) {
+        int newLen = first.length - 1;
+
+        for (int i = 0; i < newLen; i++) {
+            if (!first[i].equals(second[i])) {
+                return false;
+            }
+        }
+
+        return true;
+
+    }
+
+    private static boolean isNumeric(String str) {
+        return str.matches("(\\d)+");
+    }
 }

@@ -77,6 +77,12 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
 
                         if (Arrays.equals(entry.getValue(), otherEntry.getValue())) {
                             holder.registerProblem(otherEntry.getKey(), "Duplicate expression in switch case", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            continue;
+                        }
+
+                        if (CodeCloneUtils.changeInLiteral(entry.getValue(), otherEntry.getValue())) {
+                            holder.registerProblem(otherEntry.getKey(), "Similar expression in switch case (differs by RHS)", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            continue;
                         }
                     }
                 }

@@ -5,11 +5,14 @@ import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
+import com.sun.tools.javac.code.Attribute;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import util.CodeCloneUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
@@ -53,21 +56,29 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                     return;
                 }
 
+                //TODO: will these always be expression statements?
                 PsiExpressionStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
 
-                String[] firstFirst = CodeCloneUtils.getExprAsString(cases[0][0]);
-                String[] secondFirst = CodeCloneUtils.getExprAsString(cases[1][0]);
-                String[] secondSecond = CodeCloneUtils.getExprAsString(cases[1][1]);
+                Map<PsiElement, String[]> elementMap = new HashMap<>();
 
-
-                if (Arrays.equals(firstFirst, secondFirst)) {
-                    holder.registerProblem(cases[1][0],
-                            "EQUAL 00 10", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                for (int i = 0; i < cases.length; i++) {
+                    for (int j = 0; j < cases[0].length; j++) {
+                        if (cases[i][j] != null) {
+                            elementMap.put(cases[i][j], CodeCloneUtils.getExprAsString(cases[i][j]));
+                        }
+                    }
                 }
 
-                if (Arrays.equals(firstFirst, secondSecond)) {
-                    holder.registerProblem(cases[1][1],
-                            "EQUAL 00 11", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                for (Map.Entry<PsiElement, String[]> entry : elementMap.entrySet()) {
+                    for (Map.Entry<PsiElement, String[]> otherEntry : elementMap.entrySet()) {
+                        if (entry.getKey().equals(otherEntry.getKey())) {
+                            continue;
+                        }
+
+                        if (Arrays.equals(entry.getValue(), otherEntry.getValue())) {
+                            holder.registerProblem(otherEntry.getKey(), "Duplicate expression in switch case", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        }
+                    }
                 }
 
 

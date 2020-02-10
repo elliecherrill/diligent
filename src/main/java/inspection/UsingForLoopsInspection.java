@@ -39,6 +39,7 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
 
     @NotNull
     @Override
+    // TODO: Finish this
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
 

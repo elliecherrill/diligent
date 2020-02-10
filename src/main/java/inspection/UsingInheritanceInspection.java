@@ -55,6 +55,7 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
 
         // Check if inheritance is used anywhere in *this* file (not considering inner classes)
         // How would you do this project wide?
+        // TODO: Finish this
         @Override
         public void visitJavaFile(PsiJavaFile file) {
             super.visitJavaFile(file);

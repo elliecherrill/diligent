@@ -49,6 +49,8 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
             public void visitJavaFile(PsiJavaFile file) {
                 super.visitJavaFile(file);
 
+                // TODO: Finish this
+
                 PsiElement[] children = file.getChildren();
                 for (PsiElement child : children) {
                     if (child instanceof PsiClass) {

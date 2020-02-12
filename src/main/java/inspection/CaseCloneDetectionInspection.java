@@ -63,7 +63,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 for (PsiStatement[] c : cases) {
                     for (PsiStatement stat : c) {
                         if (stat != null) {
-                            elementMap.put(stat, CodeCloneUtils.getStatAsString(stat));
+                            elementMap.put(stat, CodeCloneUtils.getStatAsStringArray(stat));
                         }
                     }
                 }
@@ -72,21 +72,24 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                     for (Map.Entry<PsiElement, String[]> otherEntry : elementMap.entrySet()) {
                         PsiElement entryKey = entry.getKey();
                         PsiElement otherEntryKey = otherEntry.getKey();
+
+                        String[] entryValue = entry.getValue();
+                        String[] otherEntryValue = otherEntry.getValue();
+
                         if (entryKey.equals(otherEntryKey)) {
                             continue;
                         }
 
-                        if (Arrays.equals(entry.getValue(), otherEntry.getValue())) {
-                            holder.registerProblem(otherEntry.getKey(),
-                                    "Duplicate expression in switch case",
+                        if (Arrays.equals(entryValue, otherEntryValue)) {
+                            holder.registerProblem(entryKey,
+                                    "Duplicate expression in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                            continue;
                         }
 
                         if (entryKey instanceof PsiExpressionStatement && otherEntryKey instanceof PsiExpressionStatement) {
-                            if (CodeCloneUtils.changeInLiteral(entry.getValue(), otherEntry.getValue())) {
-                                holder.registerProblem(otherEntry.getKey(),
-                                        "Similar expression in switch case - differs by RHS (" + entry.getKey().getText() + " " + otherEntry.getKey().getText() + ")",
+                            if (CodeCloneUtils.changeInLiteral(entryValue, otherEntryValue)) {
+                                holder.registerProblem(entryKey,
+                                        "Similar expression in switch case - differs by RHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                         ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                             }
 
@@ -94,11 +97,12 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
 //                              holder.registerProblem(otherEntry.getKey(), "Similar expression in switch case (differs by RHS)", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 //                          }
                         }
-
+                        //TODO: if statement
+//                        if (entryKey instanceof PsiIfStatement && otherEntryKey instanceof PsiIfStatement) {
+//
+//                        }
                     }
                 }
-
-
             }
         };
     }

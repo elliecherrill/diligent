@@ -45,17 +45,96 @@ public final class CodeCloneUtils {
         return caseBlocks;
     }
 
-    public static String[] getStatAsString(PsiStatement stmt) {
+    public static String[] getStatAsStringArray(PsiStatement stmt) {
+        return getStatAsString(stmt).toArray(new String[0]);
+    }
+
+    private static List<String> getStatAsString(PsiStatement stmt) {
         if (stmt instanceof PsiExpressionStatement) {
             return getExprAsString((PsiExpressionStatement) stmt);
         }
 
-        // TODO: if if statement
+        if (stmt instanceof PsiIfStatement) {
+            return getIfStatAsString((PsiIfStatement) stmt);
+        }
+
+        if (stmt instanceof PsiBreakStatement) {
+            return new ArrayList<>();
+        }
+
+        if (stmt instanceof PsiBlockStatement) {
+            return getBlockStatAsString((PsiBlockStatement) stmt);
+        }
 
         return null;
     }
 
-    private static String[] getExprAsString(PsiExpressionStatement exprStmt) {
+    private static List<String> getBlockStatAsString(PsiBlockStatement stmt) {
+        List<String> blockStmtAsString = new ArrayList<>();
+
+        PsiStatement[] blockStmts = stmt.getCodeBlock().getStatements();
+
+        for (PsiStatement blockStmt : blockStmts) {
+            blockStmtAsString.add("STMT");
+            blockStmtAsString.addAll(getStatAsString(blockStmt));
+        }
+
+        return blockStmtAsString;
+
+    }
+
+    private static List<String> getIfStatAsString(PsiIfStatement stmt) {
+        List<String> ifStmtAsString = new ArrayList<>();
+
+        PsiExpression condExpr = stmt.getCondition();
+
+        if (condExpr != null) {
+            ifStmtAsString.add("COND");
+            ifStmtAsString.addAll(getBinExprAsString((PsiBinaryExpression) condExpr));
+        }
+
+        PsiStatement thenStmt = stmt.getThenBranch();
+        if (thenStmt != null) {
+            ifStmtAsString.add("THEN");
+            ifStmtAsString.addAll(getStatAsString(thenStmt));
+        }
+
+        PsiStatement elseStmt = stmt.getElseBranch();
+        if (elseStmt != null) {
+            ifStmtAsString.add("ELSE");
+            ifStmtAsString.addAll(getStatAsString(elseStmt));
+        }
+
+        return ifStmtAsString;
+    }
+
+    private static List<String> getBinExprAsString(PsiBinaryExpression binExpr) {
+        List<String> binExprAsString = new ArrayList<>();
+
+        PsiExpression leftExpr = binExpr.getLOperand();
+        if (leftExpr instanceof PsiReferenceExpression) {
+            binExprAsString.add(getRefAsString((PsiReferenceExpression) leftExpr));
+        }
+
+        if (leftExpr instanceof PsiLiteralExpression) {
+            binExprAsString.add(getLiteralAsString((PsiLiteralExpression) leftExpr));
+        }
+
+        binExprAsString.add(getOpAsString(binExpr.getOperationSign()));
+
+        PsiExpression rightExpr = binExpr.getROperand();
+        if (rightExpr instanceof PsiReferenceExpression) {
+            binExprAsString.add(getRefAsString((PsiReferenceExpression) rightExpr));
+        }
+
+        if (rightExpr instanceof PsiLiteralExpression) {
+            binExprAsString.add(getLiteralAsString((PsiLiteralExpression) rightExpr));
+        }
+
+        return binExprAsString;
+    }
+
+    private static List<String> getExprAsString(PsiExpressionStatement exprStmt) {
         List<String> exprAsString = new ArrayList<>();
 
         PsiExpression expr = exprStmt.getExpression();
@@ -65,43 +144,57 @@ public final class CodeCloneUtils {
             PsiExpression leftExpr = assignmentExpr.getLExpression();
 
             if (leftExpr instanceof PsiReferenceExpression) {
-                PsiReferenceExpression leftRefExpr = (PsiReferenceExpression) leftExpr;
-                String leftId = getIdentifierString(leftRefExpr);
-
-                if (leftId != null) {
-                    exprAsString.add(leftId);
-                }
+                exprAsString.add(getRefAsString((PsiReferenceExpression) leftExpr));
             }
 
             PsiJavaToken opToken = assignmentExpr.getOperationSign();
-            String opString = opToken.getTokenType().toString();
-            exprAsString.add(opString);
+            exprAsString.add(getOpAsString(opToken));
 
             PsiExpression rightExpr = assignmentExpr.getRExpression();
 
-            // If RHS is a variable
             if (rightExpr instanceof PsiReferenceExpression) {
-                PsiReferenceExpression rightRefExpr = (PsiReferenceExpression) rightExpr;
-                String rightId = getIdentifierString(rightRefExpr);
-
-                if (rightId != null) {
-                    exprAsString.add(rightId);
-                }
+                exprAsString.add(getRefAsString((PsiReferenceExpression) rightExpr));
             }
 
-            // If RHS is a literal
             if (rightExpr instanceof PsiLiteralExpression) {
-                PsiLiteralExpression rightLitExpr = (PsiLiteralExpression) rightExpr;
-                Object rightVal = rightLitExpr.getValue();
-
-                if (rightVal != null) {
-                    String litString = rightVal.toString();
-                    exprAsString.add(litString);
-                }
+                exprAsString.add(getLiteralAsString((PsiLiteralExpression) rightExpr));
             }
         }
 
-        return exprAsString.toArray(new String[0]);
+        if (expr instanceof PsiMethodCallExpression) {
+            //TODO: Handle method calls
+
+        }
+
+        return exprAsString;
+    }
+
+    private static String getOpAsString(PsiJavaToken opToken) {
+        if (opToken.getTokenType() == null) {
+            return "";
+        }
+
+        return opToken.getTokenType().toString();
+    }
+
+    private static String getLiteralAsString(PsiLiteralExpression litExpr) {
+        Object val = litExpr.getValue();
+
+        if (val != null) {
+            return val.toString();
+        }
+
+        return "";
+    }
+
+    private static String getRefAsString(PsiReferenceExpression refExpr) {
+        String id = getIdentifierString(refExpr);
+
+        if (id != null) {
+            return id;
+        }
+
+        return "";
     }
 
     private static String getIdentifierString(PsiReferenceExpression refExpr) {

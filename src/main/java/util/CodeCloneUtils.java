@@ -245,6 +245,11 @@ public final class CodeCloneUtils {
         int secondCondIndex = getStartIndex("COND", second) + 1;
         int secondCondEndIndex = getStartIndex("THEN", second);
 
+        // if no condition
+        if (firstCondIndex == firstCondEndIndex || secondCondIndex == secondCondEndIndex) {
+            return false;
+        }
+
         return Arrays.equals(first, firstCondIndex, firstCondEndIndex, second, secondCondIndex, secondCondEndIndex);
     }
 

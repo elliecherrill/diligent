@@ -24,7 +24,7 @@ public final class InspectionRegistration implements ApplicationComponent, Inspe
                 FieldsFirstInspection.class,
                 CamelCaseInspection.class,
                 SingleCharNameInspection.class,
-                MethodLengthInspection.class,
+//                MethodLengthInspection.class,
                 UsingInheritanceInspection.class,
                 UsingInterfacesInspection.class,
                 CaseCloneDetectionInspection.class

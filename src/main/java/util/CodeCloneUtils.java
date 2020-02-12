@@ -2,54 +2,61 @@ package util;
 
 import com.intellij.psi.*;
 
+import javax.print.DocFlavor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public final class CodeCloneUtils {
 
-    public static PsiExpressionStatement[][] getCaseBlocks(PsiCodeBlock body) {
+    public static PsiStatement[][] getCaseBlocks(PsiCodeBlock body) {
         // How to not iterate through twice?
         PsiStatement[] bodyStatements = body.getStatements();
 
         int numCases = 0;
-        int numExpr = 0;
-        List<Integer> expressions = new ArrayList<>();
+        int numStats = 0;
+        List<Integer> statements = new ArrayList<>();
         for (PsiStatement stat : bodyStatements) {
             if (stat instanceof PsiSwitchLabelStatement) {
                 numCases++;
-                expressions.add(numExpr);
-                numExpr = 0;
+                statements.add(numStats);
+                numStats = 0;
             }
-            if (stat instanceof PsiExpressionStatement) {
-                numExpr++;
+            if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof  PsiBreakStatement)) {
+                numStats++;
             }
         }
 
-        PsiExpressionStatement[][] caseBlocks = new PsiExpressionStatement[numCases][Collections.max(expressions)];
+        PsiStatement[][] caseBlocks = new PsiStatement[numCases][Collections.max(statements)];
         int caseIndex = -1;
-        int exprIndex = 0;
+        int statIndex = 0;
         for (PsiStatement stat : bodyStatements) {
             if (stat instanceof PsiSwitchLabelStatement) {
                 caseIndex++;
-                exprIndex = 0;
+                statIndex = 0;
             }
 
-            // Are they always going to be PsiExpressionStatement?
-            if (stat instanceof PsiExpressionStatement) {
-                caseBlocks[caseIndex][exprIndex] = (PsiExpressionStatement) stat;
-                exprIndex++;
+            if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof  PsiBreakStatement)) {
+                caseBlocks[caseIndex][statIndex] = stat;
+                statIndex++;
             }
         }
 
         return caseBlocks;
     }
 
-    // String array vs string
-    public static String[] getExprAsString(PsiExpressionStatement exprStmt) {
-        // WHAT SHOULD THIS VAL BE?
-        String[] exprAsString = new String[3];
-        int count = 0;
+    public static String[] getStatAsString(PsiStatement stmt) {
+        if (stmt instanceof PsiExpressionStatement) {
+            return getExprAsString((PsiExpressionStatement) stmt);
+        }
+
+        // TODO: if if statement
+
+        return null;
+    }
+
+    private static String[] getExprAsString(PsiExpressionStatement exprStmt) {
+        List<String> exprAsString = new ArrayList<>();
 
         PsiExpression expr = exprStmt.getExpression();
 
@@ -62,14 +69,13 @@ public final class CodeCloneUtils {
                 String leftId = getIdentifierString(leftRefExpr);
 
                 if (leftId != null) {
-                    exprAsString[count] = leftId;
-                    count++;
+                    exprAsString.add(leftId);
                 }
             }
 
             PsiJavaToken opToken = assignmentExpr.getOperationSign();
-            exprAsString[count] = opToken.getTokenType().toString();
-            count++;
+            String opString = opToken.getTokenType().toString();
+            exprAsString.add(opString);
 
             PsiExpression rightExpr = assignmentExpr.getRExpression();
 
@@ -79,22 +85,23 @@ public final class CodeCloneUtils {
                 String rightId = getIdentifierString(rightRefExpr);
 
                 if (rightId != null) {
-                    exprAsString[count] = rightId;
-                    count++;
+                    exprAsString.add(rightId);
                 }
             }
 
             // If RHS is a literal
             if (rightExpr instanceof PsiLiteralExpression) {
                 PsiLiteralExpression rightLitExpr = (PsiLiteralExpression) rightExpr;
+                Object rightVal = rightLitExpr.getValue();
 
-                exprAsString[count] = rightLitExpr.getValue().toString();
-                count++;
-
+                if (rightVal != null) {
+                    String litString = rightVal.toString();
+                    exprAsString.add(litString);
+                }
             }
         }
 
-        return exprAsString;
+        return exprAsString.toArray(new String[0]);
     }
 
     private static String getIdentifierString(PsiReferenceExpression refExpr) {
@@ -108,12 +115,30 @@ public final class CodeCloneUtils {
         return null;
     }
 
+    //TODO: what if they have different lengths?
     public static boolean changeInLiteral(String[] first, String[] second) {
         int newLen = first.length - 1;
 
         for (int i = 0; i < newLen; i++) {
             if (!first[i].equals(second[i])) {
                 return false;
+            }
+        }
+
+        return true;
+
+    }
+
+    //TODO: what if they have different lengths?
+    public static boolean changeInOp(String[] first, String[] second) {
+        // TODO: try to break this
+        int op = 1;
+
+        for (int i = 0; i < first.length; i++) {
+            if (i != op) {
+                if (!first[i].equals(second[i])) {
+                    return false;
+                }
             }
         }
 

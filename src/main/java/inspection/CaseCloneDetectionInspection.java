@@ -56,34 +56,45 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                     return;
                 }
 
-                //TODO: will these always be expression statements?
-                PsiExpressionStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
+                PsiStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
 
                 Map<PsiElement, String[]> elementMap = new HashMap<>();
 
-                for (int i = 0; i < cases.length; i++) {
-                    for (int j = 0; j < cases[0].length; j++) {
-                        if (cases[i][j] != null) {
-                            elementMap.put(cases[i][j], CodeCloneUtils.getExprAsString(cases[i][j]));
+                for (PsiStatement[] c : cases) {
+                    for (PsiStatement stat : c) {
+                        if (stat != null) {
+                            elementMap.put(stat, CodeCloneUtils.getStatAsString(stat));
                         }
                     }
                 }
 
                 for (Map.Entry<PsiElement, String[]> entry : elementMap.entrySet()) {
                     for (Map.Entry<PsiElement, String[]> otherEntry : elementMap.entrySet()) {
-                        if (entry.getKey().equals(otherEntry.getKey())) {
+                        PsiElement entryKey = entry.getKey();
+                        PsiElement otherEntryKey = otherEntry.getKey();
+                        if (entryKey.equals(otherEntryKey)) {
                             continue;
                         }
 
                         if (Arrays.equals(entry.getValue(), otherEntry.getValue())) {
-                            holder.registerProblem(otherEntry.getKey(), "Duplicate expression in switch case", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            holder.registerProblem(otherEntry.getKey(),
+                                    "Duplicate expression in switch case",
+                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                             continue;
                         }
 
-                        if (CodeCloneUtils.changeInLiteral(entry.getValue(), otherEntry.getValue())) {
-                            holder.registerProblem(otherEntry.getKey(), "Similar expression in switch case (differs by RHS)", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                            continue;
+                        if (entryKey instanceof PsiExpressionStatement && otherEntryKey instanceof PsiExpressionStatement) {
+                            if (CodeCloneUtils.changeInLiteral(entry.getValue(), otherEntry.getValue())) {
+                                holder.registerProblem(otherEntry.getKey(),
+                                        "Similar expression in switch case - differs by RHS (" + entry.getKey().getText() + " " + otherEntry.getKey().getText() + ")",
+                                        ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            }
+
+//                          if (CodeCloneUtils.changeInOp(entry.getValue(), otherEntry.getValue())) {
+//                              holder.registerProblem(otherEntry.getKey(), "Similar expression in switch case (differs by RHS)", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+//                          }
                         }
+
                     }
                 }
 

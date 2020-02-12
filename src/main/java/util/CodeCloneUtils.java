@@ -4,6 +4,7 @@ import com.intellij.psi.*;
 
 import javax.print.DocFlavor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -224,7 +225,6 @@ public final class CodeCloneUtils {
 
     //TODO: what if they have different lengths?
     public static boolean changeInOp(String[] first, String[] second) {
-        // TODO: try to break this
         int op = 1;
 
         for (int i = 0; i < first.length; i++) {
@@ -239,7 +239,36 @@ public final class CodeCloneUtils {
 
     }
 
+    public static boolean sameCondition(String[] first, String[] second) {
+        int firstCondIndex = getStartIndex("COND", first) + 1;
+        int firstCondEndIndex = getStartIndex("THEN",first);
+        int secondCondIndex = getStartIndex("COND", second) + 1;
+        int secondCondEndIndex = getStartIndex("THEN", second);
+
+        return Arrays.equals(first, firstCondIndex, firstCondEndIndex, second, secondCondIndex, secondCondEndIndex);
+    }
+
+    private static int getStartIndex(String toFind, String[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].equals(toFind)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     private static boolean isNumeric(String str) {
         return str.matches("(\\d)+");
+    }
+
+    public static String output(String[] str) {
+        StringBuilder sb = new StringBuilder();
+
+        for (String s : str) {
+            sb.append(s);
+        }
+
+        return sb.toString();
     }
 }

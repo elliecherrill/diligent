@@ -121,6 +121,10 @@ public final class CodeCloneUtils {
             binExprAsString.add(getLiteralAsString((PsiLiteralExpression) leftExpr));
         }
 
+        if (leftExpr instanceof PsiBinaryExpression) {
+            binExprAsString.addAll(getBinExprAsString((PsiBinaryExpression) leftExpr));
+        }
+
         binExprAsString.add(getOpAsString(binExpr.getOperationSign()));
 
         PsiExpression rightExpr = binExpr.getROperand();
@@ -130,6 +134,10 @@ public final class CodeCloneUtils {
 
         if (rightExpr instanceof PsiLiteralExpression) {
             binExprAsString.add(getLiteralAsString((PsiLiteralExpression) rightExpr));
+        }
+
+        if (rightExpr instanceof PsiBinaryExpression) {
+            binExprAsString.addAll(getBinExprAsString((PsiBinaryExpression) rightExpr));
         }
 
         return binExprAsString;

@@ -149,6 +149,7 @@ public final class CodeCloneUtils {
         PsiExpression expr = exprStmt.getExpression();
 
         if (expr instanceof PsiAssignmentExpression) {
+            exprAsString.add("LHS");
             PsiAssignmentExpression assignmentExpr = (PsiAssignmentExpression) expr;
             PsiExpression leftExpr = assignmentExpr.getLExpression();
 
@@ -156,9 +157,11 @@ public final class CodeCloneUtils {
                 exprAsString.add(getRefAsString((PsiReferenceExpression) leftExpr));
             }
 
+            exprAsString.add("OP");
             PsiJavaToken opToken = assignmentExpr.getOperationSign();
             exprAsString.add(getOpAsString(opToken));
 
+            exprAsString.add("RHS");
             PsiExpression rightExpr = assignmentExpr.getRExpression();
 
             if (rightExpr instanceof PsiReferenceExpression) {
@@ -217,34 +220,26 @@ public final class CodeCloneUtils {
         return null;
     }
 
-    //TODO: what if they have different lengths?
     public static boolean changeInLiteral(String[] first, String[] second) {
-        int newLen = first.length - 1;
+        // LHS and operator the same
+        // RHS different
+        int firstRhsIndex = getStartIndex("RHS", first);
+        int secondRhsIndex = getStartIndex("RHS", second);
 
-        for (int i = 0; i < newLen; i++) {
-            if (!first[i].equals(second[i])) {
-                return false;
-            }
-        }
-
-        return true;
-
+        return Arrays.equals(first, 0, firstRhsIndex, second, 0, secondRhsIndex);
     }
 
-    //TODO: what if they have different lengths?
     public static boolean changeInOp(String[] first, String[] second) {
-        int op = 1;
+        // LHS and RHS the same
+        // Operator different
+        int firstOpIndex = getStartIndex("OP", first);
+        int firstEndOpIndex = getStartIndex("RHS", first);
 
-        for (int i = 0; i < first.length; i++) {
-            if (i != op) {
-                if (!first[i].equals(second[i])) {
-                    return false;
-                }
-            }
-        }
+        int secondOpIndex = getStartIndex("OP", second);
+        int secondEndOpIndex = getStartIndex("RHS", second);
 
-        return true;
-
+        return Arrays.equals(first, 0, firstOpIndex, second, 0, secondOpIndex) &&
+                Arrays.equals(first, firstEndOpIndex, first.length, second, secondEndOpIndex, second.length);
     }
 
     public static boolean sameCondition(String[] first, String[] second) {

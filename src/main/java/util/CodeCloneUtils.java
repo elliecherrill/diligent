@@ -2,7 +2,6 @@ package util;
 
 import com.intellij.psi.*;
 
-import javax.print.DocFlavor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,7 +51,7 @@ public final class CodeCloneUtils {
 
     private static List<String> getStatAsString(PsiStatement stmt) {
         if (stmt instanceof PsiExpressionStatement) {
-            return getExprAsString((PsiExpressionStatement) stmt);
+            return getExprStmtAsString((PsiExpressionStatement) stmt);
         }
 
         if (stmt instanceof PsiIfStatement) {
@@ -143,10 +142,14 @@ public final class CodeCloneUtils {
         return binExprAsString;
     }
 
-    private static List<String> getExprAsString(PsiExpressionStatement exprStmt) {
-        List<String> exprAsString = new ArrayList<>();
-
+    private static List<String> getExprStmtAsString(PsiExpressionStatement exprStmt) {
         PsiExpression expr = exprStmt.getExpression();
+
+        return getExprAsString(expr);
+    }
+
+    private static List<String> getExprAsString(PsiExpression expr) {
+        List<String> exprAsString = new ArrayList<>();
 
         if (expr instanceof PsiAssignmentExpression) {
             exprAsString.add("LHS");
@@ -171,11 +174,27 @@ public final class CodeCloneUtils {
             if (rightExpr instanceof PsiLiteralExpression) {
                 exprAsString.add(getLiteralAsString((PsiLiteralExpression) rightExpr));
             }
-        }
 
-        if (expr instanceof PsiMethodCallExpression) {
-            //TODO: Handle method calls
+        } else if (expr instanceof PsiMethodCallExpression) {
+            PsiMethodCallExpression methodCallExpr = (PsiMethodCallExpression) expr;
+            PsiReferenceExpression refExpr = methodCallExpr.getMethodExpression();
 
+            exprAsString.add("CALL");
+            exprAsString.add(getRefAsString(refExpr));
+
+            PsiExpressionList paramList = methodCallExpr.getArgumentList();
+            PsiExpression[] params = paramList.getExpressions();
+
+            if (params.length > 0) {
+                exprAsString.add("PARAMS");
+            }
+
+            for (PsiExpression param : params) {
+                exprAsString.addAll(getExprAsString(param));
+            }
+
+        } else if (expr instanceof PsiReferenceExpression) {
+            exprAsString.add(getRefAsString((PsiReferenceExpression) expr));
         }
 
         return exprAsString;

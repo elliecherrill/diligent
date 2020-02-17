@@ -132,7 +132,25 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 // Compare all declarations
 
                 // Compare all method calls
+                for (Map.Entry<PsiMethodCallExpression, String[]> methodCall : methodCallMap.entrySet()) {
+                    for (Map.Entry<PsiMethodCallExpression, String[]> otherMethodCall : methodCallMap.entrySet()) {
+                        PsiMethodCallExpression entryKey = methodCall.getKey();
+                        PsiMethodCallExpression otherEntryKey = otherMethodCall.getKey();
 
+                        String[] entryValue = methodCall.getValue();
+                        String[] otherEntryValue = otherMethodCall.getValue();
+
+                        if (entryKey.equals(otherEntryKey)) {
+                            continue;
+                        }
+
+                        if (Arrays.equals(entryValue, otherEntryValue)) {
+                            holder.registerProblem(entryKey,
+                                    "Duplicate method call in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
+                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        }
+                    }
+                }
             }
         };
     }

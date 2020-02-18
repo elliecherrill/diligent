@@ -396,4 +396,14 @@ public final class CodeCloneUtils {
 
         return sb.toString();
     }
+
+    public static boolean isAllTrue (boolean[] bs) {
+        for (boolean b : bs) {
+            if (!b) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

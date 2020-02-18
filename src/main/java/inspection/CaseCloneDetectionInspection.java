@@ -81,14 +81,18 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             Pair<Integer, Integer> location = new Pair<>(i, j);
 
                             if (type == StatType.ASSIGNMENT) {
-                                assignmentLocationMap.put((PsiAssignmentExpression) stat, location);
+                                PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
+                                assignmentLocationMap.put((PsiAssignmentExpression) expr, location);
                             } else if (type == StatType.DECLARATION) {
                                 declarationLocationMap.put((PsiDeclarationStatement) stat, location);
                             } else if (type == StatType.METHOD_CALL) {
-                                methodCallLocationMap.put((PsiMethodCallExpression) stat, location);
+                                PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
+                                methodCallLocationMap.put((PsiMethodCallExpression) expr, location);
                             } else if (type == StatType.IF) {
                                 ifStmtLocationMap.put((PsiIfStatement) stat, location);
                             }
+                        } else {
+                            cloneDetected[i][j] = true;
                         }
                     }
                 }
@@ -102,6 +106,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         String[] entryValue = assExpr.getValue();
                         String[] otherEntryValue = otherAssExpr.getValue();
 
+                        boolean update = false;
+
                         if (entryKey.equals(otherEntryKey)) {
                             continue;
                         }
@@ -111,6 +117,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                                     "Duplicate assignment expression in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 
+                            updateCloneDetected(cloneDetected, assignmentLocationMap, entryKey, otherEntryKey);
                             continue;
                         }
 
@@ -118,11 +125,19 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Similar assignment expression in switch case - differs by RHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            update = true;
                         }
 
                         if (CodeCloneUtils.changeInOp(entryValue, otherEntryValue)) {
                             holder.registerProblem(otherEntryKey, "Similar assignment expression in switch case - differs by op (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            update = true;
+                        }
+
+                        if (update) {
+                            updateCloneDetected(cloneDetected, assignmentLocationMap, entryKey, otherEntryKey);
                         }
                     }
                 }
@@ -136,6 +151,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         String[] entryValue = ifStmt.getValue();
                         String[] otherEntryValue = otherIfStmt.getValue();
 
+                        boolean update = false;
+
                         if (entryKey.equals(otherEntryKey)) {
                             continue;
                         }
@@ -144,6 +161,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Duplicate 'if' statement in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            updateCloneDetected(cloneDetected, ifStmtLocationMap, entryKey, otherEntryKey);
                             continue;
                         }
 
@@ -151,20 +170,32 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey.getCondition(),
                                     "Same 'if' condition in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            update = true;
                         } else if (CodeCloneUtils.conditionChangeInLhs(entryValue,otherEntryValue)) {
                             holder.registerProblem(entryKey.getCondition(),
                                     "Similar 'if' condition in switch case - differs by LHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            update = true;
                         } else if (CodeCloneUtils.conditionChangeInRhs(entryValue,otherEntryValue)) {
                             holder.registerProblem(entryKey.getCondition(),
                                     "Similar 'if' condition in switch case - differs by RHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            update = true;
                         }
 
                         if (CodeCloneUtils.sameIfBody(entryValue, otherEntryValue)) {
                             holder.registerProblem(entryKey.getThenBranch(),
                                     "Same 'if' body (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            update = true;
+                        }
+
+                        if (update) {
+                            updateCloneDetected(cloneDetected, ifStmtLocationMap, entryKey, otherEntryKey);
                         }
                     }
                 }
@@ -178,6 +209,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         String[] entryValue = declStmt.getValue();
                         String[] otherEntryValue = otherDeclStmt.getValue();
 
+                        boolean update = false;
+
                         if (entryKey.equals(otherEntryKey)) {
                             continue;
                         }
@@ -186,6 +219,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Duplicate declaration statement in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            updateCloneDetected(cloneDetected, declarationLocationMap, entryKey, otherEntryKey);
                             continue;
                         }
 
@@ -193,6 +228,12 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Similar declaration statement in switch case - differs by variable name (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            update = true;
+                        }
+
+                        if (update) {
+                            updateCloneDetected(cloneDetected, declarationLocationMap, entryKey, otherEntryKey);
                         }
                     }
                 }
@@ -214,13 +255,64 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Duplicate method call in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                            updateCloneDetected(cloneDetected, methodCallLocationMap, entryKey, otherEntryKey);
                             continue;
+                        }
+                    }
+                }
+
+                // If we have an entire case where duplicate / similar has been detected for every line
+                for (int i = 0; i < cases.length; i++) {
+                    if (CodeCloneUtils.isAllTrue(cloneDetected[i])) {
+                        if (cases[i][0] != null) {
+                            holder.registerProblem(cases[i][0],
+                                    "Clone 'case' block",
+                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                         }
                     }
                 }
             }
         };
     }
+
+    //TODO: could we make this nicer?
+    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap,
+                                     PsiMethodCallExpression entryKey, PsiMethodCallExpression otherEntryKey) {
+        Pair<Integer, Integer> entryLocation = methodCallLocationMap.get(entryKey);
+        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
+
+        Pair<Integer, Integer> otherEntryLocation = methodCallLocationMap.get(otherEntryKey);
+        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
+    }
+
+    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap,
+                                     PsiDeclarationStatement entryKey, PsiDeclarationStatement otherEntryKey) {
+        Pair<Integer, Integer> entryLocation = declarationLocationMap.get(entryKey);
+        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
+
+        Pair<Integer, Integer> otherEntryLocation = declarationLocationMap.get(otherEntryKey);
+        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
+    }
+
+    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap,
+                                     PsiIfStatement entryKey, PsiIfStatement otherEntryKey) {
+        Pair<Integer, Integer> entryLocation = ifStmtLocationMap.get(entryKey);
+        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
+
+        Pair<Integer, Integer> otherEntryLocation = ifStmtLocationMap.get(otherEntryKey);
+        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
+    }
+
+    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap,
+                                     PsiAssignmentExpression entryKey, PsiAssignmentExpression otherEntryKey) {
+        Pair<Integer, Integer> entryLocation = assignmentLocationMap.get(entryKey);
+        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
+
+        Pair<Integer, Integer> otherEntryLocation = assignmentLocationMap.get(otherEntryKey);
+        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
+    }
+
 
     private StatType addStatToMap(PsiStatement stat, Map<PsiDeclarationStatement, String[]> declarationMap,
                               Map<PsiAssignmentExpression, String[]> assignmentMap, Map<PsiIfStatement, String[]> ifStmtMap,

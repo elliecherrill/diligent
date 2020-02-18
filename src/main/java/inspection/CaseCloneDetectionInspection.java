@@ -8,6 +8,7 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import util.CodeCloneUtils;
+import util.Pair;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -57,15 +58,37 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
 
                 PsiStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
 
+                boolean[][] cloneDetected = new boolean[cases.length][cases[0].length];
+
                 Map<PsiDeclarationStatement, String[]> declarationMap = new HashMap<>();
                 Map<PsiAssignmentExpression, String[]> assignmentMap = new HashMap<>();
                 Map<PsiIfStatement, String[]> ifStmtMap = new HashMap<>();
                 Map<PsiMethodCallExpression, String[]> methodCallMap = new HashMap<>();
 
-                for (PsiStatement[] c : cases) {
-                    for (PsiStatement stat : c) {
+                Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap = new HashMap<>();
+                Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap = new HashMap<>();
+                Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap = new HashMap<>();
+                Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap = new HashMap<>();
+
+                for (int i = 0; i < cases.length; i++) {
+                    for (int j = 0; j < cases[0].length; j++) {
+                        PsiStatement stat = cases[i][j];
                         if (stat != null) {
-                            addStatToMap(stat, declarationMap, assignmentMap, ifStmtMap, methodCallMap);
+                            StatType type = addStatToMap(stat, declarationMap, assignmentMap, ifStmtMap, methodCallMap);
+
+                            assert type != null: "Unexpected PsiStatement type found.";
+
+                            Pair<Integer, Integer> location = new Pair<>(i, j);
+
+                            if (type == StatType.ASSIGNMENT) {
+                                assignmentLocationMap.put((PsiAssignmentExpression) stat, location);
+                            } else if (type == StatType.DECLARATION) {
+                                declarationLocationMap.put((PsiDeclarationStatement) stat, location);
+                            } else if (type == StatType.METHOD_CALL) {
+                                methodCallLocationMap.put((PsiMethodCallExpression) stat, location);
+                            } else if (type == StatType.IF) {
+                                ifStmtLocationMap.put((PsiIfStatement) stat, location);
+                            }
                         }
                     }
                 }
@@ -87,6 +110,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Duplicate assignment expression in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
                             continue;
                         }
 
@@ -198,7 +222,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
         };
     }
 
-    private void addStatToMap(PsiStatement stat, Map<PsiDeclarationStatement, String[]> declarationMap,
+    private StatType addStatToMap(PsiStatement stat, Map<PsiDeclarationStatement, String[]> declarationMap,
                               Map<PsiAssignmentExpression, String[]> assignmentMap, Map<PsiIfStatement, String[]> ifStmtMap,
                               Map<PsiMethodCallExpression, String[]> methodCallMap) {
         //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
@@ -209,25 +233,35 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
             if (expr instanceof PsiAssignmentExpression) {
                 PsiAssignmentExpression assExpr = (PsiAssignmentExpression) expr;
                 assignmentMap.put(assExpr, stringRep);
-                return;
+                return StatType.ASSIGNMENT;
             }
 
             if (expr instanceof PsiMethodCallExpression) {
                 PsiMethodCallExpression callExpr = (PsiMethodCallExpression) expr;
                 methodCallMap.put(callExpr, stringRep);
-                return;
+                return StatType.METHOD_CALL;
             }
         }
 
         if (stat instanceof PsiIfStatement) {
             PsiIfStatement ifStmt = (PsiIfStatement) stat;
             ifStmtMap.put(ifStmt, stringRep);
-            return;
+            return StatType.IF;
         }
 
         if (stat instanceof PsiDeclarationStatement) {
             PsiDeclarationStatement declStmt = (PsiDeclarationStatement) stat;
             declarationMap.put(declStmt, stringRep);
+            return StatType.DECLARATION;
         }
+
+        return null;
     }
+}
+
+enum StatType {
+    ASSIGNMENT,
+    METHOD_CALL,
+    IF,
+    DECLARATION
 }

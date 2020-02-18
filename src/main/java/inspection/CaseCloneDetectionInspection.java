@@ -87,6 +87,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Duplicate assignment expression in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            continue;
                         }
 
                         if (CodeCloneUtils.changeInLiteral(entryValue, otherEntryValue)) {
@@ -119,13 +120,32 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Duplicate 'if' statement in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            continue;
                         }
 
-                        if (CodeCloneUtils.sameCondition(entryValue, otherEntryValue)) {
+                        if (CodeCloneUtils.sameIfCondition(entryValue, otherEntryValue)) {
                             holder.registerProblem(entryKey.getCondition(),
-                                    "Same 'if' condition (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
+                                    "Same 'if' condition in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
+                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        } else if (CodeCloneUtils.conditionChangeInLhs(entryValue,otherEntryValue)) {
+                            holder.registerProblem(entryKey.getCondition(),
+                                    "Similar 'if' condition in switch case - differs by LHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
+                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        } else if (CodeCloneUtils.conditionChangeInRhs(entryValue,otherEntryValue)) {
+                            holder.registerProblem(entryKey.getCondition(),
+                                    "Similar 'if' condition in switch case - differs by RHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                         }
+
+                        if (CodeCloneUtils.sameIfBody(entryValue, otherEntryValue)) {
+                            holder.registerProblem(entryKey.getThenBranch(),
+                                    "Same 'if' body (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
+                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        }
+
+                        //Same THEN, different ELSE
+
+                        //Same ELSE, different THEN
                     }
                 }
 
@@ -148,6 +168,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             holder.registerProblem(entryKey,
                                     "Duplicate method call in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            continue;
                         }
                     }
                 }

@@ -111,6 +111,8 @@ public final class CodeCloneUtils {
     private static List<String> getBinExprAsString(PsiBinaryExpression binExpr) {
         List<String> binExprAsString = new ArrayList<>();
 
+        binExprAsString.add("BINEXPRLHS");
+
         PsiExpression leftExpr = binExpr.getLOperand();
         if (leftExpr instanceof PsiReferenceExpression) {
             binExprAsString.add(getRefAsString((PsiReferenceExpression) leftExpr));
@@ -124,7 +126,10 @@ public final class CodeCloneUtils {
             binExprAsString.addAll(getBinExprAsString((PsiBinaryExpression) leftExpr));
         }
 
+        binExprAsString.add("BINEXPROP");
         binExprAsString.add(getOpAsString(binExpr.getOperationSign()));
+
+        binExprAsString.add("BINEXPRRHS");
 
         PsiExpression rightExpr = binExpr.getROperand();
         if (rightExpr instanceof PsiReferenceExpression) {
@@ -261,7 +266,7 @@ public final class CodeCloneUtils {
                 Arrays.equals(first, firstEndOpIndex, first.length, second, secondEndOpIndex, second.length);
     }
 
-    public static boolean sameCondition(String[] first, String[] second) {
+    public static boolean sameIfCondition(String[] first, String[] second) {
         int firstCondIndex = getStartIndex("COND", first) + 1;
         int firstCondEndIndex = getStartIndex("THEN",first);
         int secondCondIndex = getStartIndex("COND", second) + 1;
@@ -273,6 +278,32 @@ public final class CodeCloneUtils {
         }
 
         return Arrays.equals(first, firstCondIndex, firstCondEndIndex, second, secondCondIndex, secondCondEndIndex);
+    }
+
+    public static boolean conditionChangeInRhs(String[] first, String[] second) {
+        // LHS and operator the same
+        // RHS different
+        int firstRhsIndex = getStartIndex("BINEXPRRHS", first);
+        int secondRhsIndex = getStartIndex("BINEXPRRHS", second);
+
+        return Arrays.equals(first,0, firstRhsIndex, second, 0, secondRhsIndex);
+    }
+
+    public static boolean conditionChangeInLhs(String[] first, String[] second) {
+        // RHS and operator the same
+        // LHS different
+        int firstOpIndex = getStartIndex("BINEXPROP", first);
+        int secondOpIndex = getStartIndex("BINEXPROP", second);
+
+        return Arrays.equals(first,firstOpIndex, first.length, second, secondOpIndex, second.length);
+    }
+
+
+    public static boolean sameIfBody(String[] first, String[] second) {
+        int firstThenIndex = getStartIndex("THEN", first);
+        int secondThenIndex = getStartIndex("THEN", second);
+
+        return Arrays.equals(first, firstThenIndex, first.length, second, secondThenIndex, second.length);
     }
 
     private static int getStartIndex(String toFind, String[] arr) {

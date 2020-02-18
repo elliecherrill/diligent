@@ -45,17 +45,17 @@ public final class CodeCloneUtils {
         return caseBlocks;
     }
 
-    public static String[] getStatAsStringArray(PsiStatement stmt) {
-        return getStatAsString(stmt).toArray(new String[0]);
+    public static String[] getStmtAsStringArray(PsiStatement stmt) {
+        return getStmtAsString(stmt).toArray(new String[0]);
     }
 
-    private static List<String> getStatAsString(PsiStatement stmt) {
+    private static List<String> getStmtAsString(PsiStatement stmt) {
         if (stmt instanceof PsiExpressionStatement) {
             return getExprStmtAsString((PsiExpressionStatement) stmt);
         }
 
         if (stmt instanceof PsiIfStatement) {
-            return getIfStatAsString((PsiIfStatement) stmt);
+            return getIfStmtAsString((PsiIfStatement) stmt);
         }
 
         if (stmt instanceof PsiBreakStatement) {
@@ -63,27 +63,66 @@ public final class CodeCloneUtils {
         }
 
         if (stmt instanceof PsiBlockStatement) {
-            return getBlockStatAsString((PsiBlockStatement) stmt);
+            return getBlockStmtAsString((PsiBlockStatement) stmt);
+        }
+
+        if (stmt instanceof PsiDeclarationStatement) {
+            return getDeclStmtAsString((PsiDeclarationStatement) stmt);
         }
 
         return null;
     }
 
-    private static List<String> getBlockStatAsString(PsiBlockStatement stmt) {
+    private static List<String> getDeclStmtAsString(PsiDeclarationStatement stmt) {
+        List<String> declStmtAsString = new ArrayList<>();
+
+        //TODO: try with multiple elements
+        PsiElement[] elements = stmt.getDeclaredElements();
+
+        for (PsiElement elem : elements) {
+            // TODO: what else could it be?
+            if (elem instanceof PsiLocalVariable) {
+                declStmtAsString.addAll(getLocalVarAsString((PsiLocalVariable) elem));
+            }
+        }
+
+        return declStmtAsString;
+    }
+
+    private static List<String> getLocalVarAsString(PsiLocalVariable var) {
+        List<String> localVarAsString = new ArrayList<>();
+
+        localVarAsString.add("TYPE");
+        PsiTypeElement type = var.getTypeElement();
+        localVarAsString.add(type.getType().getCanonicalText());
+
+        localVarAsString.add("NAME");
+        localVarAsString.add(var.getName());
+
+        if (var.hasInitializer()) {
+            localVarAsString.add("INIT");
+            PsiExpression varInit = var.getInitializer();
+            localVarAsString.addAll(getExprAsString(varInit));
+        }
+
+        return localVarAsString;
+    }
+
+    private static List<String> getBlockStmtAsString(PsiBlockStatement stmt) {
         List<String> blockStmtAsString = new ArrayList<>();
 
         PsiStatement[] blockStmts = stmt.getCodeBlock().getStatements();
 
         for (PsiStatement blockStmt : blockStmts) {
             blockStmtAsString.add("STMT");
-            blockStmtAsString.addAll(getStatAsString(blockStmt));
+            blockStmtAsString.addAll(getStmtAsString(blockStmt));
         }
 
         return blockStmtAsString;
 
     }
 
-    private static List<String> getIfStatAsString(PsiIfStatement stmt) {
+    private static List<String> getIfStmtAsString(PsiIfStatement stmt) {
         List<String> ifStmtAsString = new ArrayList<>();
 
         PsiExpression condExpr = stmt.getCondition();
@@ -96,13 +135,13 @@ public final class CodeCloneUtils {
         PsiStatement thenStmt = stmt.getThenBranch();
         if (thenStmt != null) {
             ifStmtAsString.add("THEN");
-            ifStmtAsString.addAll(getStatAsString(thenStmt));
+            ifStmtAsString.addAll(getStmtAsString(thenStmt));
         }
 
         PsiStatement elseStmt = stmt.getElseBranch();
         if (elseStmt != null) {
             ifStmtAsString.add("ELSE");
-            ifStmtAsString.addAll(getStatAsString(elseStmt));
+            ifStmtAsString.addAll(getStmtAsString(elseStmt));
         }
 
         return ifStmtAsString;
@@ -200,6 +239,9 @@ public final class CodeCloneUtils {
 
         } else if (expr instanceof PsiReferenceExpression) {
             exprAsString.add(getRefAsString((PsiReferenceExpression) expr));
+
+        } else if (expr instanceof PsiLiteralExpression) {
+            exprAsString.add(getLiteralAsString((PsiLiteralExpression) expr));
         }
 
         return exprAsString;
@@ -298,12 +340,37 @@ public final class CodeCloneUtils {
         return Arrays.equals(first,firstOpIndex, first.length, second, secondOpIndex, second.length);
     }
 
-
     public static boolean sameIfBody(String[] first, String[] second) {
         int firstThenIndex = getStartIndex("THEN", first);
         int secondThenIndex = getStartIndex("THEN", second);
 
         return Arrays.equals(first, firstThenIndex, first.length, second, secondThenIndex, second.length);
+    }
+
+    public static boolean declChangeInVarName(String[] first, String[] second) {
+        // int z = 0 and int x = 0 are the same we just have called them different names
+        // Same type and initialiser (if they have one)
+        // Different variable name
+        int firstNameIndex = getStartIndex("NAME", first);
+        int firstEndNameIndex = getStartIndex("INIT",first);
+        int secondNameIndex = getStartIndex("NAME", second);
+        int secondEndNameIndex = getStartIndex("INIT",second);
+
+        boolean sameType = Arrays.equals(first, 0, firstNameIndex, second, 0, secondNameIndex);
+
+        if (!sameType) {
+            return false;
+        }
+
+        if (firstEndNameIndex == -1 && secondEndNameIndex == -1) {
+            return true;
+        }
+
+        if (firstEndNameIndex != -1 && secondEndNameIndex != -1) {
+            return Arrays.equals(first,firstEndNameIndex, first.length, second, secondEndNameIndex, second.length);
+        }
+
+        return false;
     }
 
     private static int getStartIndex(String toFind, String[] arr) {

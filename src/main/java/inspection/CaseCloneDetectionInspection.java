@@ -142,14 +142,36 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                                     "Same 'if' body (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                         }
-
-                        //Same THEN, different ELSE
-
-                        //Same ELSE, different THEN
                     }
                 }
 
                 // Compare all declarations
+                for (Map.Entry<PsiDeclarationStatement, String[]> declStmt : declarationMap.entrySet()) {
+                    for (Map.Entry<PsiDeclarationStatement, String[]> otherDeclStmt : declarationMap.entrySet()) {
+                        PsiDeclarationStatement entryKey = declStmt.getKey();
+                        PsiDeclarationStatement otherEntryKey = otherDeclStmt.getKey();
+
+                        String[] entryValue = declStmt.getValue();
+                        String[] otherEntryValue = otherDeclStmt.getValue();
+
+                        if (entryKey.equals(otherEntryKey)) {
+                            continue;
+                        }
+
+                        if (Arrays.equals(entryValue, otherEntryValue)) {
+                            holder.registerProblem(entryKey,
+                                    "Duplicate declaration statement in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
+                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            continue;
+                        }
+
+                        if (CodeCloneUtils.declChangeInVarName(entryValue,otherEntryValue)) {
+                            holder.registerProblem(entryKey,
+                                    "Similar declaration statement in switch case - differs by variable name (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
+                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        }
+                    }
+                }
 
                 // Compare all method calls
                 for (Map.Entry<PsiMethodCallExpression, String[]> methodCall : methodCallMap.entrySet()) {
@@ -180,7 +202,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                               Map<PsiAssignmentExpression, String[]> assignmentMap, Map<PsiIfStatement, String[]> ifStmtMap,
                               Map<PsiMethodCallExpression, String[]> methodCallMap) {
         //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
-        String[] stringRep = CodeCloneUtils.getStatAsStringArray(stat);
+        String[] stringRep = CodeCloneUtils.getStmtAsStringArray(stat);
 
         if (stat instanceof PsiExpressionStatement) {
             PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();

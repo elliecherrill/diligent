@@ -340,6 +340,13 @@ public final class CodeCloneUtils {
         return Arrays.equals(first,firstOpIndex, first.length, second, secondOpIndex, second.length);
     }
 
+    // TODO
+//    public static boolean orSameCondition(String[] first, String[] second) {
+//        // If first is a condition in the form A OR B
+//        int firstLhsIndex = getStartIndex("BINEXPRLHS", first);
+//        int firstRhsIndex = getStartIndex("BINEXPRRHS", first);
+//    }
+
     public static boolean sameIfBody(String[] first, String[] second) {
         int firstThenIndex = getStartIndex("THEN", first);
         int secondThenIndex = getStartIndex("THEN", second);
@@ -397,13 +404,13 @@ public final class CodeCloneUtils {
         return sb.toString();
     }
 
-    public static boolean isAllTrue (boolean[] bs) {
-        for (boolean b : bs) {
-            if (!b) {
-                return false;
-            }
-        }
-
-        return true;
-    }
+//    public static boolean isAllTrue (boolean[] bs) {
+//        for (boolean b : bs) {
+//            if (!b) {
+//                return false;
+//            }
+//        }
+//
+//        return true;
+//    }
 }

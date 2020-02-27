@@ -10,9 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import util.CodeCloneUtils;
 import util.Pair;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
@@ -58,17 +56,23 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
 
                 PsiStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
 
-                boolean[][] cloneDetected = new boolean[cases.length][cases[0].length];
-
+                // String representation
                 Map<PsiDeclarationStatement, String[]> declarationMap = new HashMap<>();
                 Map<PsiAssignmentExpression, String[]> assignmentMap = new HashMap<>();
                 Map<PsiIfStatement, String[]> ifStmtMap = new HashMap<>();
                 Map<PsiMethodCallExpression, String[]> methodCallMap = new HashMap<>();
 
+                // Location
                 Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap = new HashMap<>();
                 Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap = new HashMap<>();
                 Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap = new HashMap<>();
                 Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap = new HashMap<>();
+
+                // Location of clones
+                Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap = new HashMap<>();
+                Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap = new HashMap<>();
+                Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap = new HashMap<>();
+                Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap = new HashMap<>();
 
                 for (int i = 0; i < cases.length; i++) {
                     for (int j = 0; j < cases[0].length; j++) {
@@ -91,8 +95,6 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             } else if (type == StatType.IF) {
                                 ifStmtLocationMap.put((PsiIfStatement) stat, location);
                             }
-                        } else {
-                            cloneDetected[i][j] = true;
                         }
                     }
                 }
@@ -117,7 +119,9 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                                     "Duplicate assignment expression in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 
-                            updateCloneDetected(cloneDetected, assignmentLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(assignmentCloneMap, assignmentLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(assignmentCloneMap, assignmentLocationMap, otherEntryKey, entryKey);
+
                             continue;
                         }
 
@@ -137,7 +141,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         }
 
                         if (update) {
-                            updateCloneDetected(cloneDetected, assignmentLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(assignmentCloneMap, assignmentLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(assignmentCloneMap, assignmentLocationMap, otherEntryKey, entryKey);
                         }
                     }
                 }
@@ -162,7 +167,9 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                                     "Duplicate 'if' statement in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 
-                            updateCloneDetected(cloneDetected, ifStmtLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(ifStmtCloneMap, ifStmtLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(ifStmtCloneMap, ifStmtLocationMap, otherEntryKey, entryKey);
+
                             continue;
                         }
 
@@ -195,7 +202,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         }
 
                         if (update) {
-                            updateCloneDetected(cloneDetected, ifStmtLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(ifStmtCloneMap, ifStmtLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(ifStmtCloneMap, ifStmtLocationMap, otherEntryKey, entryKey);
                         }
                     }
                 }
@@ -220,7 +228,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                                     "Duplicate declaration statement in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 
-                            updateCloneDetected(cloneDetected, declarationLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(declarationCloneMap, declarationLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(declarationCloneMap, declarationLocationMap, otherEntryKey, entryKey);
                             continue;
                         }
 
@@ -233,7 +242,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         }
 
                         if (update) {
-                            updateCloneDetected(cloneDetected, declarationLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(declarationCloneMap, declarationLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(declarationCloneMap, declarationLocationMap, otherEntryKey, entryKey);
                         }
                     }
                 }
@@ -256,62 +266,138 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                                     "Duplicate method call in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
                                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 
-                            updateCloneDetected(cloneDetected, methodCallLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(methodCallCloneMap, methodCallLocationMap, entryKey, otherEntryKey);
+                            updateCloneSet(methodCallCloneMap, methodCallLocationMap, otherEntryKey, entryKey);
+
                             continue;
                         }
                     }
                 }
 
-                // If we have an entire case where duplicate / similar has been detected for every line
+                // If we have an entire case where duplicate / similar has been detected for every line in another case
                 for (int i = 0; i < cases.length; i++) {
-                    if (CodeCloneUtils.isAllTrue(cloneDetected[i])) {
-                        if (cases[i][0] != null) {
-                            holder.registerProblem(cases[i][0],
-                                    "Clone 'case' block",
-                                    ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                    // Empty case
+                    //TODO: consider fallthrough
+                    if (cases[i][0] == null) {
+                        continue;
+                    }
+
+                    Set<Integer> firstClones = getClones(cases[i][0], declarationCloneMap, assignmentCloneMap, ifStmtCloneMap, methodCallCloneMap);
+                    if (firstClones == null) {
+                        continue;
+                    }
+
+                    Set<Integer> intersection = new HashSet<>(firstClones);
+
+                    for (int j = 1; j < cases[0].length; j++) {
+                        if (cases[i][j] == null) {
+                            break;
+                        }
+                        Set<Integer> currClones = getClones(cases[i][j], declarationCloneMap, assignmentCloneMap, ifStmtCloneMap, methodCallCloneMap);
+                        if (currClones == null) {
+                            intersection.clear();
+                            break;
+                        } else {
+                            intersection.retainAll(currClones);
                         }
                     }
+
+                    if (!intersection.isEmpty()) {
+                        holder.registerProblem(cases[i][0],
+                                "Clone 'case' block (clone of " + intersection + " )",
+                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                    }
                 }
+
+
             }
         };
     }
 
+    private void updateCloneSet(Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap,
+                                Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap,
+                                PsiAssignmentExpression entryKey, PsiAssignmentExpression otherEntryKey) {
+        Set<Integer> existingClones = assignmentCloneMap.get(entryKey);
+        int caseIndex = assignmentLocationMap.get(otherEntryKey).getFirst();
+        if (existingClones == null) {
+            existingClones = new HashSet<>();
+        }
+        existingClones.add(caseIndex);
+        assignmentCloneMap.put(entryKey, existingClones);
+    }
+
+    private void updateCloneSet(Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap,
+                                Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap,
+                                PsiMethodCallExpression entryKey, PsiMethodCallExpression otherEntryKey) {
+        Set<Integer> existingClones = methodCallCloneMap.get(entryKey);
+        int caseIndex = methodCallLocationMap.get(otherEntryKey).getFirst();
+        if (existingClones == null) {
+            existingClones = new HashSet<>();
+        }
+        existingClones.add(caseIndex);
+        methodCallCloneMap.put(entryKey, existingClones);
+    }
+
+    private void updateCloneSet(Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap,
+                                Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap,
+                                PsiDeclarationStatement entryKey, PsiDeclarationStatement otherEntryKey) {
+        Set<Integer> existingClones = declarationCloneMap.get(entryKey);
+        int caseIndex = declarationLocationMap.get(otherEntryKey).getFirst();
+        if (existingClones == null) {
+            existingClones = new HashSet<>();
+        }
+        existingClones.add(caseIndex);
+        declarationCloneMap.put(entryKey, existingClones);
+    }
+
+    private void updateCloneSet(Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap,
+                                Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap,
+                                PsiIfStatement entryKey, PsiIfStatement otherEntryKey) {
+        Set<Integer> existingClones = ifStmtCloneMap.get(entryKey);
+        int caseIndex = ifStmtLocationMap.get(otherEntryKey).getFirst();
+        if (existingClones == null) {
+            existingClones = new HashSet<>();
+        }
+        existingClones.add(caseIndex);
+        ifStmtCloneMap.put(entryKey, existingClones);
+    }
+
     //TODO: could we make this nicer?
-    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap,
-                                     PsiMethodCallExpression entryKey, PsiMethodCallExpression otherEntryKey) {
-        Pair<Integer, Integer> entryLocation = methodCallLocationMap.get(entryKey);
-        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
-
-        Pair<Integer, Integer> otherEntryLocation = methodCallLocationMap.get(otherEntryKey);
-        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
-    }
-
-    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap,
-                                     PsiDeclarationStatement entryKey, PsiDeclarationStatement otherEntryKey) {
-        Pair<Integer, Integer> entryLocation = declarationLocationMap.get(entryKey);
-        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
-
-        Pair<Integer, Integer> otherEntryLocation = declarationLocationMap.get(otherEntryKey);
-        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
-    }
-
-    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap,
-                                     PsiIfStatement entryKey, PsiIfStatement otherEntryKey) {
-        Pair<Integer, Integer> entryLocation = ifStmtLocationMap.get(entryKey);
-        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
-
-        Pair<Integer, Integer> otherEntryLocation = ifStmtLocationMap.get(otherEntryKey);
-        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
-    }
-
-    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap,
-                                     PsiAssignmentExpression entryKey, PsiAssignmentExpression otherEntryKey) {
-        Pair<Integer, Integer> entryLocation = assignmentLocationMap.get(entryKey);
-        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
-
-        Pair<Integer, Integer> otherEntryLocation = assignmentLocationMap.get(otherEntryKey);
-        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
-    }
+//    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap,
+//                                     PsiMethodCallExpression entryKey, PsiMethodCallExpression otherEntryKey) {
+//        Pair<Integer, Integer> entryLocation = methodCallLocationMap.get(entryKey);
+//        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
+//
+//        Pair<Integer, Integer> otherEntryLocation = methodCallLocationMap.get(otherEntryKey);
+//        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
+//    }
+//
+//    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap,
+//                                     PsiDeclarationStatement entryKey, PsiDeclarationStatement otherEntryKey) {
+//        Pair<Integer, Integer> entryLocation = declarationLocationMap.get(entryKey);
+//        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
+//
+//        Pair<Integer, Integer> otherEntryLocation = declarationLocationMap.get(otherEntryKey);
+//        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
+//    }
+//
+//    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap,
+//                                     PsiIfStatement entryKey, PsiIfStatement otherEntryKey) {
+//        Pair<Integer, Integer> entryLocation = ifStmtLocationMap.get(entryKey);
+//        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
+//
+//        Pair<Integer, Integer> otherEntryLocation = ifStmtLocationMap.get(otherEntryKey);
+//        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
+//    }
+//
+//    private void updateCloneDetected(boolean[][] cloneDetected, Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap,
+//                                     PsiAssignmentExpression entryKey, PsiAssignmentExpression otherEntryKey) {
+//        Pair<Integer, Integer> entryLocation = assignmentLocationMap.get(entryKey);
+//        cloneDetected[entryLocation.getFirst()][entryLocation.getSecond()] = true;
+//
+//        Pair<Integer, Integer> otherEntryLocation = assignmentLocationMap.get(otherEntryKey);
+//        cloneDetected[otherEntryLocation.getFirst()][otherEntryLocation.getSecond()] = true;
+//    }
 
 
     private StatType addStatToMap(PsiStatement stat, Map<PsiDeclarationStatement, String[]> declarationMap,
@@ -345,6 +431,35 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
             PsiDeclarationStatement declStmt = (PsiDeclarationStatement) stat;
             declarationMap.put(declStmt, stringRep);
             return StatType.DECLARATION;
+        }
+
+        return null;
+    }
+
+    private Set<Integer> getClones(PsiStatement stat, Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap,
+                                  Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap, Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap,
+                                  Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap) {
+        if (stat instanceof PsiExpressionStatement) {
+            PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
+            if (expr instanceof PsiAssignmentExpression) {
+                PsiAssignmentExpression assExpr = (PsiAssignmentExpression) expr;
+                return assignmentCloneMap.get(assExpr);
+            }
+
+            if (expr instanceof PsiMethodCallExpression) {
+                PsiMethodCallExpression callExpr = (PsiMethodCallExpression) expr;
+                return methodCallCloneMap.get(callExpr);
+            }
+        }
+
+        if (stat instanceof PsiIfStatement) {
+            PsiIfStatement ifStmt = (PsiIfStatement) stat;
+            return ifStmtCloneMap.get(ifStmt);
+        }
+
+        if (stat instanceof PsiDeclarationStatement) {
+            PsiDeclarationStatement declStmt = (PsiDeclarationStatement) stat;
+            return declarationCloneMap.get(declStmt);
         }
 
         return null;

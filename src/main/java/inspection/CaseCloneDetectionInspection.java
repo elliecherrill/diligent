@@ -11,6 +11,8 @@ import util.CodeCloneUtils;
 import util.Pair;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
@@ -302,14 +304,20 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         }
                     }
 
-                    if (!intersection.isEmpty()) {
+                    int currCase = i;
+                    List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).filter(x -> x != currCase).boxed().collect(Collectors.toList());
+
+                    if (intersection.containsAll(rangeOfCases)) {
+                        holder.registerProblem(statement,
+                                "All cases in switch are clones",
+                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        return;
+                    } else if (!intersection.isEmpty()) {
                         holder.registerProblem(cases[i][0],
                                 "Clone 'case' block (clone of " + intersection + " )",
                                 ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                     }
                 }
-
-
             }
         };
     }

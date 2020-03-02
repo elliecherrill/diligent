@@ -52,6 +52,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 super.visitSwitchStatement(statement);
 
                 PsiCodeBlock switchBody = statement.getBody();
+
                 if (switchBody == null) {
                     return;
                 }
@@ -276,6 +277,9 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                     }
                 }
 
+                List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).boxed().collect(Collectors.toList());
+                List<Set<Integer>> clones = new ArrayList<>(cases.length);
+
                 // If we have an entire case where duplicate / similar has been detected for every line in another case
                 for (int i = 0; i < cases.length; i++) {
                     // Empty case
@@ -285,7 +289,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                     }
 
                     Set<Integer> firstClones = getClones(cases[i][0], declarationCloneMap, assignmentCloneMap, ifStmtCloneMap, methodCallCloneMap);
-                    if (firstClones == null) {
+
+                    if (firstClones.size() == 0) {
                         continue;
                     }
 
@@ -304,22 +309,47 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         }
                     }
 
-                    int currCase = i;
-                    List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).filter(x -> x != currCase).boxed().collect(Collectors.toList());
+                    // Add itself to its clones
+                    intersection.add(i);
 
-                    if (intersection.containsAll(rangeOfCases)) {
-                        holder.registerProblem(statement,
-                                "All cases in switch are clones",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        return;
-                    } else if (!intersection.isEmpty()) {
+                    clones.add(intersection);
+
+                    if (!intersection.isEmpty()) {
                         holder.registerProblem(cases[i][0],
                                 "Clone 'case' block (clone of " + intersection + " )",
                                 ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                     }
                 }
+
+                if (transitiveClosureOfClones(clones, rangeOfCases)) {
+                    holder.registerProblem(statement,
+                            "All cases in switch are clones",
+                            ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                }
             }
         };
+    }
+
+    private boolean transitiveClosureOfClones(List<Set<Integer>> cases, List<Integer> aim) {
+        if (cases.isEmpty()){
+            return false;
+        }
+
+        Set<Integer> currClones = new HashSet<>(cases.get(0));
+
+        for (int i = 1; i < cases.size(); i++) {
+            if (Collections.disjoint(currClones, cases.get(i))) {
+                currClones = cases.get(i);
+            } else {
+                currClones.addAll(cases.get(i));
+            }
+
+            if (currClones.containsAll(aim)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void updateCloneSet(Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap,

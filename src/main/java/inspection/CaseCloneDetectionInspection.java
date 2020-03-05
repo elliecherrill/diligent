@@ -8,6 +8,8 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import util.CodeCloneUtils;
+import util.Feedback;
+import util.FeedbackHolder;
 import util.Pair;
 
 import java.util.*;
@@ -46,6 +48,15 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
+            FeedbackHolder feedbackHolder = new FeedbackHolder();
+
+            @Override
+            public void visitFile(@NotNull PsiFile file) {
+                super.visitFile(file);
+
+                //TODO: move up to this level
+                //feedbackHolder.writeToFile();
+            }
 
             @Override
             public void visitSwitchStatement(PsiSwitchStatement statement) {
@@ -325,8 +336,15 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                     holder.registerProblem(statement,
                             "All cases in switch are clones",
                             ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
+                    //TODO: add feedback like this instead of to problems holder
+                    //TODO: get line number (this is offset - not right)
+                    feedbackHolder.addFeedback(new Feedback(statement.getTextOffset(), "All cases in switch are clones"));
                 }
+                // TODO: move up to visitFile method
+                feedbackHolder.writeToFile();
             }
+
         };
     }
 

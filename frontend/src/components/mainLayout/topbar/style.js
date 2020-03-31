@@ -1,7 +1,6 @@
 import {
     makeStyles
 } from '@material-ui/core/index'
-import React from 'react'
 
 export const useStyles = makeStyles(theme => ({
     drawerButton: {

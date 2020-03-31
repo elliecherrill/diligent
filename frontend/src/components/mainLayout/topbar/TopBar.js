@@ -24,7 +24,7 @@ function ElevationScroll({ children, window }) {
 }
 
 export default props => {
-    const { onLogoutAction, goToHome, setGoToHome, userInfo } = props
+    const { onLogoutAction } = props
     const classes = useStyles()
 
     return (

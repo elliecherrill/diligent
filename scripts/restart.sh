@@ -1,12 +1,12 @@
 #! /bin/bash
 
 export PATH=$PWD/venv/bin:$PATH
-export veracity_path=$PWD
+export diligent_path=$PWD
 
 cd ~
-rm -rf ~/veracity
-cp -r $veracity_path ~/veracity
-cd veracity
+rm -rf ~/individual_project
+cp -r $diligent_path ~/individual_project
+cd individual_project
 
 echo Killing any gunicorn instances
 pkill gunicorn

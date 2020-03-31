@@ -1,0 +1,49 @@
+{
+  "name": "diligent",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "^4.5.0",
+    "@material-ui/icons": "^4.4.3",
+    "axios": "^0.19.0",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.15.1",
+    "enzyme-to-json": "^3.4.3",
+    "eslint-plugin-react": "^7.17.0",
+    "history": "latest",
+    "json2mq": "^0.2.0",
+    "moment": "^2.24.0",
+    "react": "^16.8.6",
+    "react-cookie": "^4.0.1",
+    "react-csv": "^1.1.1",
+    "react-dom": "^16.8.6",
+    "react-router-dom": "^5.0.1",
+    "react-scripts": "3.0.1",
+    "clsx": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "test": "jest --collectCoverage",
+    "build": "react-scripts --max_old_space_size=3072 build",
+    "postbuild": "",
+    "eject": "react-scripts eject",
+    "lint": "eslint src",
+    "lint-fix": "eslint src --fix"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "proxy": "http://localhost:5000",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

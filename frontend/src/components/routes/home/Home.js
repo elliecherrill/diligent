@@ -26,7 +26,7 @@ const Home = props => {
     return (
         <div>
             <Grid container justify='center' className={classes.gridContainer}>
-                Home Page
+                <p>  Home Page </p>
             </Grid>
         </div>
     )

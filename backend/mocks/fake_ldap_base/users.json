@@ -1,5 +1,5 @@
 {
-  "logan": {
+  "staff": {
     "givenName": "staff",
     "sn": "Howlett",
     "distinguishedName": {
@@ -10,7 +10,7 @@
     "extensionAttribute6": "Staff"
   },
 
-  "abc123": {
+  "student": {
     "givenName": "student",
     "sn": "123",
     "distinguishedName": {

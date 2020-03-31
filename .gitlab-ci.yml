@@ -22,6 +22,7 @@ deploy:
     - npm install --prefix frontend
     - npm run build --prefix frontend
     - export ENV=production
+    - chmod +x ./scripts/restart.sh
     - ./scripts/restart.sh
   environment:
     name: production

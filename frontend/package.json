@@ -6,6 +6,7 @@
     "@material-ui/core": "^4.5.0",
     "@material-ui/icons": "^4.4.3",
     "axios": "^0.19.0",
+    "clsx": "latest",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.1",
     "enzyme-to-json": "^3.4.3",
@@ -19,7 +20,7 @@
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
-    "clsx": "latest"
+    "serve": "^11.3.0"
   },
   "scripts": {
     "start": "react-scripts start",

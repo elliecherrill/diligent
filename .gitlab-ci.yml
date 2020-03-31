@@ -24,6 +24,8 @@ deploy:
     - export ENV=production
     - chmod +x ./scripts/restart.sh
     - ./scripts/restart.sh
+  tags:
+    - deploy
   environment:
     name: production
     url: http://146.169.40.72:8000

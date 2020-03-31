@@ -1,11 +1,24 @@
 #! /bin/bash
 
+echo Starting restart script
+
 export PATH=$PWD/venv/bin:$PATH
 export diligent_path=$PWD
 
+echo here 1
+
 cd ~
+
+echo here 2
+
 rm -rf ~/individual_project
+
+echo here 3
+
 cp -r $diligent_path ~/individual_project
+
+echo here 4
+
 cd individual_project
 
 echo Killing any gunicorn instances

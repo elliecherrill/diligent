@@ -23,8 +23,6 @@ deploy:
     - npm run build --prefix frontend
     - export ENV=production
     - ./scripts/restart.sh
-  tags:
-    - deploy_prod
   environment:
     name: production
     url: http://146.169.40.72:8000

@@ -1,0 +1,23 @@
+{
+  "logan": {
+    "givenName": "staff",
+    "sn": "Howlett",
+    "distinguishedName": {
+      "OU": [
+        "doc"
+      ]
+    },
+    "extensionAttribute6": "Staff"
+  },
+
+  "abc123": {
+    "givenName": "student",
+    "sn": "123",
+    "distinguishedName": {
+      "OU": [
+        "doc"
+      ]
+    },
+    "extensionAttribute6": "Student"
+  }
+}

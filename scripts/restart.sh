@@ -30,5 +30,5 @@ else
   sudo killall node
 fi
 
-cd ../
-npx serve -s frontend/build -l 3000 &>/dev/null &
+cd frontend/
+npx serve -s build -l 3000 &>/dev/null &

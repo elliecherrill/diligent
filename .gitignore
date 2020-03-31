@@ -11,3 +11,37 @@ gradlew*
 src/test/
 
 !.gitignore
+
+# build directory
+build
+
+# pyc files
+**/*.pyc
+
+.cache
+
+# content of db
+**/*.db
+
+# idea files
+.idea
+*.iml
+
+# virtual environment
+venv/
+
+# out
+out/
+
+# pycache
+**/__pycache__/
+
+# node
+node_modules/
+
+# coverage log
+.coverage
+
+# vs code
+.vscode/
+

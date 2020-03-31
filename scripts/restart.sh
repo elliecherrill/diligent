@@ -27,7 +27,7 @@ then
   echo Node not running already
 else
   echo Killing and restarting node
-  sudo killall node
+  killall node
 fi
 
 cd frontend/

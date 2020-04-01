@@ -1,33 +1,50 @@
 import {
-    Grid
-} from '@material-ui/core/index'
-import React from 'react'
-import useStyles from './style'
+    Button
+} from '@material-ui/core'
+import React, {useState} from 'react'
+import colours from '../../../constants/colours'
+import {Redirect} from 'react-router-dom'
+import routes from '../../../constants/routes'
 
-const Home = props => {
-    const classes = useStyles()
-
-    // const [loaded, setLoaded] = useState(true)
-
-    // const isSmallScreen = IsSmallScreen()
-
-    // if (!loaded) {
-    //     return (<div className={classes.root}>
-    //         <Grid container justify='center' className={classes.gridContainer}>
-    //             <Grid item>
-    //                 <CircularProgress/>
-    //             </Grid>
-    //         </Grid>
-    //     </div>)
-    // }
+const Home = () => {
+    document.body.style.backgroundColor = colours.PRIMARY
+    const [goToNewConfig, setGoToNewConfig] = useState(false)
 
     return (
         <div>
-            <Grid container justify='center' className={classes.gridContainer}>
-                <p>  Home Page </p>
-            </Grid>
+            <section className='hero is-large'>
+                <div className='hero-body'>
+                    <div className='container'>
+                        <h1 className='title is-1' style={{fontSize: '5rem', textAlign: 'center', color: 'white'}}>
+                            Diligent
+                        </h1>
+                        <h1 className='subtitle is-3'
+                            style={{
+                                fontSize: '2rem',
+                                textAlign: 'center',
+                                color: 'rgb(220, 220, 220)',
+                                marginBottom: '5%'
+                            }}>
+                            A tool which does something.
+                        </h1>
+                    </div>
+                </div>
+            </section>
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Button
+                    variant='outlined'
+                    color='secondary'
+                    onClick={() => setGoToNewConfig(true)}
+                >
+                    Create A New Configuration
+                </Button>
+            </div>
+
+            {goToNewConfig ? <Redirect to={routes.NEW_CONFIG}/> : false}
+
         </div>
     )
 }
+
 
 export default Home

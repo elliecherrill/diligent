@@ -17,5 +17,10 @@ export const useStyles = makeStyles(theme => ({
     },
     lastItemLeft: {
         flexGrow: 1
+    },
+    logo: {
+        height: '24px',
+        width: '24px',
+        marginRight: theme.spacing(2)
     }
 }))

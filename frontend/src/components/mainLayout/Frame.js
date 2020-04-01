@@ -33,7 +33,7 @@ const Frame = props => {
                     userInfo={userInfo}
                 />
                 <div className={classes.main}>
-                    <Container className={classes.container}>
+                    <Container className={classes.container} maxWidth={false}>
                         <Switch>
                             <Route
                                 exact

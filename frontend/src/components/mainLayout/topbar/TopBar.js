@@ -14,6 +14,7 @@ import {
 import { useStyles } from './style'
 import routes from '../../../constants/routes'
 import Tooltip from '@material-ui/core/Tooltip'
+import logo from '../../../images/diligent-white.svg'
 
 function ElevationScroll({ children, window }) {
     return React.cloneElement(children, {
@@ -32,6 +33,7 @@ export default props => {
             <ElevationScroll {...props}>
                 <AppBar className={props.newWindow ? '' : classes.appBar} >
                     <Toolbar className={classes.toolbar}>
+                        <img src={logo} alt='Diligent Logo' className={classes.logo}/>
                         <Typography variant='h6' className={classes.lastItemLeft}>
                             Diligent
                         </Typography>

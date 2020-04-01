@@ -11,7 +11,8 @@ let theme =  createMuiTheme({
         secondary: {
             light: '#fff280',
             dark: '#b9901d',
-            main: '#efc050',
+            // main: '#efc050',
+            main: '#ffffff',
             contrastText: '#000000'
         }
     },

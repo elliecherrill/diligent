@@ -5,6 +5,7 @@ import authenticationService from '../../utils/authenticationService'
 import routes from '../../constants/routes'
 import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import Home from '../routes/home/Home'
+import NewConfig from '../routes/newConfig/NewConfig'
 import useUserInformation from './topbar/userInfoHook'
 import useStyles from './style'
 import PageNotFound from '../routes/404/PageNotFound'
@@ -40,6 +41,14 @@ const Frame = props => {
                                 render={routeProps => {
                                     window.scrollTo(0, 0)
                                     return <Home userInfo={userInfo} setGoToHome={setGoToHome} {...routeProps} />
+                                }}
+                            />
+                            <Route
+                                exact
+                                path={routes.NEW_CONFIG}
+                                render={routeProps => {
+                                    window.scrollTo(0, 0)
+                                    return <NewConfig />
                                 }}
                             />
                             <Route

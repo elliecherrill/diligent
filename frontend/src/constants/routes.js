@@ -1,5 +1,6 @@
 export default {
     LOGIN: '/',
     REFRESH: '/token/refresh',
-    HOME: '/home'
+    HOME: '/home',
+    NEW_CONFIG: '/create-configuration'
 }

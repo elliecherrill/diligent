@@ -22,12 +22,5 @@ gunicorn backend.wsgi:app \
            --enable-stdio-inheritance \
            --daemon
 
-if ! pgrep -x "node" > /dev/null
-then
-  echo Node not running already
-else
-  echo Killing and restarting node
-  sudo killall node
-fi
-
-serve -s frontend/build -l 3000 &>/dev/null &
+cd frontend/
+npx serve -s build -l 3000 &>/dev/null &

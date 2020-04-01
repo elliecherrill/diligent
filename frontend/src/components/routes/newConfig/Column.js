@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import ConfigComponent from "./ConfigComponent";
-import {Draggable, Droppable} from "react-beautiful-dnd";
+import {Droppable} from "react-beautiful-dnd";
 
 const Container = styled.div`
     margin: 8px;

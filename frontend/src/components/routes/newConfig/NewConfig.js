@@ -1,5 +1,4 @@
-import React, {useState} from 'react'
-import useStyles from './style'
+import React from 'react'
 import initialConfigs from '../../../constants/config'
 import Column from './Column'
 import {DragDropContext} from 'react-beautiful-dnd'

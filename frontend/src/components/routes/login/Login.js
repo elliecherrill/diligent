@@ -12,6 +12,7 @@ import authentication from '../../../utils/authenticationService'
 import routes from '../../../constants/routes'
 
 export default props => {
+    document.body.style.backgroundColor = 'inherit'
     const classes = useStyles()
     const [username, setUser] = useState('')
     const [password, setPassword] = useState('')
@@ -32,6 +33,7 @@ export default props => {
 
     if (allowRedirection) return <Redirect to={from} />
     return (
+
         <Container component='main' maxWidth='xs'>
             <CssBaseline />
             <div className={classes.paper}>

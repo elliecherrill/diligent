@@ -1,13 +1,14 @@
 import React from 'react'
 import styled from 'styled-components'
 import {Draggable} from 'react-beautiful-dnd'
+import colours from '../../../constants/colours'
 
 const Container = styled.div`
     margin-bottom: 8px;
     padding: 8px;
-    border: 1px solid lightgrey;
-    border-radius: 2px;
-    background-color: ${props => (props.isDragging ? 'lightgreen' : 'white')};
+    border: 3px solid ${props => (props.isDragging ? colours.PRIMARY : 'lightgray')};
+    border-radius: 10px;
+    background-color: white;
 `
 
 export default class ConfigComponent extends React.Component {

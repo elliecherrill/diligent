@@ -3,6 +3,8 @@ import initialConfigs from '../../../constants/config'
 import Column from './Column'
 import {DragDropContext} from 'react-beautiful-dnd'
 import styled from 'styled-components'
+import colours from '../../../constants/colours'
+import {Button} from '@material-ui/core'
 
 const Container = styled.div`
     display: flex;
@@ -12,24 +14,7 @@ const Container = styled.div`
 class NewConfig extends React.Component {
     state = initialConfigs
 
-    // onDragStart = () => {
-    //     document.body.style.color = 'orange'
-    //     document.body.style.transition = 'background-color 0.2s ease'
-    // }
-    //
-    // onDragUpdate = update => {
-    //     const {destination} = update
-    //     const opacity = destination
-    //         ? destination.index / Object.keys(this.state.configs).length
-    //         : 0
-    //
-    //     document.body.style.backgroundColor = `rgba(153, 141, 217, ${opacity})`
-    // }
-
     onDragEnd = result => {
-        // document.body.style.color = 'inherit'
-        // document.body.style.backgroundColor = 'inherit'
-
         const {destination, source, draggableId} = result
 
         if (!destination) {
@@ -94,21 +79,30 @@ class NewConfig extends React.Component {
     }
 
     render() {
+        document.body.style.backgroundColor = colours.PRIMARY
         return (
-            <DragDropContext
-                onDragEnd={this.onDragEnd}
-                // onDragStart={this.onDragStart}
-                // onDragUpdate={this.onDragUpdate}
-            >
-                <Container>
-                    {this.state.columnOrder.map((columnId) => {
-                        const column = this.state.categories[columnId]
-                        const configs = column.configIds.map(configId => this.state.configs[configId])
+            <div>
+                <DragDropContext
+                    onDragEnd={this.onDragEnd}
+                >
+                    <Container>
+                        {this.state.columnOrder.map((columnId) => {
+                            const column = this.state.categories[columnId]
+                            const configs = column.configIds.map(configId => this.state.configs[configId])
 
-                        return <Column key={column.id} column={column} configs={configs}/>
-                    })}
-                </Container>
-            </DragDropContext>
+                            return <Column key={column.id} column={column} configs={configs}/>
+                        })}
+                    </Container>
+                </DragDropContext>
+                <div style={{display: 'flex', justifyContent: 'center', marginTop: '5%'}}>
+                    <Button
+                        variant='contained'
+                        color='secondary'
+                    >
+                        Save Configuration
+                    </Button>
+                </div>
+            </div>
         )
     }
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import initialConfigs from '../../../constants/config'
+import {initialConfigs} from '../../../constants/config'
 import Column from './Column'
 import {DragDropContext} from 'react-beautiful-dnd'
 import styled from 'styled-components'
@@ -81,27 +81,15 @@ class NewConfig extends React.Component {
     }
 
     getHighPriorityChecks = () => {
-        const configIds = this.state.categories['category-1'].configIds
-
-        return configIds.map((configId) => {
-            return this.state.configs[configId].content
-        })
+        return this.state.categories['category-1'].configIds
     }
 
     getMediumPriorityChecks = () => {
-        const configIds = this.state.categories['category-2'].configIds
-
-        return configIds.map((configId) => {
-            return this.state.configs[configId].content
-        })
+        return this.state.categories['category-2'].configIds
     }
 
     getLowPriorityChecks = () => {
-        const configIds = this.state.categories['category-3'].configIds
-
-        return configIds.map((configId) => {
-            return this.state.configs[configId].content
-        })
+        return this.state.categories['category-3'].configIds
     }
 
     isValid = () => {

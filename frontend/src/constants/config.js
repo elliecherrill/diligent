@@ -1,4 +1,4 @@
-const initialConfigs = {
+export const initialConfigs = {
     configs: {
         'config-1': { id: 'config-1', content: 'No use of == for String comparison'},
         'config-2': { id: 'config-2', content: 'Use of inheritance'},
@@ -15,5 +15,3 @@ const initialConfigs = {
     },
     columnOrder: ['category-1', 'category-2', 'category-3', 'category-4']
 }
-
-export default initialConfigs

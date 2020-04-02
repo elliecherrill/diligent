@@ -67,6 +67,10 @@ class Configuration:
         })
 
     @classmethod
-    def find_configs_by_id(cls, username):
+    def find_configs_by_username(cls, username):
         return db.find("configuration", {"creator": username})
+
+    @classmethod
+    def find_config_by_id(cls, config_id):
+        return db.find_one("configuration", {"_id": config_id})
 

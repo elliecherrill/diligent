@@ -62,17 +62,46 @@ def create_new_quiz():
 
     return response
 
+
 @bp.route("/get_my_configs", methods=["GET"])
 @jwt_required
 def get_my_configs():
     username = get_jwt_identity()
-    configs = Configuration.find_configs_by_id(username)
+    configs = Configuration.find_configs_by_username(username)
 
     titles = []
     for config in configs:
-        titles.append({"id": config["_id"], "title": config["title"]})
+        titles.append({"_id": config["_id"], "title": config["title"]})
 
     return jsonify(titles)
+
+
+@bp.route("/get_checks/<config_id>", methods=["GET"])
+def get_checks(config_id):
+    config = Configuration.find_config_by_id(ObjectId(config_id))
+
+    checks = {"high": list(), "medium": list(), "low": list()}
+
+    forFile = {
+        'config-1': '==-string',
+        'config-2': 'inheritance',
+        'config-3': 'interfaces',
+        'config-4': 'streams',
+        'config-5': 'camelcase',
+        'config-6': 'screaming-snake-case'
+    }
+
+    for highCheck in config["high"]:
+        checks["high"].append(forFile[highCheck["check"]])
+
+    for mediumCheck in config["medium"]:
+        checks["medium"].append(forFile[mediumCheck["check"]])
+
+    for lowCheck in config["low"]:
+        checks["low"].append(forFile[lowCheck["check"]])
+
+    return jsonify(checks)
+
 
 ##################################################################
 # U T I L I T I E S

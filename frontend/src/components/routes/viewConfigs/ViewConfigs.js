@@ -20,7 +20,19 @@ const Container = styled.div`
 `
 
 const createFile = c => {
-    console.log(c)
+    API.get_checks(c['_id']['$oid']).then(response => downloadFile(response))
+
+}
+
+const downloadFile = async (response) => {
+    const blob = new Blob([JSON.stringify(response)],{type:'application/json'})
+    const href = await URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = href
+    link.download = 'diligent.json'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
 }
 
 const ViewConfigs = () => {

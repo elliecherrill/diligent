@@ -163,7 +163,7 @@ class NewConfig extends React.Component {
                             Save Configuration
                         </Button>
 
-                        {this.state.goToHome ? <Redirect to={{pathname: routes.HOME, state: this.state.title}}/> : false}
+                        {this.state.goToHome ? <Redirect push to={{pathname: routes.HOME, state: this.state.title}}/> : false}
                     </div>
                 </div>
             </div>

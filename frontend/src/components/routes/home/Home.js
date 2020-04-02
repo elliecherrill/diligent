@@ -58,8 +58,8 @@ const Home = (props) => {
                 </Button>
             </div>
 
-            {goToNewConfig ? <Redirect to={routes.NEW_CONFIG}/> : false}
-            {goToViewConfigs ? <Redirect to={routes.VIEW_CONFIGS}/> : false}
+            {goToNewConfig ? <Redirect push to={routes.NEW_CONFIG}/> : false}
+            {goToViewConfigs ? <Redirect push to={routes.VIEW_CONFIGS}/> : false}
             {props.location.state ? <NewConfigSnackbar title={props.location.state} setGoToViewsConfigs={setGoToViewsConfigs} /> : false}
         }
         </div>

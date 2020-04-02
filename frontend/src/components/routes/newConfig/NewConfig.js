@@ -5,6 +5,7 @@ import {DragDropContext} from 'react-beautiful-dnd'
 import styled from 'styled-components'
 import colours from '../../../constants/colours'
 import {Button} from '@material-ui/core'
+import * as API from '../../../api'
 
 const Container = styled.div`
     display: flex;
@@ -78,6 +79,30 @@ class NewConfig extends React.Component {
         this.setState(newState)
     }
 
+    getHighPriorityChecks = () => {
+        const configIds = this.state.categories['category-1'].configIds
+
+        return configIds.map((configId) => {
+            return this.state.configs[configId].content
+        })
+    }
+
+    getMediumPriorityChecks = () => {
+        const configIds = this.state.categories['category-2'].configIds
+
+        return configIds.map((configId) => {
+            return this.state.configs[configId].content
+        })
+    }
+
+    getLowPriorityChecks = () => {
+        const configIds = this.state.categories['category-3'].configIds
+
+        return configIds.map((configId) => {
+            return this.state.configs[configId].content
+        })
+    }
+
     render() {
         document.body.style.backgroundColor = colours.PRIMARY
         return (
@@ -98,6 +123,12 @@ class NewConfig extends React.Component {
                     <Button
                         variant='contained'
                         color='secondary'
+                        onClick={() => {
+                            //Add validity check of title etc
+                            const title = "this is my config"
+                            API.create_new_config(title, this.getHighPriorityChecks(), this.getMediumPriorityChecks(), this.getLowPriorityChecks())
+                            //.then() create snackbar
+                        }}
                     >
                         Save Configuration
                     </Button>

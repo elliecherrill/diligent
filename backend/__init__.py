@@ -3,7 +3,6 @@ import os
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_login import LoginManager
-from flask_socketio import SocketIO
 
 from .auth import ldap_handler
 from .db import database
@@ -57,10 +56,11 @@ def create_app(test_configuration=None, test_db=None):
 
     ############################################################
 
-    from .views import auth, index, home
+    from .views import auth, index, home, configuration
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(index.bp)
     app.register_blueprint(home.bp)
+    app.register_blueprint(configuration.bp)
 
     return app

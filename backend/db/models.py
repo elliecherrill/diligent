@@ -1,7 +1,7 @@
 from .database import DB
-from bson import ObjectId
 
 db = DB
+
 
 class User:
 
@@ -46,10 +46,22 @@ class User:
     def find_by_username(cls, username):
         return db.find_one("user", {"username": username})
 
-# TODO
-# CREATE A CLASS CALLED CONFIGURATION - see veracty file
 
+class Configuration:
 
+    def __init__(self, title, creator, high, medium, low):
+        self.title = title
+        self.creator = creator
+        self.high = high
+        self.medium = medium
+        self.low = low
 
-
-
+    def save(self):
+        """Save instance to DB"""
+        return db.add("configuration", {
+            "title": self.title,
+            "creator": self.creator,
+            "high": self.high,
+            "medium": self.medium,
+            "low": self.low
+        })

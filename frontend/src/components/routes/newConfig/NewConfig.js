@@ -131,6 +131,7 @@ class NewConfig extends React.Component {
                             label='Configuration Name'
                             variant='outlined'
                             color='primary'
+                            autoComplete='off'
                             style={{marginRight: '2%'}}
                             id={'title-input'}
                             error={this.state.titleError}

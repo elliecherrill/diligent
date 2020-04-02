@@ -1,17 +1,14 @@
 import React, {useState} from 'react'
 import useStyles from './style'
-import SnackbarContent from '@material-ui/core/SnackbarContent'
-import IconButton from '@material-ui/core/IconButton'
-import Snackbar from '@material-ui/core/Snackbar'
+import {Snackbar, Button, IconButton, SnackbarContent} from '@material-ui/core'
 import clsx from 'clsx'
-
 import {
     Close as CloseIcon,
     PostAdd as NewIcon,
 } from '@material-ui/icons'
 
 
-const NewConfigSnackbar = ({title}) => {
+const NewConfigSnackbar = ({title, setGoToViewsConfigs}) => {
     const classes = useStyles()
     const [open, setOpen] = useState(true)
 
@@ -37,9 +34,15 @@ const NewConfigSnackbar = ({title}) => {
                 </span>
                 }
                 action={[
+                    <Button color="primary" size="small" onClick={() => {
+                        handleClose()
+                        setGoToViewsConfigs(true)
+                    }}>
+                        VIEW
+                    </Button>,
                     <IconButton key="close" aria-label="close" color="inherit" onClick={handleClose}>
                         <CloseIcon className={classes.snackbarIcon}/>
-                    </IconButton>,
+                    </IconButton>
                 ]}
             />
         </Snackbar>

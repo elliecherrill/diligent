@@ -1,16 +1,22 @@
 import {
     Button
 } from '@material-ui/core'
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import colours from '../../../constants/colours'
 import {Redirect} from 'react-router-dom'
 import routes from '../../../constants/routes'
 import NewConfigSnackbar from "./NewConfigSnackbar";
+import * as API from "../../../api";
 
 const Home = (props) => {
     document.body.style.backgroundColor = colours.PRIMARY
     const [goToNewConfig, setGoToNewConfig] = useState(false)
     const [goToViewConfigs, setGoToViewsConfigs] = useState(false)
+    const [configs, setConfigs] = useState(null)
+
+    useEffect(() => {
+        API.get_my_configs().then(r => setConfigs(r))
+    }, [])
 
     return (
         <div>
@@ -41,10 +47,10 @@ const Home = (props) => {
                 >
                     Create A New Configuration
                 </Button>
-                {/*TODO: Disable this button if they have no configs - and add a tooltip saying they don't*/}
                 <Button
                     variant='outlined'
                     color='secondary'
+                    disabled={!configs || configs.length === 0}
                     onClick={() => setGoToViewsConfigs(true)}
                     style={{marginLeft: '1.5%'}}
                 >
@@ -54,7 +60,7 @@ const Home = (props) => {
 
             {goToNewConfig ? <Redirect to={routes.NEW_CONFIG}/> : false}
             {goToViewConfigs ? <Redirect to={routes.VIEW_CONFIGS}/> : false}
-            {props.location.state ? <NewConfigSnackbar title={props.location.state} /> : false}
+            {props.location.state ? <NewConfigSnackbar title={props.location.state} setGoToViewsConfigs={setGoToViewsConfigs} /> : false}
         }
         </div>
     )

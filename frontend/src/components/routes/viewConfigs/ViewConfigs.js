@@ -10,11 +10,7 @@ import {
 import IconButton from '@material-ui/core/IconButton';
 
 const Container = styled.div`
-    margin: 10%;
-    border: 3px solid ${colours.PRIMARY};
-    border-radius: 5px;
-    background-color: 'white';
-    
+    margin: 7%;    
     display: flex;
     flex-direction: column;
 `
@@ -36,7 +32,8 @@ const downloadFile = async (response) => {
 }
 
 const ViewConfigs = () => {
-    document.body.style.backgroundColor = 'inherit'
+    document.body.style.backgroundColor = colours.PRIMARY
+
     const classes = useStyles()
     const [configs, setConfigs] = useState(null)
 
@@ -54,10 +51,9 @@ const ViewConfigs = () => {
         </div>)
     }
 
-
     return (
         <Container>
-            <h1 className='title' style={{color: colours.PRIMARY, marginLeft: '5%'}}>Your Configurations</h1>
+            <h1 className='title' style={{color: 'white', marginLeft: '5%'}}>Your Configurations</h1>
             <TableContainer component={Paper} style={{margin: '5%', width: '90%'}}>
                 <Table className={classes.table} aria-label='simple table'>
                     <TableHead>

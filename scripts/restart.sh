@@ -22,5 +22,7 @@ gunicorn backend.wsgi:app \
            --enable-stdio-inheritance \
            --daemon
 
+killall node
+
 cd frontend/
 npx serve -s build -l 3000 &>/dev/null &

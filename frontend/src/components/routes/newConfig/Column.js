@@ -14,7 +14,6 @@ const Container = styled.div`
     flex-direction: column;
     
     background-color: white;
-    
 `
 const Title = styled.h3`
     padding: 8px;

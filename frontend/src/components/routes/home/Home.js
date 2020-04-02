@@ -10,7 +10,7 @@ import NewConfigSnackbar from "./NewConfigSnackbar";
 const Home = (props) => {
     document.body.style.backgroundColor = colours.PRIMARY
     const [goToNewConfig, setGoToNewConfig] = useState(false)
-
+    const [goToViewConfigs, setGoToViewsConfigs] = useState(false)
 
     return (
         <div>
@@ -37,13 +37,23 @@ const Home = (props) => {
                     variant='outlined'
                     color='secondary'
                     onClick={() => setGoToNewConfig(true)}
+                    style={{marginRight: '1.5%'}}
                 >
                     Create A New Configuration
+                </Button>
+                {/*TODO: Disable this button if they have no configs - and add a tooltip saying they don't*/}
+                <Button
+                    variant='outlined'
+                    color='secondary'
+                    onClick={() => setGoToViewsConfigs(true)}
+                    style={{marginLeft: '1.5%'}}
+                >
+                    View Your Configurations
                 </Button>
             </div>
 
             {goToNewConfig ? <Redirect to={routes.NEW_CONFIG}/> : false}
-
+            {goToViewConfigs ? <Redirect to={routes.VIEW_CONFIGS}/> : false}
             {props.location.state ? <NewConfigSnackbar title={props.location.state} /> : false}
         }
         </div>

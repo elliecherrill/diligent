@@ -9,6 +9,7 @@ import NewConfig from '../routes/newConfig/NewConfig'
 import useUserInformation from './topbar/userInfoHook'
 import useStyles from './style'
 import PageNotFound from '../routes/404/PageNotFound'
+import ViewConfigs from '../routes/viewConfigs/ViewConfigs'
 
 const Frame = props => {
 
@@ -49,6 +50,14 @@ const Frame = props => {
                                 render={routeProps => {
                                     window.scrollTo(0, 0)
                                     return <NewConfig />
+                                }}
+                            />
+                            <Route
+                                exact
+                                path={routes.VIEW_CONFIGS}
+                                render={routeProps => {
+                                    window.scrollTo(0, 0)
+                                    return <ViewConfigs />
                                 }}
                             />
                             <Route

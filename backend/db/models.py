@@ -65,3 +65,8 @@ class Configuration:
             "medium": self.medium,
             "low": self.low
         })
+
+    @classmethod
+    def find_configs_by_id(cls, username):
+        return db.find("configuration", {"creator": username})
+

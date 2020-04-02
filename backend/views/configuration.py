@@ -62,6 +62,17 @@ def create_new_quiz():
 
     return response
 
+@bp.route("/get_my_configs", methods=["GET"])
+@jwt_required
+def get_my_configs():
+    username = get_jwt_identity()
+    configs = Configuration.find_configs_by_id(username)
+
+    titles = []
+    for config in configs:
+        titles.append({"id": config["_id"], "title": config["title"]})
+
+    return jsonify(titles)
 
 ##################################################################
 # U T I L I T I E S

@@ -28,3 +28,7 @@ function formatCheck(check) {
         'check': check
     }
 }
+
+export function get_my_configs() {
+    return axios.get('/api/configuration/get_my_configs', {headers: getHeaders()}).then(resp => resp.data)
+}

@@ -5,10 +5,12 @@ import React, {useState} from 'react'
 import colours from '../../../constants/colours'
 import {Redirect} from 'react-router-dom'
 import routes from '../../../constants/routes'
+import NewConfigSnackbar from "./NewConfigSnackbar";
 
-const Home = () => {
+const Home = (props) => {
     document.body.style.backgroundColor = colours.PRIMARY
     const [goToNewConfig, setGoToNewConfig] = useState(false)
+
 
     return (
         <div>
@@ -42,6 +44,8 @@ const Home = () => {
 
             {goToNewConfig ? <Redirect to={routes.NEW_CONFIG}/> : false}
 
+            {props.location.state ? <NewConfigSnackbar title={props.location.state} /> : false}
+        }
         </div>
     )
 }

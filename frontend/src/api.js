@@ -20,7 +20,6 @@ export function create_new_config(title, highPriorityChecks, mediumPriorityCheck
         'low': lowPriorityChecks.map(check => formatCheck(check))
     }
 
-    console.log("Trying to post", config)
     return axios.post('/api/configuration/new_config', config, {headers: getHeaders()})
 }
 

@@ -6,14 +6,15 @@ import styled from 'styled-components'
 import colours from '../../../constants/colours'
 import {Button, TextField} from '@material-ui/core'
 import * as API from '../../../api'
+import routes from '../../../constants/routes'
+import {Redirect} from 'react-router-dom'
 
 const Container = styled.div`
     display: flex;
-    
 `
 
 class NewConfig extends React.Component {
-    state = {...initialConfigs, title: ''}
+    state = {...initialConfigs, title: '', titleError: false, goToHome: false}
 
     onDragEnd = result => {
         const {destination, source, draggableId} = result
@@ -103,6 +104,20 @@ class NewConfig extends React.Component {
         })
     }
 
+    isValid = () => {
+        //TODO: Add more validity checks - have they already got one with this name? have they selected any checks? (don't want to create an empty config)
+        if (this.state.title === '') {
+            const newState = {
+                ...this.state,
+                titleError: true
+            }
+            this.setState(newState)
+            return false
+        }
+
+        return true
+    }
+
     render() {
         document.body.style.backgroundColor = colours.PRIMARY
         return (
@@ -130,10 +145,13 @@ class NewConfig extends React.Component {
                             color='primary'
                             style={{marginRight: '2%'}}
                             id={'title-input'}
+                            error={this.state.titleError}
+                            helperText={this.state.titleError ? 'Name of Configuration cannot be empty.' : ''}
                             onChange={(e) => {
                                 const newState = {
                                     ...this.state,
-                                    title: e.target.value
+                                    title: e.target.value,
+                                    titleError: false
                                 }
                                 this.setState(newState)
                             }}
@@ -142,14 +160,21 @@ class NewConfig extends React.Component {
                             variant='contained'
                             color='primary'
                             onClick={() => {
-                                //TODO
-                                //Add validity check of title etc
-                                API.create_new_config(this.state.title, this.getHighPriorityChecks(), this.getMediumPriorityChecks(), this.getLowPriorityChecks())
-                                //.then() create snackbar
+                                if (this.isValid()) {
+                                    API.create_new_config(this.state.title, this.getHighPriorityChecks(), this.getMediumPriorityChecks(), this.getLowPriorityChecks()).then(() => {
+                                        const newState = {
+                                            ...this.state,
+                                            goToHome: true
+                                        }
+                                        this.setState(newState)
+                                    })
+                                }
                             }}
                         >
                             Save Configuration
                         </Button>
+
+                        {this.state.goToHome ? <Redirect to={{pathname: routes.HOME, state: this.state.title}}/> : false}
                     </div>
                 </div>
             </div>

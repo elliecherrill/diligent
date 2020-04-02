@@ -5,10 +5,13 @@ const useStyles = makeStyles(theme => ({
         flexGrow: 1,
         paddingTop: theme.spacing(3),
         paddingBottom: theme.spacing(3),
+        paddingLeft: 0,
+        paddingRight: 0
     },
     container: {
         marginTop: theme.spacing(8),
-        padding: theme.spacing(4)
+        paddingLeft: 0,
+        paddingRight: 0
     }
 }))
 

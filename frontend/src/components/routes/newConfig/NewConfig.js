@@ -4,7 +4,7 @@ import Column from './Column'
 import {DragDropContext} from 'react-beautiful-dnd'
 import styled from 'styled-components'
 import colours from '../../../constants/colours'
-import {Button} from '@material-ui/core'
+import {Button, TextField} from '@material-ui/core'
 import * as API from '../../../api'
 
 const Container = styled.div`
@@ -13,7 +13,7 @@ const Container = styled.div`
 `
 
 class NewConfig extends React.Component {
-    state = initialConfigs
+    state = {...initialConfigs, title: ''}
 
     onDragEnd = result => {
         const {destination, source, draggableId} = result
@@ -107,31 +107,50 @@ class NewConfig extends React.Component {
         document.body.style.backgroundColor = colours.PRIMARY
         return (
             <div>
-                <DragDropContext
-                    onDragEnd={this.onDragEnd}
-                >
-                    <Container>
-                        {this.state.columnOrder.map((columnId) => {
-                            const column = this.state.categories[columnId]
-                            const configs = column.configIds.map(configId => this.state.configs[configId])
-
-                            return <Column key={column.id} column={column} configs={configs}/>
-                        })}
-                    </Container>
-                </DragDropContext>
-                <div style={{display: 'flex', justifyContent: 'center', marginTop: '5%'}}>
-                    <Button
-                        variant='contained'
-                        color='secondary'
-                        onClick={() => {
-                            //Add validity check of title etc
-                            const title = "this is my config"
-                            API.create_new_config(title, this.getHighPriorityChecks(), this.getMediumPriorityChecks(), this.getLowPriorityChecks())
-                            //.then() create snackbar
-                        }}
+                <div style={{paddingLeft: '5%', paddingRight: '5%'}}>
+                    <DragDropContext
+                        onDragEnd={this.onDragEnd}
                     >
-                        Save Configuration
-                    </Button>
+                        <Container>
+                            {this.state.columnOrder.map((columnId) => {
+                                const column = this.state.categories[columnId]
+                                const configs = column.configIds.map(configId => this.state.configs[configId])
+
+                                return <Column key={column.id} column={column} configs={configs}/>
+                            })}
+                        </Container>
+                    </DragDropContext>
+                </div>
+                <div style={{width: '100%', backgroundColor: 'white', padding: '5%', marginTop: '5%'}}>
+                    <div style={{display: 'flex', justifyContent: 'center'}}>
+                        <TextField
+                            required
+                            label='Configuration Name'
+                            variant='outlined'
+                            color='primary'
+                            style={{marginRight: '2%'}}
+                            id={'title-input'}
+                            onChange={(e) => {
+                                const newState = {
+                                    ...this.state,
+                                    title: e.target.value
+                                }
+                                this.setState(newState)
+                            }}
+                        />
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            onClick={() => {
+                                //TODO
+                                //Add validity check of title etc
+                                API.create_new_config(this.state.title, this.getHighPriorityChecks(), this.getMediumPriorityChecks(), this.getLowPriorityChecks())
+                                //.then() create snackbar
+                            }}
+                        >
+                            Save Configuration
+                        </Button>
+                    </div>
                 </div>
             </div>
         )

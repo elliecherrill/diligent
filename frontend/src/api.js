@@ -1,5 +1,6 @@
 import authConstants from './constants/auth'
 import axios from 'axios'
+import fileDownload from 'js-file-download'
 
 /**
  *
@@ -35,4 +36,16 @@ export function get_my_configs() {
 
 export function get_checks(config_id) {
     return axios.get('/api/configuration/get_checks/' + config_id, {headers: getHeaders()}).then(resp => resp.data)
+}
+
+export function get_plugin() {
+    return axios({
+        url: '/api/plugin/download',
+        responseType: 'blob',
+        headers: getHeaders(),
+        method: 'GET'
+    }).then(resp => {
+        fileDownload(resp.data, 'diligent-1.0.0.zip')
+        return true
+    }).catch(() => false)
 }

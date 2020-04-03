@@ -56,11 +56,12 @@ def create_app(test_configuration=None, test_db=None):
 
     ############################################################
 
-    from .views import auth, index, home, configuration
+    from .views import auth, index, home, configuration, plugin
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(index.bp)
     app.register_blueprint(home.bp)
     app.register_blueprint(configuration.bp)
+    app.register_blueprint(plugin.bp)
 
     return app

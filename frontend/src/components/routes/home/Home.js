@@ -5,8 +5,8 @@ import React, {useEffect, useState} from 'react'
 import colours from '../../../constants/colours'
 import {Redirect} from 'react-router-dom'
 import routes from '../../../constants/routes'
-import NewConfigSnackbar from "./NewConfigSnackbar";
-import * as API from "../../../api";
+import NewConfigSnackbar from './NewConfigSnackbar'
+import * as API from '../../../api'
 
 const Home = (props) => {
     document.body.style.backgroundColor = colours.PRIMARY
@@ -17,6 +17,16 @@ const Home = (props) => {
     useEffect(() => {
         API.get_my_configs().then(r => setConfigs(r))
     }, [])
+
+    const downloadPlugin = () => {
+        API.get_plugin().then(r => {
+            if (r) {
+                console.log('SUCCESS')
+            } else {
+                console.log('FAILURE')
+            }
+        })
+    }
 
     return (
         <div>
@@ -52,16 +62,25 @@ const Home = (props) => {
                     color='secondary'
                     disabled={!configs || configs.length === 0}
                     onClick={() => setGoToViewsConfigs(true)}
-                    style={{marginLeft: '1.5%'}}
+                    style={{marginLeft: '1.5%', marginRight: '1.5%'}}
                 >
                     View Your Configurations
+                </Button>
+                <Button
+                    variant='outlined'
+                    color='secondary'
+                    onClick={() => downloadPlugin()}
+                    style={{marginLeft: '1.5%'}}
+                >
+                    Download Diligent Plugin
                 </Button>
             </div>
 
             {goToNewConfig ? <Redirect push to={routes.NEW_CONFIG}/> : false}
             {goToViewConfigs ? <Redirect push to={routes.VIEW_CONFIGS}/> : false}
-            {props.location.state ? <NewConfigSnackbar title={props.location.state} setGoToViewsConfigs={setGoToViewsConfigs} /> : false}
-        }
+            {props.location.state ?
+                <NewConfigSnackbar title={props.location.state} setGoToViewsConfigs={setGoToViewsConfigs}/> : false}
+            }
         </div>
     )
 }

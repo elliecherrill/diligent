@@ -13,6 +13,7 @@
     "enzyme-to-json": "^3.4.3",
     "eslint-plugin-react": "^7.17.0",
     "history": "latest",
+    "js-file-download": "^0.4.11",
     "json2mq": "^0.2.0",
     "moment": "^2.24.0",
     "react": "^16.8.6",

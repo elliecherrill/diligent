@@ -9,27 +9,31 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FeedbackHolder {
 
     //TODO: make this path within their project
     private static final String FILEPATH = "out/diligent.html";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
-    private final List<Feedback> feedback;
+    private static final FeedbackHolder INSTANCE = new FeedbackHolder();
+    private final Map<String, FileFeedbackHolder> files;
 
-    public FeedbackHolder() {
-        feedback = new ArrayList<>();
+    private FeedbackHolder() {
+        files = new HashMap<>();
     }
 
-    public void addFeedback(Feedback newFeedback) {
-        feedback.add(newFeedback);
+    public static FeedbackHolder getInstance() {
+        return INSTANCE;
     }
 
     public void writeToFile() {
         try {
             String template = getOutputTemplate();
-            template = template.replace("$feedback", getFeedbackAsHTMLString());
+            template = template.replace("$files", getAllFilesAsHTMLString());
+            template = template.replace("$feedback", getAllFeedbackAsHTMLString());
             File newHtmlFile = new File(FILEPATH);
             FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
         } catch (IOException | IndexOutOfBoundsException e) {
@@ -56,12 +60,7 @@ public class FeedbackHolder {
                 "    </div>\n" +
                 "    <div style=\"display: flex;flex-direction: row;height: 100%;\">\n" +
                 "        <div style=\"width: 15%; background-color: #34558b; color: white;height: 100%;display: flex;flex-direction: column;align-items: center;\">\n" +
-                "            <div style=\"border: white solid 2px; width: 80%; margin-top: 5%; border-radius: 5px; padding: 10px;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
-                "                Example File 1\n" +
-                "            </div>\n" +
-                "            <div style=\"border: white solid 2px; width: 80%; margin-top: 5%; border-radius: 5px;padding: 10px;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
-                "                Example File 2\n" +
-                "            </div>\n" +
+                "            $files " +
                 "        </div>\n" +
                 "        <div style=\"width:100%;height: 100%;display: flex;flex-direction: column;\">\n" +
                 "            $feedback" +
@@ -72,57 +71,34 @@ public class FeedbackHolder {
                 "</html>";
     }
 
-    private String getFeedbackAsHTMLString() {
+    private String getAllFilesAsHTMLString() {
         StringBuffer sb = new StringBuffer();
 
-        for (Feedback f : feedback) {
-            sb.append(f.toHTMLString());
+        for (Map.Entry file : files.entrySet()) {
+            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+            sb.append(fileFeedbackHolder.toHTMLString());
         }
 
         return sb.toString();
     }
 
-    private String getFeedbackAsString() {
+    private String getAllFeedbackAsHTMLString() {
         StringBuffer sb = new StringBuffer();
 
-        for (Feedback f : feedback) {
-            sb.append(f.toString());
-            sb.append(" <br> ");
+        for (Map.Entry file : files.entrySet()) {
+            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+            sb.append(fileFeedbackHolder.getFeedbackAsHTMLString());
         }
 
         return sb.toString();
     }
 
-    private void initialiseFile(BufferedWriter bw) {
-        String template = "<!DOCTYPE html>\n" +
-                "<html lang=\"en\">\n" +
-                "<head>\n" +
-                "    <meta charset=\"UTF-8\">\n" +
-                "    <title>Individual Project</title>\n" +
-                "</head>\n" +
-                "<body>\n";
-
-        write(template, bw);
-    }
-
-    private void write(String str, BufferedWriter bw) {
-        try {
-            bw.write(str);
-            bw.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public void addFeedback(String filename, Feedback feedback) {
+        FileFeedbackHolder fileFeedbackHolder = files.get(filename);
+        if (fileFeedbackHolder == null) {
+            fileFeedbackHolder = new FileFeedbackHolder(filename);
         }
-    }
-
-    private void close(BufferedWriter bw) {
-        String endStr = "\n" +
-                "</body>\n" +
-                "</html>";
-        try {
-            write(endStr, bw);
-            bw.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        fileFeedbackHolder.addFeedback(feedback);
+        files.put(filename, fileFeedbackHolder);
     }
 }

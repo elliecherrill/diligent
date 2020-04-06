@@ -46,7 +46,7 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
 
-            FeedbackHolder feedbackHolder = new FeedbackHolder();
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
 
             @Override
             public void visitFile(@NotNull PsiFile file) {
@@ -68,7 +68,7 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 if (!Utils.isCamelCase(field.getName())) {
                     holder.registerProblem(field.getNameIdentifier(), "Field names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 //                  // TODO: get line number (rather than offset)
-                    feedbackHolder.addFeedback(new Feedback(field.getTextOffset(), "Field names should be in camelCase."));
+                    feedbackHolder.addFeedback(field.getContainingFile().getName(), new Feedback(field.getTextOffset(), "Field names should be in camelCase.", field.getContainingFile().getName()));
                 }
             }
 
@@ -83,7 +83,7 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                         PsiLocalVariable localElement = (PsiLocalVariable) e;
                         if (!(Utils.isCamelCase(localElement.getName()))) {
                             holder.registerProblem(localElement.getNameIdentifier(), "Variable names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                            feedbackHolder.addFeedback(new Feedback(statement.getTextOffset(), "Variable names should be in camelCase."));
+                            feedbackHolder.addFeedback(statement.getContainingFile().getName(), new Feedback(statement.getTextOffset(), "Variable names should be in camelCase.", statement.getContainingFile().getName()));
                         }
                     }
                 }
@@ -96,7 +96,7 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 // Method names
                 if (!(Utils.isCamelCase(method.getName()))) {
                     holder.registerProblem(method.getNameIdentifier(), "Method names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(new Feedback(method.getTextOffset(), "Method names should be in camelCase."));
+                    feedbackHolder.addFeedback(method.getContainingFile().getName(), new Feedback(method.getTextOffset(), "Method names should be in camelCase.", method.getContainingFile().getName()));
                 }
 
                 // Parameter names
@@ -105,7 +105,7 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 for (PsiParameter p : params) {
                     if (!(Utils.isCamelCase(p.getName()))) {
                         holder.registerProblem(p.getNameIdentifier(), "Parameter names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        feedbackHolder.addFeedback(new Feedback(p.getTextOffset(), "Parameter names should be in camelCase."));
+                        feedbackHolder.addFeedback(p.getContainingFile().getName(), new Feedback(p.getTextOffset(), "Parameter names should be in camelCase.", p.getContainingFile().getName()));
                     }
                 }
             }

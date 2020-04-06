@@ -48,7 +48,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
-            FeedbackHolder feedbackHolder = new FeedbackHolder();
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
 
             @Override
             public void visitFile(@NotNull PsiFile file) {
@@ -339,7 +339,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
 
                     //TODO: add feedback like this instead of to problems holder
                     //TODO: get line number (this is offset - not right)
-                    feedbackHolder.addFeedback(new Feedback(statement.getTextOffset(), "All cases in switch are clones"));
+                    feedbackHolder.addFeedback(statement.getContainingFile().getName(), new Feedback(statement.getTextOffset(), "All cases in switch are clones", statement.getContainingFile().getName()));
                 }
                 // TODO: move up to visitFile method
                 feedbackHolder.writeToFile();

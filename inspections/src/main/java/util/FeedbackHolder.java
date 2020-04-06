@@ -29,22 +29,12 @@ public class FeedbackHolder {
     public void writeToFile() {
         try {
             String template = getOutputTemplate();
+            template = template.replace("$feedback", getFeedbackAsHTMLString());
             File newHtmlFile = new File(FILEPATH);
             FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | IndexOutOfBoundsException e) {
+            System.err.println(e);
         }
-
-
-//        File index = new File(FILEPATH);
-//        try {
-//            BufferedWriter bw = new BufferedWriter(new FileWriter(index));
-//            initialiseFile(bw);
-//            write(getFeedbackAsString(), bw);
-//            close(bw);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     private String getOutputTemplate() {
@@ -74,20 +64,22 @@ public class FeedbackHolder {
                 "            </div>\n" +
                 "        </div>\n" +
                 "        <div style=\"width:100%;height: 100%;display: flex;flex-direction: column;\">\n" +
-                "            <div style=\"border: red solid 2px; width: 40%; margin-top: 2.5%; margin-left: 2.5%;border-radius: 5px; padding: 1%;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
-                "                <p style=\"font-weight: 500;\"> TITLE </p>\n" +
-                "                <p> EXPLANATION </p>\n" +
-                "            </div>\n" +
-                "            <div style=\"border: green solid 2px; width: 40%; margin-top: 2.5%; margin-left: 2.5%;border-radius: 5px;padding: 1%;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
-                "                <p style=\"font-weight: 500;\"> TITLE </p>\n" +
-                "                <p> EXPLANATION </p>\n" +
-                "\n" +
-                "            </div>\n" +
+                "            $feedback" +
                 "        </div>\n" +
                 "    </div>\n" +
                 "</div>\n" +
                 "</body>\n" +
                 "</html>";
+    }
+
+    private String getFeedbackAsHTMLString() {
+        StringBuffer sb = new StringBuffer();
+
+        for (Feedback f : feedback) {
+            sb.append(f.toHTMLString());
+        }
+
+        return sb.toString();
     }
 
     private String getFeedbackAsString() {
@@ -123,7 +115,7 @@ public class FeedbackHolder {
     }
 
     private void close(BufferedWriter bw) {
-        String endStr =  "\n" +
+        String endStr = "\n" +
                 "</body>\n" +
                 "</html>";
         try {

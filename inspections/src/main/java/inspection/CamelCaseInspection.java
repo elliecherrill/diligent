@@ -8,6 +8,7 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.FeedbackHolder;
 import util.Utils;
 
 public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -42,6 +43,15 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
+
+            FeedbackHolder feedbackHolder = new FeedbackHolder();
+
+            @Override
+            public void visitFile(@NotNull PsiFile file) {
+                super.visitFile(file);
+
+                feedbackHolder.writeToFile();
+            }
 
             @Override
             public void visitField(PsiField field) {

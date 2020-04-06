@@ -14,3 +14,12 @@ intellij {
   plugins 'java'
   updateSinceUntilBuild false
 }
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+}
+

@@ -49,10 +49,6 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
 
                 if (field.getModifierList() != null) {
                     if (field.getModifierList().hasModifierProperty("final")) {
-                        if (!Utils.isUpperSnakeCase(field.getName())) {
-                            holder.registerProblem(field.getNameIdentifier(), "Constant field names should be in UPPER_SNAKE_CASE.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        }
-
                         return;
                     }
                 }

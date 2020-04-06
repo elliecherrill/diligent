@@ -82,13 +82,19 @@ def get_checks(config_id):
 
     checks = {"high": list(), "medium": list(), "low": list()}
 
-    forFile = {
-        'config-1': '==-string',
+    forFile = {	
+        #TODO 'config-1': '==-string',
         'config-2': 'inheritance',
         'config-3': 'interfaces',
-        'config-4': 'streams',
-        'config-5': 'camelcase',
-        'config-6': 'screaming-snake-case'
+        #TODO 'config-4': 'streams',
+	    #TODO 'config-5': 'for-loops',
+	    #TODO 'config-6': 'while-loops',
+        'config-7': 'camelcase',
+        'config-8': 'screaming-snake-case',
+	    'config-9': 'redundant-else',
+	    'config-10': 'single-char-name',
+        'config-11': 'method-length',
+        'config-12': 'clone'
     }
 
     for highCheck in config["high"]:

@@ -3,10 +3,10 @@
 	<ff>"Inspection"</ff>
 	<category name="Inspection">
 		<idea-plugin url='https://gitlab.doc.ic.ac.uk/hac17/individual_project'>
-			<id>ExtraJavaInspections</id>
-			<name>Extra Java Inspections</name>
+			<id>Diligent</id>
+			<name>Diligent</name>
 			<version>1.0.0</version>
-			<description>Java inspections for First Year Computing Students at Imperial</description>
+			<description>TODO: (update) A tool which does something.</description>
 		</idea-plugin>
 	</category>
 </plugin-repository>

@@ -34,11 +34,7 @@ public class Feedback {
                 "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
                 "       <p> " + filename + " > " + lineNumber + " </p>\n" +
                 "   </div>\n" +
-                "   <div style=\"margin-left: 2.5%;\">\n" +
-                "       <button id=\"ignorebutton\">\n" +
-                "           Ignore Advice\n" +
-                "       </button>\n" +
-                "   </div>\n" +
+                getIgnoreAdviceButton() +
                 "</div>";
     }
 
@@ -49,5 +45,17 @@ public class Feedback {
 
     private String getColour() {
         return fixed ? "green" : "red";
+    }
+
+    private String getIgnoreAdviceButton() {
+        if (!fixed) {
+            return "<div style=\"margin-left: 2.5%;\">\n" +
+                    "   <button id=\"ignorebutton\">\n" +
+                    "       Ignore Advice\n" +
+                    "   </button>\n" +
+                    "</div>\n";
+        }
+
+        return "";
     }
 }

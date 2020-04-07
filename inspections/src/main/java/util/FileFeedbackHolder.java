@@ -1,16 +1,19 @@
 package util;
 
+import org.apache.commons.collections.map.HashedMap;
+
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileFeedbackHolder {
 
-    private final List<Feedback> feedback;
+    private final Map<String, Feedback> feedback;
     private final String filename;
     private final String filepath;
 
     public FileFeedbackHolder(String filename) {
-        feedback = new ArrayList<>();
+        feedback = new HashMap<>();
         this.filename = filename;
         this.filepath = filename.replace(".java", "") + ".html";
     }
@@ -19,26 +22,26 @@ public class FileFeedbackHolder {
         return filepath;
     }
 
-    public void addFeedback(Feedback newFeedback) {
-        feedback.add(newFeedback);
+    public void addFeedback(String id, Feedback newFeedback) {
+        feedback.put(id, newFeedback);
+    }
+
+    public void fixFeedback(String id) {
+        Feedback f = feedback.get(id);
+
+        if (f == null) {
+            return;
+        }
+
+        f.setToFixed();
     }
 
     public String getFeedbackAsHTMLString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
-        for (Feedback f : feedback) {
+        for (Map.Entry entry : feedback.entrySet()) {
+            Feedback f = (Feedback) entry.getValue();
             sb.append(f.toHTMLString());
-        }
-
-        return sb.toString();
-    }
-
-    private String getFeedbackAsString() {
-        StringBuffer sb = new StringBuffer();
-
-        for (Feedback f : feedback) {
-            sb.append(f.toString());
-            sb.append(" <br> ");
         }
 
         return sb.toString();

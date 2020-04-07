@@ -20,8 +20,11 @@ public class FeedbackHolder {
 
     private final Map<String, FileFeedbackHolder> files;
 
+    private boolean isCurrent;
+
     private FeedbackHolder() {
         files = new HashMap<>();
+        isCurrent = true;
     }
 
     public static FeedbackHolder getInstance() {
@@ -29,6 +32,10 @@ public class FeedbackHolder {
     }
 
     public void writeToFile() {
+        if (isCurrent) {
+            return;
+        }
+
         try {
             String allFilesAsHTML = getAllFilesAsHTMLString();
 
@@ -54,6 +61,8 @@ public class FeedbackHolder {
         } catch (IOException | IndexOutOfBoundsException e) {
             System.err.println(e);
         }
+
+        isCurrent = true;
     }
 
     private String getOutputTemplate() {
@@ -243,12 +252,24 @@ public class FeedbackHolder {
         return sb.toString();
     }
 
-    public void addFeedback(String filename, Feedback feedback) {
+    public void addFeedback(String filename, String feedbackId, Feedback feedback) {
         FileFeedbackHolder fileFeedbackHolder = files.get(filename);
         if (fileFeedbackHolder == null) {
             fileFeedbackHolder = new FileFeedbackHolder(filename);
         }
-        fileFeedbackHolder.addFeedback(feedback);
+        fileFeedbackHolder.addFeedback(feedbackId, feedback);
         files.put(filename, fileFeedbackHolder);
+
+        isCurrent = false;
+    }
+
+    public void fixFeedback(String filename, String feedbackId) {
+        FileFeedbackHolder fileFeedbackHolder = files.get(filename);
+        if (fileFeedbackHolder == null) {
+            return;
+        }
+        fileFeedbackHolder.fixFeedback(feedbackId);
+
+        isCurrent = false;
     }
 }

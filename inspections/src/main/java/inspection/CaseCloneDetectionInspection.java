@@ -54,8 +54,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
-                //TODO: move up to this level
-                //feedbackHolder.writeToFile();
+                feedbackHolder.writeToFile();
             }
 
             @Override
@@ -339,10 +338,10 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
 
                     //TODO: add feedback like this instead of to problems holder
                     //TODO: get line number (this is offset - not right)
-                    feedbackHolder.addFeedback(statement.getContainingFile().getName(), new Feedback(statement.getTextOffset(), "All cases in switch are clones", statement.getContainingFile().getName()));
+//                    feedbackHolder.addFeedback(statement.getContainingFile().getName(), new Feedback(statement.getTextOffset(), "All cases in switch are clones", statement.getContainingFile().getName()));
+
+                    //TODO call fixFeedback when the error has been fixed
                 }
-                // TODO: move up to visitFile method
-                feedbackHolder.writeToFile();
             }
 
         };

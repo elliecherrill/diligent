@@ -8,6 +8,8 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.Feedback;
+import util.FeedbackHolder;
 import util.Utils;
 
 public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -43,6 +45,8 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
 
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+
             // Check if interfaces are used anywhere in *this* file (not considering inner classes)
             // How would you do this project wide?
             @Override
@@ -63,6 +67,10 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
                 }
 
                 holder.registerProblem(file.getOriginalElement(), "Interfaces are not being used in this file.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+//                feedbackHolder.addFeedback(file.getName(), new Feedback(0, "Interfaces is not being used in this file.", file.getName()));
+//                feedbackHolder.writeToFile();
+                //TODO add fixfeedback (once it's been fixed)
+
             }
         };
     }

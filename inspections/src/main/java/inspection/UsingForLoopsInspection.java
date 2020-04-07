@@ -8,6 +8,7 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.FeedbackHolder;
 
 public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -42,6 +43,15 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
     // TODO: Finish this
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
+
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+
+            @Override
+            public void visitFile(@NotNull PsiFile file) {
+                super.visitFile(file);
+
+                feedbackHolder.writeToFile();
+            }
 
             // Check if for loop is used anywhere in this class
             // How would you do this project wide?

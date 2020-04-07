@@ -8,6 +8,8 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.Feedback;
+import util.FeedbackHolder;
 import util.Utils;
 
 public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -43,14 +45,29 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
 
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+
+            @Override
+            public void visitFile(@NotNull PsiFile file) {
+                super.visitFile(file);
+
+                feedbackHolder.writeToFile();
+            }
+
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
 
                 if (field.getModifierList() != null) {
-                    if (field.getModifierList().hasModifierProperty("final")) {
+                    if (field.getModifierList().hasModifierProperty("final") && field.getModifierList().hasModifierProperty("static")) {
+                        String feedbackId = field.hashCode() + "screaming-snake-case";
+                        String filename = field.getContainingFile().getName();
+
                         if (!Utils.isUpperSnakeCase(field.getName())) {
-                            holder.registerProblem(field.getNameIdentifier(), "Constant field names should be in UPPER_SNAKE_CASE.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            holder.registerProblem(field.getNameIdentifier(), "Constant field names should be in SCREAMING_SNAKE_CASE.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            feedbackHolder.addFeedback(filename, feedbackId, new Feedback(field.getTextOffset(), "Constant field names should be in SCREAMING_SNAKE_CASE.", filename));
+                        } else {
+                            feedbackHolder.fixFeedback(filename, feedbackId);
                         }
                     }
                 }

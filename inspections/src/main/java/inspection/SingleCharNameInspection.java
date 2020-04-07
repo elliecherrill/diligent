@@ -8,6 +8,8 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.Feedback;
+import util.FeedbackHolder;
 
 public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -42,12 +44,27 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
 
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+
+            @Override
+            public void visitFile(@NotNull PsiFile file) {
+                super.visitFile(file);
+
+                feedbackHolder.writeToFile();
+            }
+
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
 
+                String feedbackId = field.hashCode() + "single-char-name";
+                String filename = field.getContainingFile().getName();
+
                 if (field.getName().length() == 1) {
                     holder.registerProblem(field.getNameIdentifier(), "Field names should be more than one character in length.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(field.getTextOffset(), "Field names should be more than one character in length.", filename));
+                } else {
+                    feedbackHolder.fixFeedback(filename,feedbackId);
                 }
             }
 
@@ -60,9 +77,16 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                     // Local variables (not in for loops)
                     if (e instanceof PsiLocalVariable) {
                         PsiLocalVariable localElement = (PsiLocalVariable) e;
-                        if (localElement.getName().length() == 1) {
-                            if (!(statement.getParent() instanceof PsiForeachStatement || statement.getParent() instanceof PsiForStatement)) {
+
+                        String feedbackId = localElement.hashCode() + "single-char-name";
+                        String filename = statement.getContainingFile().getName();
+
+                        if (!(statement.getParent() instanceof PsiForeachStatement || statement.getParent() instanceof PsiForStatement)) {
+                            if (localElement.getName().length() == 1) {
                                 holder.registerProblem(localElement.getNameIdentifier(), "Variable names should be more than one character in length.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                                feedbackHolder.addFeedback(filename, feedbackId, new Feedback(localElement.getTextOffset(), "Variable names should be more than one character in length.", filename));
+                            } else {
+                                feedbackHolder.fixFeedback(filename,feedbackId);
                             }
                         }
                     }
@@ -74,16 +98,27 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 super.visitMethod(method);
 
                 // Method names
+                String feedbackId = method.hashCode() + "single-char-name";
+                String filename = method.getContainingFile().getName();
+
                 if (method.getName().length() == 1) {
                     holder.registerProblem(method.getNameIdentifier(), "Method names should be more than one character in length.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(method.getTextOffset(), "Method names should be more than one character in length.", filename));
+                } else {
+                    feedbackHolder.fixFeedback(filename, feedbackId);
                 }
 
                 // Parameter names
                 PsiParameterList paramList = method.getParameterList();
                 PsiParameter[] params = paramList.getParameters();
                 for (PsiParameter p : params) {
+                    feedbackId = p.hashCode() + "single-char-name";
+
                     if (p.getName().length() == 1) {
                         holder.registerProblem(p.getNameIdentifier(), "Parameter names should be more than one character in length.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        feedbackHolder.addFeedback(filename, feedbackId, new Feedback(p.getTextOffset(), "Parameter names should be more than one character in length.", filename));
+                    } else {
+                        feedbackHolder.fixFeedback(filename, feedbackId);
                     }
                 }
             }

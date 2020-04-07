@@ -65,10 +65,15 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                     }
                 }
 
+                String feedbackId = field.hashCode() + "camelcase";
+                String filename = field.getContainingFile().getName();
+
                 if (!Utils.isCamelCase(field.getName())) {
                     holder.registerProblem(field.getNameIdentifier(), "Field names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-//                  // TODO: get line number (rather than offset)
-                    feedbackHolder.addFeedback(field.getContainingFile().getName(), new Feedback(field.getTextOffset(), "Field names should be in camelCase.", field.getContainingFile().getName()));
+                    // TODO: get line number (rather than offset)
+                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(field.getTextOffset(), "Field names should be in camelCase.", filename));
+                } else {
+                    feedbackHolder.fixFeedback(filename,feedbackId);
                 }
             }
 
@@ -81,9 +86,15 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                     // Local variables
                     if (e instanceof PsiLocalVariable) {
                         PsiLocalVariable localElement = (PsiLocalVariable) e;
+
+                        String feedbackId = localElement.hashCode() + "camelcase";
+                        String filename = statement.getContainingFile().getName();
+
                         if (!(Utils.isCamelCase(localElement.getName()))) {
                             holder.registerProblem(localElement.getNameIdentifier(), "Variable names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                            feedbackHolder.addFeedback(statement.getContainingFile().getName(), new Feedback(statement.getTextOffset(), "Variable names should be in camelCase.", statement.getContainingFile().getName()));
+                            feedbackHolder.addFeedback(filename, feedbackId, new Feedback(statement.getTextOffset(), "Variable names should be in camelCase.", filename));
+                        } else {
+                            feedbackHolder.fixFeedback(filename, feedbackId);
                         }
                     }
                 }
@@ -94,18 +105,27 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 super.visitMethod(method);
 
                 // Method names
+                String feedbackId = method.hashCode() + "camelcase";
+                String filename = method.getContainingFile().getName();
+
                 if (!(Utils.isCamelCase(method.getName()))) {
                     holder.registerProblem(method.getNameIdentifier(), "Method names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(method.getContainingFile().getName(), new Feedback(method.getTextOffset(), "Method names should be in camelCase.", method.getContainingFile().getName()));
+                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(method.getTextOffset(), "Method names should be in camelCase.", filename));
+                } else {
+                    feedbackHolder.fixFeedback(filename,feedbackId);
                 }
 
                 // Parameter names
                 PsiParameterList paramList = method.getParameterList();
                 PsiParameter[] params = paramList.getParameters();
+
                 for (PsiParameter p : params) {
+                    feedbackId = p.hashCode() + "camelcase";
                     if (!(Utils.isCamelCase(p.getName()))) {
                         holder.registerProblem(p.getNameIdentifier(), "Parameter names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        feedbackHolder.addFeedback(p.getContainingFile().getName(), new Feedback(p.getTextOffset(), "Parameter names should be in camelCase.", p.getContainingFile().getName()));
+                        feedbackHolder.addFeedback(filename, feedbackId, new Feedback(p.getTextOffset(), "Parameter names should be in camelCase.", filename));
+                    } else {
+                        feedbackHolder.fixFeedback(filename, feedbackId);
                     }
                 }
             }

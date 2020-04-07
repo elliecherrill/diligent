@@ -5,6 +5,8 @@ import com.intellij.codeInspection.*;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
+import util.Feedback;
+import util.FeedbackHolder;
 
 public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
@@ -38,6 +40,15 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
 
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+
+            @Override
+            public void visitFile(@NotNull PsiFile file) {
+                super.visitFile(file);
+
+                feedbackHolder.writeToFile();
+            }
+
             @Override
             public void visitIfStatement(PsiIfStatement statement) {
                 super.visitIfStatement(statement);
@@ -55,9 +66,15 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                         }
                     }
 
+                    String filename = statement.getContainingFile().getName();
+                    String feedbackId = statement.hashCode() + "redundant-else";
+
                     if (endsWithReturn && statement.getElseBranch() != null) {
                         holder.registerProblem(statement.getElseElement().getOriginalElement(),
                                 "Unnecessary 'else' branch", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        feedbackHolder.addFeedback(filename, feedbackId, new Feedback(statement.getTextOffset(), "Unnecessary 'else' branch", filename));
+                    } else {
+                        feedbackHolder.fixFeedback(filename, feedbackId);
                     }
                 }
             }

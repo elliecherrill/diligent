@@ -8,6 +8,8 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.Feedback;
+import util.FeedbackHolder;
 import util.Utils;
 
 public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -45,13 +47,29 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         return new JavaElementVisitor() {
 
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+
+            @Override
+            public void visitFile(@NotNull PsiFile file) {
+                super.visitFile(file);
+
+                feedbackHolder.writeToFile();
+            }
+
             @Override
             public void visitMethod(PsiMethod method) {
                 super.visitMethod(method);
 
                 PsiCodeBlock body = method.getBody();
+
+                String filename = method.getContainingFile().getName();
+                String feedbackId = method.hashCode() + "method-length";
+
                 if (body != null && body.getStatementCount() >= MAX_METHOD_LENGTH) {
                     holder.registerProblem(Utils.removeWhitespaceUntilNext(body.getFirstBodyElement()), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(method.getTextOffset(), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename));
+                } else {
+                    feedbackHolder.fixFeedback(filename, feedbackId);
                 }
             }
         };

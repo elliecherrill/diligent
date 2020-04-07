@@ -38,7 +38,6 @@ public class Feedback {
                 "</div>";
     }
 
-    // TODO: When to update fixed?
     public void setToFixed() {
         fixed = true;
     }

@@ -16,7 +16,7 @@ public class FeedbackHolder {
     private static final String TEMPLATE_FILEPATH = "out/$filename";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final FeedbackHolder INSTANCE = new FeedbackHolder();
-    private static final Notifier notifier = new Notifier();
+    private static final Notifier NOTIFIER = new Notifier();
 
     private final Map<String, FileFeedbackHolder> files;
 
@@ -37,25 +37,24 @@ public class FeedbackHolder {
         }
 
         try {
-            String allFilesAsHTML = getAllFilesAsHTMLString();
-
             String frameTemplate = getFrameTemplate();
-            frameTemplate = frameTemplate.replace("$files", allFilesAsHTML);
+            frameTemplate = frameTemplate.replace("$files", getAllFilesAsHTMLString());
             File frameHtmlFile = new File(FILEPATH);
             FileUtils.writeStringToFile(frameHtmlFile, frameTemplate, CHARSET);
 
 
             for (Map.Entry file : files.entrySet()) {
+                String filename = (String) file.getKey();
                 FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
 
                 String template = getOutputTemplate();
-                template = template.replace("$files", allFilesAsHTML);
+                template = template.replace("$files", getAllFilesAsHTMLString(filename));
                 template = template.replace("$feedback", fileFeedbackHolder.getFeedbackAsHTMLString());
-                File newHtmlFile = new File(TEMPLATE_FILEPATH.replace("$filename",fileFeedbackHolder.getFilepath()));
+                File newHtmlFile = new File(TEMPLATE_FILEPATH.replace("$filename", fileFeedbackHolder.getFilepath()));
                 FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
             }
 
-            notifier.notify("Diligent", "Updated <a href=\"" + System.getProperty("user.dir") + "/" + FILEPATH + "\"> Diligent Feedback Report </a>");
+            NOTIFIER.notify("Diligent", "Updated <a href=\"" + System.getProperty("user.dir") + "/" + FILEPATH + "\"> Diligent Feedback Report </a>");
 
 
         } catch (IOException | IndexOutOfBoundsException e) {
@@ -63,6 +62,55 @@ public class FeedbackHolder {
         }
 
         isCurrent = true;
+    }
+
+    private String getAllFilesAsHTMLString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry file : files.entrySet()) {
+            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+            sb.append(fileFeedbackHolder.toHTMLString());
+        }
+
+        return sb.toString();
+    }
+
+    private String getAllFilesAsHTMLString(String selectedFile) {
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry file : files.entrySet()) {
+            String filename = (String) file.getKey();
+            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+
+            if (filename.equals(selectedFile)) {
+                sb.append(fileFeedbackHolder.toSelectedHTMLString());
+            } else {
+                sb.append(fileFeedbackHolder.toHTMLString());
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public void addFeedback(String filename, String feedbackId, Feedback feedback) {
+        FileFeedbackHolder fileFeedbackHolder = files.get(filename);
+        if (fileFeedbackHolder == null) {
+            fileFeedbackHolder = new FileFeedbackHolder(filename);
+        }
+        fileFeedbackHolder.addFeedback(feedbackId, feedback);
+        files.put(filename, fileFeedbackHolder);
+
+        isCurrent = false;
+    }
+
+    public void fixFeedback(String filename, String feedbackId) {
+        FileFeedbackHolder fileFeedbackHolder = files.get(filename);
+        if (fileFeedbackHolder == null) {
+            return;
+        }
+        fileFeedbackHolder.fixFeedback(feedbackId);
+
+        isCurrent = false;
     }
 
     private String getOutputTemplate() {
@@ -267,37 +315,5 @@ public class FeedbackHolder {
                 "</div>\n" +
                 "</body>\n" +
                 "</html>";
-    }
-
-    private String getAllFilesAsHTMLString() {
-        StringBuilder sb = new StringBuilder();
-
-        for (Map.Entry file : files.entrySet()) {
-            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
-            sb.append(fileFeedbackHolder.toHTMLString());
-        }
-
-        return sb.toString();
-    }
-
-    public void addFeedback(String filename, String feedbackId, Feedback feedback) {
-        FileFeedbackHolder fileFeedbackHolder = files.get(filename);
-        if (fileFeedbackHolder == null) {
-            fileFeedbackHolder = new FileFeedbackHolder(filename);
-        }
-        fileFeedbackHolder.addFeedback(feedbackId, feedback);
-        files.put(filename, fileFeedbackHolder);
-
-        isCurrent = false;
-    }
-
-    public void fixFeedback(String filename, String feedbackId) {
-        FileFeedbackHolder fileFeedbackHolder = files.get(filename);
-        if (fileFeedbackHolder == null) {
-            return;
-        }
-        fileFeedbackHolder.fixFeedback(feedbackId);
-
-        isCurrent = false;
     }
 }

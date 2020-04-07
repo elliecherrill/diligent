@@ -58,6 +58,17 @@ public class FileFeedbackHolder {
                 "</div>\n";
     }
 
+    public String toSelectedHTMLString() {
+        return "<div onClick=\"location.href = './" + filepath + " '\" id=\"file\" style=\"font-weight: 550;border: 5px solid white;\">\n" +
+                "   <div id=\"filecontainer\">\n" +
+                "       <div id=\"filetitle\">\n" +
+                filename +
+                "       </div>\n" +
+                "       <div style=\"background-color: " + getStatus() + ";\" id=\"progress\"> </div>\n" +
+                "   </div> " +
+                "</div>\n";
+    }
+
     private String getStatus() {
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();

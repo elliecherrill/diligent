@@ -65,20 +65,87 @@ public class FeedbackHolder {
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=Roboto:300,400,500\">\n" +
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\">\n" +
                 "    <title>Diligent</title>\n" +
+                "    <style>\n" +
+                "        #topbar {\n" +
+                "            min-height: 64px;\n" +
+                "            background-color: #34558b;\n" +
+                "            display: flex;\n" +
+                "            position: relative;\n" +
+                "            align-items: center;\n" +
+                "        }\n" +
+                "        #topbartitle {\n" +
+                "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
+                "            font-weight: 500;\n" +
+                "            line-height: 1.6;\n" +
+                "            letter-spacing: 0.0075em;\n" +
+                "            color:white;\n" +
+                "            margin: 0px;\n" +
+                "            padding-left: 24px;\n" +
+                "        }\n" +
+                "        #page {\n" +
+                "            display: flex;\n" +
+                "            flex-direction: row;\n" +
+                "            height: 100%;\n" +
+                "        }\n" +
+                "        #filesidebar {\n" +
+                "            width: 15%;\n" +
+                "            background-color: #34558b;\n" +
+                "            color: white;\n" +
+                "            height: 100%;\n" +
+                "            display: flex;\n" +
+                "            flex-direction: column;\n" +
+                "            align-items: center;\n" +
+                "        }\n" +
+                "        #file {\n" +
+                "            cursor: pointer;\n" +
+                "            border: white solid 2px;\n" +
+                "            width: 80%;\n" +
+                "            margin-top: 5%;\n" +
+                "            border-radius: 5px;\n" +
+                "            padding: 10px;\n" +
+                "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
+                "        }\n" +
+                "        #mainpage {\n" +
+                "            width:100%;\n" +
+                "            height: 100%;\n" +
+                "            display: flex;\n" +
+                "            flex-direction: column;\n" +
+                "        }\n" +
+                "        #feedbackcontainer {\n" +
+                "            display: flex;\n" +
+                "            flex-direction: row;\n" +
+                "            align-items: center;\n" +
+                "            margin-top: 2.5%;\n" +
+                "            margin-left: 2.5%;\n" +
+                "        }\n" +
+                "        #feedback {\n" +
+                "            width: 40%;\n" +
+                "            border-radius: 5px;\n" +
+                "            padding: 1%;\n" +
+                "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
+                "        }\n" +
+                "        #ignorebutton {\n" +
+                "            background-color: #34558b;\n" +
+                "            color: white;\n" +
+                "            border: none;\n" +
+                "            border-radius: 5px;\n" +
+                "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
+                "        }\n" +
+                "    </style>\n" +
                 "</head>\n" +
                 "<body style=\"margin: 0px;height: 100%;\">\n" +
                 "<div id=\"root\" style=\"height: 100%;\">\n" +
-                "    <div style=\"min-height: 64px;background-color: #34558b;display: flex;position: relative;align-items: center;\">\n" +
-                "        <h1 style=\"font-family: Roboto, Helvetica, Arial, sans-serif;font-weight: 500;line-height: 1.6;letter-spacing: 0.0075em;color:white;margin: 0px;padding-left: 24px;\">\n" +
+                "    <div id=\"topbar\">\n" +
+                "        <h1 id=\"topbartitle\">\n" +
                 "            Diligent\n" +
                 "        </h1>\n" +
                 "    </div>\n" +
-                "    <div style=\"display: flex;flex-direction: row;height: 100%;\">\n" +
-                "        <div style=\"width: 15%; background-color: #34558b; color: white;height: 100%;display: flex;flex-direction: column;align-items: center;\">\n" +
+                "    <div id=\"page\">\n" +
+                "        <div id=\"filesidebar\">\n" +
                 "            $files " +
                 "        </div>\n" +
-                "        <div style=\"width:100%;height: 100%;display: flex;flex-direction: column;\">\n" +
-                "            $feedback" +
+                "        <div id=\"mainpage\">\n" +
+                "            $feedback\n" +
                 "        </div>\n" +
                 "    </div>\n" +
                 "</div>\n" +
@@ -95,19 +162,66 @@ public class FeedbackHolder {
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=Roboto:300,400,500\">\n" +
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\">\n" +
                 "    <title>Diligent</title>\n" +
+                "    <style>\n" +
+                "        #topbar {\n" +
+                "            min-height: 64px;\n" +
+                "            background-color: #34558b;\n" +
+                "            display: flex;\n" +
+                "            position: relative;\n" +
+                "            align-items: center;\n" +
+                "        }\n" +
+                "        #topbartitle {\n" +
+                "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
+                "            font-weight: 500;\n" +
+                "            line-height: 1.6;\n" +
+                "            letter-spacing: 0.0075em;\n" +
+                "            color:white;\n" +
+                "            margin: 0px;\n" +
+                "            padding-left: 24px;\n" +
+                "        }\n" +
+                "        #page {\n" +
+                "            display: flex;\n" +
+                "            flex-direction: row;\n" +
+                "            height: 100%;\n" +
+                "        }\n" +
+                "        #filesidebar {\n" +
+                "            width: 15%;\n" +
+                "            background-color: #34558b;\n" +
+                "            color: white;\n" +
+                "            height: 100%;\n" +
+                "            display: flex;\n" +
+                "            flex-direction: column;\n" +
+                "            align-items: center;\n" +
+                "        }\n" +
+                "        #file {\n" +
+                "            cursor: pointer;\n" +
+                "            border: white solid 2px;\n" +
+                "            width: 80%;\n" +
+                "            margin-top: 5%;\n" +
+                "            border-radius: 5px;\n" +
+                "            padding: 10px;\n" +
+                "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
+                "        }\n" +
+                "        #mainpage {\n" +
+                "            width:100%;\n" +
+                "            height: 100%;\n" +
+                "            display: flex;\n" +
+                "            flex-direction: column;\n" +
+                "        }\n" +
+                "    </style>\n" +
                 "</head>\n" +
                 "<body style=\"margin: 0px;height: 100%;\">\n" +
                 "<div id=\"root\" style=\"height: 100%;\">\n" +
-                "    <div style=\"min-height: 64px;background-color: #34558b;display: flex;position: relative;align-items: center;\">\n" +
-                "        <h1 style=\"font-family: Roboto, Helvetica, Arial, sans-serif;font-weight: 500;line-height: 1.6;letter-spacing: 0.0075em;color:white;margin: 0px;padding-left: 24px;\">\n" +
+                "    <div id=\"topbar\">\n" +
+                "        <h1 id=\"topbartitle\">\n" +
                 "            Diligent\n" +
                 "        </h1>\n" +
                 "    </div>\n" +
-                "    <div style=\"display: flex;flex-direction: row;height: 100%;\">\n" +
-                "        <div style=\"width: 15%; background-color: #34558b; color: white;height: 100%;display: flex;flex-direction: column;align-items: center;\">\n" +
+                "    <div id=\"page\">\n" +
+                "        <div id=\"filesidebar\">\n" +
                 "            $files " +
                 "        </div>\n" +
-                "        <div style=\"width:100%;height: 100%;display: flex;flex-direction: column;\">\n" +
+                "        <div id=\"mainpage\">\n" +
                 "            <div style=\"width: 40%; margin-top: 2.5%; margin-left: 2.5%;padding: 1%;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
                 "                <p style=\"font-weight: 500;\"> Please select a file. </p>\n" +
                 "            </div>\n" +

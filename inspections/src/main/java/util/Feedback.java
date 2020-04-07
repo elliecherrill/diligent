@@ -29,13 +29,13 @@ public class Feedback {
 
     // TODO: How to feedback when Ignore Advice button has been pressed and *use* this?
     public String toHTMLString() {
-        return "<div style=\"display: flex;flex-direction: row; align-items: center;margin-top: 2.5%; margin-left: 2.5%;\">\n" +
-                "   <div style=\"border: " + getColour() + " solid 2px; width: 40%; border-radius: 5px; padding: 1%;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
+        return "<div id=\"feedbackcontainer\">\n" +
+                "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                 "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
                 "       <p> " + filename + " > " + lineNumber + " </p>\n" +
                 "   </div>\n" +
                 "   <div style=\"margin-left: 2.5%;\">\n" +
-                "       <button style=\"background-color: #34558b; color: white; border: none; border-radius: 5px;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
+                "       <button id=\"ignorebutton\">\n" +
                 "           Ignore Advice\n" +
                 "       </button>\n" +
                 "   </div>\n" +

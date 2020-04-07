@@ -45,7 +45,7 @@ public class FileFeedbackHolder {
     }
 
     public String toHTMLString() {
-        return "<div onClick=\"location.href = './" + filepath + " '\" style=\"cursor: pointer;border: white solid 2px; width: 80%; margin-top: 5%; border-radius: 5px;padding: 10px;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
+        return "<div onClick=\"location.href = './" + filepath + " '\" id=\"file\">\n" +
                 filename + "</div>\n";
     }
 

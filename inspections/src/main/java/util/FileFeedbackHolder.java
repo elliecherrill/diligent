@@ -5,12 +5,18 @@ import java.util.List;
 
 public class FileFeedbackHolder {
 
-    private final String filename;
     private final List<Feedback> feedback;
+    private final String filename;
+    private final String filepath;
 
     public FileFeedbackHolder(String filename) {
         feedback = new ArrayList<>();
         this.filename = filename;
+        this.filepath = filename.replace(".java", "") + ".html";
+    }
+
+    public String getFilepath() {
+        return filepath;
     }
 
     public void addFeedback(Feedback newFeedback) {
@@ -39,7 +45,9 @@ public class FileFeedbackHolder {
     }
 
     public String toHTMLString() {
-        return "<div style=\"border: white solid 2px; width: 80%; margin-top: 5%; border-radius: 5px;padding: 10px;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
+        return "<div onClick=\"location.href = './" + filepath + " '\" style=\"cursor: pointer;border: white solid 2px; width: 80%; margin-top: 5%; border-radius: 5px;padding: 10px;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
                 filename + "</div>\n";
     }
+
+
 }

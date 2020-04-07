@@ -108,11 +108,13 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 String feedbackId = method.hashCode() + "camelcase";
                 String filename = method.getContainingFile().getName();
 
-                if (!(Utils.isCamelCase(method.getName()))) {
-                    holder.registerProblem(method.getNameIdentifier(), "Method names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(method.getTextOffset(), "Method names should be in camelCase.", filename));
-                } else {
-                    feedbackHolder.fixFeedback(filename,feedbackId);
+                if (!method.isConstructor()) {
+                    if (!(Utils.isCamelCase(method.getName()))) {
+                        holder.registerProblem(method.getNameIdentifier(), "Method names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                        feedbackHolder.addFeedback(filename, feedbackId, new Feedback(method.getTextOffset(), "Method names should be in camelCase.", filename));
+                    } else {
+                        feedbackHolder.fixFeedback(filename, feedbackId);
+                    }
                 }
 
                 // Parameter names

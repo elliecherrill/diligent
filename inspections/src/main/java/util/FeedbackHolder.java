@@ -2,15 +2,11 @@ package util;
 
 import org.apache.commons.io.FileUtils;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class FeedbackHolder {
@@ -20,6 +16,8 @@ public class FeedbackHolder {
     private static final String TEMPLATE_FILEPATH = "out/$filename";
     private static final Charset CHARSET = StandardCharsets.UTF_8;
     private static final FeedbackHolder INSTANCE = new FeedbackHolder();
+    private static final Notifier notifier = new Notifier();
+
     private final Map<String, FileFeedbackHolder> files;
 
     private FeedbackHolder() {
@@ -49,6 +47,8 @@ public class FeedbackHolder {
                 File newHtmlFile = new File(TEMPLATE_FILEPATH.replace("$filename",fileFeedbackHolder.getFilepath()));
                 FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
             }
+
+            notifier.notify("Diligent", "Updated <a href=\"" + System.getProperty("user.dir") + "/" + FILEPATH + "\"> Diligent Feedback Report </a>");
 
 
         } catch (IOException | IndexOutOfBoundsException e) {

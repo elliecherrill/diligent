@@ -49,7 +49,24 @@ public class FileFeedbackHolder {
 
     public String toHTMLString() {
         return "<div onClick=\"location.href = './" + filepath + " '\" id=\"file\">\n" +
-                filename + "</div>\n";
+                "   <div id=\"filecontainer\">\n" +
+                "       <div id=\"filetitle\">\n" +
+                filename +
+                "       </div>\n" +
+                "       <div style=\"background-color: " + getStatus() + ";\" id=\"progress\"> </div>\n" +
+                "   </div> " +
+                "</div>\n";
+    }
+
+    private String getStatus() {
+        for (Map.Entry entry : feedback.entrySet()) {
+            Feedback f = (Feedback) entry.getValue();
+            if (!f.isFixed()) {
+                return "red";
+            }
+        }
+
+        return "green";
     }
 
 

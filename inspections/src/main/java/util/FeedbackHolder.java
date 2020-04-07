@@ -140,6 +140,20 @@ public class FeedbackHolder {
                 "            border-radius: 5px;\n" +
                 "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
                 "        }\n" +
+                "        #progress {\n" +
+                "            border: white solid 2px;\n" +
+                "            border-radius: 50%;\n" +
+                "            height: 15px;\n" +
+                "            width: 15px;\n" +
+                "        }\n" +
+                "        #filetitle {\n" +
+                "            display: flex;\n" +
+                "            flex-grow: 1;\n" +
+                "        }\n" +
+                "        #filecontainer {\n" +
+                "            display: flex;\n" +
+                "            flex-direction: row;\n" +
+                "        }\n" +
                 "    </style>\n" +
                 "</head>\n" +
                 "<body style=\"margin: 0px;height: 100%;\">\n" +
@@ -216,6 +230,20 @@ public class FeedbackHolder {
                 "            height: 100%;\n" +
                 "            display: flex;\n" +
                 "            flex-direction: column;\n" +
+                "        }\n" +
+                "        #progress {\n" +
+                "            border: white solid 2px;\n" +
+                "            border-radius: 50%;\n" +
+                "            height: 15px;\n" +
+                "            width: 15px;\n" +
+                "        }\n" +
+                "        #filetitle {\n" +
+                "            display: flex;\n" +
+                "            flex-grow: 1;\n" +
+                "        }\n" +
+                "        #filecontainer {\n" +
+                "            display: flex;\n" +
+                "            flex-direction: row;\n" +
                 "        }\n" +
                 "    </style>\n" +
                 "</head>\n" +

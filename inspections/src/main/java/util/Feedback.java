@@ -58,4 +58,8 @@ public class Feedback {
 
         return "";
     }
+
+    public boolean isFixed() {
+        return fixed;
+    }
 }

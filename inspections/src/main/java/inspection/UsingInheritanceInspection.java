@@ -76,7 +76,8 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
 
             //TODO: make sure names and checks match up (i.e. is inheritance being used or *not* being used?
             holder.registerProblem(file.getOriginalElement(), "Inheritance is not being used in this file.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-//            feedbackHolder.addFeedback(file.getName(), new Feedback(0, "Inheritance is not being used in this file.", file.getName()));
+            //                String projectPath = Utils.getProjectPath(file);
+//            feedbackHolder.addFeedback(projectPath, file.getName(), new Feedback(0, "Inheritance is not being used in this file.", file.getName()));
 //            feedbackHolder.writeToFile();
             //TODO add fixfeedback (once it's been fixed)
         }

@@ -64,12 +64,13 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
 
                 String filename = method.getContainingFile().getName();
                 String feedbackId = method.hashCode() + "method-length";
+                String projectPath = Utils.getProjectPath(method);
 
                 if (body != null && body.getStatementCount() >= MAX_METHOD_LENGTH) {
                     holder.registerProblem(Utils.removeWhitespaceUntilNext(body.getFirstBodyElement()), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(Utils.getLineNumber(method), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename));
+                    feedbackHolder.addFeedback(projectPath, filename, feedbackId, new Feedback(Utils.getLineNumber(method), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename));
                 } else {
-                    feedbackHolder.fixFeedback(filename, feedbackId);
+                    feedbackHolder.fixFeedback(projectPath, filename, feedbackId);
                 }
             }
         };

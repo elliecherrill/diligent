@@ -67,7 +67,8 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
                 }
 
                 holder.registerProblem(file.getOriginalElement(), "Interfaces are not being used in this file.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-//                feedbackHolder.addFeedback(file.getName(), new Feedback(0, "Interfaces is not being used in this file.", file.getName()));
+                //            //                String projectPath = Utils.getProjectPath(file);
+//                feedbackHolder.addFeedback(projectPath, file.getName(), new Feedback(0, "Interfaces is not being used in this file.", file.getName()));
 //                feedbackHolder.writeToFile();
                 //TODO add fixfeedback (once it's been fixed)
 

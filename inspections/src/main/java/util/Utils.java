@@ -54,4 +54,12 @@ public final class Utils {
 
         return lineNumber;
     }
+
+    public static String getProjectPath(PsiElement element) {
+        PsiFile containingFile = element.getContainingFile();
+        Project project = containingFile.getProject();
+        String projectPath = project.getBasePath();
+
+        return projectPath;
+    }
 }

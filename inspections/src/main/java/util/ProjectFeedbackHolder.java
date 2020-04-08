@@ -49,7 +49,7 @@ public class ProjectFeedbackHolder {
                 FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
             }
 
-            NOTIFIER.notify("Diligent", "Updated <a href=\"" + projectPath + "/" + FILEPATH + "\"> Diligent Feedback Report " + projectPath + "/" + FILEPATH + " </a>");
+            NOTIFIER.notify("Diligent", "Updated <a href=\"" + projectPath + "/" + FILEPATH + "\"> Diligent Feedback Report </a>");
 
 
         } catch (IOException | IndexOutOfBoundsException e) {

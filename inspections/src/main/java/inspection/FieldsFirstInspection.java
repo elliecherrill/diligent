@@ -43,6 +43,11 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
+
+        if (!Utils.isInspectionOn(holder,"fields-first")) {
+            return new JavaElementVisitor() {};
+        }
+
         return new JavaElementVisitor() {
 
             FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();

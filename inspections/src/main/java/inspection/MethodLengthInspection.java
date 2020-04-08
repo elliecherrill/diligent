@@ -45,6 +45,11 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
+
+        if (!Utils.isInspectionOn(holder,"method-length")) {
+            return new JavaElementVisitor() {};
+        }
+
         return new JavaElementVisitor() {
 
             FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();

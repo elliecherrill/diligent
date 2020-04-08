@@ -43,6 +43,11 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
+
+        if (!Utils.isInspectionOn(holder,"single-char-name")) {
+            return new JavaElementVisitor() {};
+        }
+
         return new JavaElementVisitor() {
 
             FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();

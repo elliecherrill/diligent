@@ -43,6 +43,11 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
+
+        if (!Utils.isInspectionOn(holder,"inheritance")) {
+            return new JavaElementVisitor() {};
+        }
+
         return new InheritanceVisitor(holder);
     }
 

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import util.FeedbackHolder;
+import util.Utils;
 
 public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -42,6 +43,11 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
     @Override
     // TODO: Finish this
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
+
+        if (!Utils.isInspectionOn(holder,"for-loops")) {
+            return new JavaElementVisitor() {};
+        }
+
         return new JavaElementVisitor() {
 
             FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();

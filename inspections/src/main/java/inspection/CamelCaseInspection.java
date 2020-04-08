@@ -43,6 +43,11 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
+
+        if (!Utils.isInspectionOn(holder,"camelcase")) {
+            return new JavaElementVisitor() {};
+        }
+
         return new JavaElementVisitor() {
 
             FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();

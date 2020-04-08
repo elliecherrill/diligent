@@ -7,10 +7,7 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import util.CodeCloneUtils;
-import util.Feedback;
-import util.FeedbackHolder;
-import util.Pair;
+import util.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,6 +44,11 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
+
+        if (!Utils.isInspectionOn(holder,"clone")) {
+            return new JavaElementVisitor() {};
+        }
+
         return new JavaElementVisitor() {
             FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
 

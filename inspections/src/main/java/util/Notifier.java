@@ -16,4 +16,15 @@ public class Notifier {
         notification.notify(project);
         return notification;
     }
+
+    public Notification notifyError(String title, String content) {
+        return notifyError(null, title, content);
+    }
+
+    public Notification notifyError(Project project, String title, String content) {
+        Notification notification = NOTIFICATION_GROUP.createNotification(title, content, NotificationType.ERROR, NotificationListener.URL_OPENING_LISTENER);
+        notification.notify(project);
+        return notification;
+    }
+
 }

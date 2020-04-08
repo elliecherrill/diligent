@@ -5,13 +5,15 @@ public class Feedback {
     private final int lineNumber;
     private final String errorMsg;
     private final String filename;
-    private boolean fixed;
+    private boolean isFixed;
+    private boolean isHidden;
 
     public Feedback(int lineNumber, String errorMsg, String filename) {
         this.lineNumber = lineNumber;
         this.errorMsg = errorMsg;
         this.filename = filename;
-        fixed = false;
+        isFixed = false;
+        isHidden = false;
     }
 
     @Override
@@ -38,16 +40,12 @@ public class Feedback {
                 "</div>";
     }
 
-    public void setToFixed() {
-        fixed = true;
-    }
-
     private String getColour() {
-        return fixed ? "green" : "red";
+        return isFixed ? "green" : "red";
     }
 
     private String getIgnoreAdviceButton() {
-        if (!fixed) {
+        if (!isFixed) {
             return "<div style=\"margin-left: 2.5%;\">\n" +
                     "   <button id=\"ignorebutton\">\n" +
                     "       Ignore Advice\n" +
@@ -59,6 +57,15 @@ public class Feedback {
     }
 
     public boolean isFixed() {
-        return fixed;
+        return isFixed;
+    }
+
+    public void setToFixed() {
+        isFixed = true;
+    }
+
+    // TODO: when to call this?
+    public void setToHidden() {
+        isHidden = true;
     }
 }

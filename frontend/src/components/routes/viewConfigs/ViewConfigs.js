@@ -20,7 +20,9 @@ import {
     Edit as EditIcon,
     Clear as DeleteIcon
 } from '@material-ui/icons'
-import IconButton from '@material-ui/core/IconButton';
+import IconButton from '@material-ui/core/IconButton'
+import Alert from './Alert'
+import DeleteConfigSnackbar from './DeleteConfigSnackbar'
 
 const Container = styled.div`
     margin: 7%;    
@@ -44,19 +46,31 @@ const downloadFile = async (response) => {
     document.body.removeChild(link)
 }
 
-const deleteConfig = c => {
-    API.delete_config(c['_id']['$oid']).then(response => console.log("deleted"))
-}
-
 const ViewConfigs = () => {
     document.body.style.backgroundColor = colours.PRIMARY
 
     const classes = useStyles()
     const [configs, setConfigs] = useState(null)
+    const [openDeleteAlert, setOpenDeleteAlert] = useState(false)
+    const [currentConfig, setCurrentConfig] = useState(null)
+    const [refresh, setRefresh] = useState(false)
+    const [deleted, setDeleted] = useState(false)
 
     useEffect(() => {
-        API.get_my_configs().then(r => setConfigs(r))
-    }, [])
+        API.get_my_configs().then(r => {
+            setConfigs(r)
+            setRefresh(false)
+        })
+    }, [refresh])
+
+    const deleteCurrConfig = () => {
+        API.delete_config(currentConfig['_id']['$oid']).then(response => {
+            setOpenDeleteAlert(false)
+            setRefresh(true)
+            setDeleted(true)
+        })
+
+    }
 
     if (!configs) {
         return (<div className={classes.root}>
@@ -97,7 +111,13 @@ const ViewConfigs = () => {
                                         </IconButton>
                                     </Tooltip>
                                     <Tooltip title="Delete Configuration">
-                                        <IconButton color='inherit' onClick={() => deleteConfig(c)}>
+                                        <IconButton
+                                            color='inherit'
+                                            onClick={() => {
+                                                setDeleted(false)
+                                                setCurrentConfig(c)
+                                                setOpenDeleteAlert(true)
+                                            }}>
                                             <DeleteIcon/>
                                         </IconButton>
                                     </Tooltip>
@@ -107,6 +127,19 @@ const ViewConfigs = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <Alert
+                title={'Confirm Delete Configuration'}
+                content={'Are you sure you want to delete this configuration? This cannot be undone.'}
+                actions={[
+                    {title: 'BACK', action: (() => setOpenDeleteAlert(false))},
+                    {title: 'DELETE', action: deleteCurrConfig}
+                    ]}
+                open={openDeleteAlert}
+            />
+
+            {deleted ? <DeleteConfigSnackbar/> : false}
+
         </Container>
     )
 }

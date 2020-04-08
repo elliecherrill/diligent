@@ -1,5 +1,6 @@
 package util;
 
+import com.intellij.openapi.project.Project;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -18,12 +19,14 @@ public class ProjectFeedbackHolder {
 
     private final Map<String, FileFeedbackHolder> files;
     private final String projectPath;
+    private final Project project;
 
     private boolean isCurrent;
 
-    public ProjectFeedbackHolder(String projectPath) {
+    public ProjectFeedbackHolder(Project project) {
         files = new HashMap<>();
-        this.projectPath = projectPath;
+        this.projectPath = project.getBasePath();
+        this.project = project;
         isCurrent = true;
     }
 
@@ -49,7 +52,7 @@ public class ProjectFeedbackHolder {
                 FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
             }
 
-            NOTIFIER.notify("Diligent", "Updated <a href=\"" + projectPath + "/" + FILEPATH + "\"> Diligent Feedback Report </a>");
+            NOTIFIER.notify(project, "Diligent", "Updated <a href=\"" + projectPath + "/" + FILEPATH + "\"> Diligent Feedback Report </a>");
 
 
         } catch (IOException | IndexOutOfBoundsException e) {

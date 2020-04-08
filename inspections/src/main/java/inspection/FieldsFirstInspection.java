@@ -82,13 +82,12 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
 
                 String filename = field.getContainingFile().getName();
                 String feedbackId = field.hashCode() + "fields-first";
-                String projectPath = Utils.getProjectPath(field);
 
                 if (registerProblem) {
                     holder.registerProblem(field.getNameIdentifier(), "Declare fields at the top", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(projectPath, filename, feedbackId, new Feedback(Utils.getLineNumber(field), "Declare fields at the top", filename));
+                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(field), "Declare fields at the top", filename));
                 } else {
-                    feedbackHolder.fixFeedback(projectPath, filename, feedbackId);
+                    feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }
             }
 

@@ -1,12 +1,14 @@
 package util;
 
+import com.intellij.openapi.project.Project;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class FeedbackHolder {
 
     private static final FeedbackHolder INSTANCE = new FeedbackHolder();
-    private final Map<String, ProjectFeedbackHolder> projects;
+    private final Map<Project, ProjectFeedbackHolder> projects;
 
     private FeedbackHolder() {
         projects = new HashMap<>();
@@ -23,19 +25,19 @@ public class FeedbackHolder {
         }
     }
 
-    public void addFeedback(String projectPath, String filename, String feedbackId, Feedback feedback) {
-        ProjectFeedbackHolder projectFeedbackHolder = projects.get(projectPath);
+    public void addFeedback(Project project, String filename, String feedbackId, Feedback feedback) {
+        ProjectFeedbackHolder projectFeedbackHolder = projects.get(project);
 
         if (projectFeedbackHolder == null) {
-            projectFeedbackHolder = new ProjectFeedbackHolder(projectPath);
+            projectFeedbackHolder = new ProjectFeedbackHolder(project);
         }
 
         projectFeedbackHolder.addFeedback(filename, feedbackId, feedback);
-        projects.put(projectPath, projectFeedbackHolder);
+        projects.put(project, projectFeedbackHolder);
     }
 
-    public void fixFeedback(String projectPath, String filename, String feedbackId) {
-        ProjectFeedbackHolder projectFeedbackHolder = projects.get(projectPath);
+    public void fixFeedback(Project project, String filename, String feedbackId) {
+        ProjectFeedbackHolder projectFeedbackHolder = projects.get(project);
         if (projectFeedbackHolder == null) {
             return;
         }

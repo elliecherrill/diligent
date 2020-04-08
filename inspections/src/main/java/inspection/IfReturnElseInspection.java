@@ -74,14 +74,13 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
 
                     String filename = statement.getContainingFile().getName();
                     String feedbackId = statement.hashCode() + "redundant-else";
-                    String projectPath = Utils.getProjectPath(statement);
 
                     if (endsWithReturn && statement.getElseBranch() != null) {
                         holder.registerProblem(statement.getElseElement().getOriginalElement(),
                                 "Unnecessary 'else' branch", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        feedbackHolder.addFeedback(projectPath, filename, feedbackId, new Feedback(Utils.getLineNumber(statement), "Unnecessary 'else' branch", filename));
+                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(statement), "Unnecessary 'else' branch", filename));
                     } else {
-                        feedbackHolder.fixFeedback(projectPath, filename, feedbackId);
+                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
                 }
             }

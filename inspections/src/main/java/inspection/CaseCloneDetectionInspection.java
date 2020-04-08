@@ -339,8 +339,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 
                     //TODO: add feedback like this instead of to problems holder
-                    //                String projectPath = Utils.getProjectPath(statement);
-//                    feedbackHolder.addFeedback(projectPath, statement.getContainingFile().getName(), new Feedback(Utils.getLineNumber(statement), "All cases in switch are clones", statement.getContainingFile().getName()));
+//                    feedbackHolder.addFeedback(holder.getProject(), statement.getContainingFile().getName(), new Feedback(Utils.getLineNumber(statement), "All cases in switch are clones", statement.getContainingFile().getName()));
 
                     //TODO call fixFeedback when the error has been fixed
                 }

@@ -105,7 +105,7 @@ public final class Utils {
 
         } catch (IOException | ParseException e) {
             if (!configNotFound) {
-                NOTIFIER.notifyError("Diligent", "No configuration file found at '" + projectPath + "/diligent.json'");
+                NOTIFIER.notifyError(holder.getProject(), "Diligent", "No configuration file found at '" + projectPath + "/diligent.json'");
             }
             configNotFound = true;
             return false;

@@ -71,13 +71,12 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
 
                 String feedbackId = field.hashCode() + "camelcase";
                 String filename = field.getContainingFile().getName();
-                String projectPath = Utils.getProjectPath(field);
 
                 if (!Utils.isCamelCase(field.getName())) {
                     holder.registerProblem(field.getNameIdentifier(), "Field names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(projectPath, filename, feedbackId, new Feedback(Utils.getLineNumber(field), "Field names should be in camelCase.", filename));
+                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(field), "Field names should be in camelCase.", filename));
                 } else {
-                    feedbackHolder.fixFeedback(projectPath, filename,feedbackId);
+                    feedbackHolder.fixFeedback(holder.getProject(), filename,feedbackId);
                 }
             }
 
@@ -93,13 +92,12 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
 
                         String feedbackId = localElement.hashCode() + "camelcase";
                         String filename = statement.getContainingFile().getName();
-                        String projectPath = Utils.getProjectPath(statement);
 
                         if (!(Utils.isCamelCase(localElement.getName()))) {
                             holder.registerProblem(localElement.getNameIdentifier(), "Variable names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                            feedbackHolder.addFeedback(projectPath, filename, feedbackId, new Feedback(Utils.getLineNumber(statement), "Variable names should be in camelCase.", filename));
+                            feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(statement), "Variable names should be in camelCase.", filename));
                         } else {
-                            feedbackHolder.fixFeedback(projectPath, filename, feedbackId);
+                            feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                         }
                     }
                 }
@@ -112,14 +110,13 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 // Method names
                 String feedbackId = method.hashCode() + "camelcase";
                 String filename = method.getContainingFile().getName();
-                String projectPath = Utils.getProjectPath(method);
 
                 if (!method.isConstructor()) {
                     if (!(Utils.isCamelCase(method.getName()))) {
                         holder.registerProblem(method.getNameIdentifier(), "Method names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        feedbackHolder.addFeedback(projectPath, filename, feedbackId, new Feedback(Utils.getLineNumber(method), "Method names should be in camelCase.", filename));
+                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(method), "Method names should be in camelCase.", filename));
                     } else {
-                        feedbackHolder.fixFeedback(projectPath, filename, feedbackId);
+                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
                 }
 
@@ -131,9 +128,9 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                     feedbackId = p.hashCode() + "camelcase";
                     if (!(Utils.isCamelCase(p.getName()))) {
                         holder.registerProblem(p.getNameIdentifier(), "Parameter names should be in camelCase.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        feedbackHolder.addFeedback(projectPath, filename, feedbackId, new Feedback(Utils.getLineNumber(p), "Parameter names should be in camelCase.", filename));
+                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(p), "Parameter names should be in camelCase.", filename));
                     } else {
-                        feedbackHolder.fixFeedback(projectPath, filename, feedbackId);
+                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
                 }
             }

@@ -65,7 +65,7 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
 
                         if (!Utils.isUpperSnakeCase(field.getName())) {
                             holder.registerProblem(field.getNameIdentifier(), "Constant field names should be in SCREAMING_SNAKE_CASE.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                            feedbackHolder.addFeedback(filename, feedbackId, new Feedback(field.getTextOffset(), "Constant field names should be in SCREAMING_SNAKE_CASE.", filename));
+                            feedbackHolder.addFeedback(filename, feedbackId, new Feedback(Utils.getLineNumber(field), "Constant field names should be in SCREAMING_SNAKE_CASE.", filename));
                         } else {
                             feedbackHolder.fixFeedback(filename, feedbackId);
                         }

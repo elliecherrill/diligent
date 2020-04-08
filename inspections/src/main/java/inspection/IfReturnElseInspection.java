@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import util.Feedback;
 import util.FeedbackHolder;
+import util.Utils;
 
 public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
@@ -72,7 +73,7 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                     if (endsWithReturn && statement.getElseBranch() != null) {
                         holder.registerProblem(statement.getElseElement().getOriginalElement(),
                                 "Unnecessary 'else' branch", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        feedbackHolder.addFeedback(filename, feedbackId, new Feedback(statement.getTextOffset(), "Unnecessary 'else' branch", filename));
+                        feedbackHolder.addFeedback(filename, feedbackId, new Feedback(Utils.getLineNumber(statement), "Unnecessary 'else' branch", filename));
                     } else {
                         feedbackHolder.fixFeedback(filename, feedbackId);
                     }

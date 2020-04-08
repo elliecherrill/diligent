@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import util.Feedback;
 import util.FeedbackHolder;
+import util.Utils;
 
 public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -62,7 +63,7 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                 if (field.getName().length() == 1) {
                     holder.registerProblem(field.getNameIdentifier(), "Field names should be more than one character in length.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(field.getTextOffset(), "Field names should be more than one character in length.", filename));
+                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(Utils.getLineNumber(field), "Field names should be more than one character in length.", filename));
                 } else {
                     feedbackHolder.fixFeedback(filename,feedbackId);
                 }
@@ -84,7 +85,7 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                         if (!(statement.getParent() instanceof PsiForeachStatement || statement.getParent() instanceof PsiForStatement)) {
                             if (localElement.getName().length() == 1) {
                                 holder.registerProblem(localElement.getNameIdentifier(), "Variable names should be more than one character in length.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                                feedbackHolder.addFeedback(filename, feedbackId, new Feedback(localElement.getTextOffset(), "Variable names should be more than one character in length.", filename));
+                                feedbackHolder.addFeedback(filename, feedbackId, new Feedback(Utils.getLineNumber(localElement), "Variable names should be more than one character in length.", filename));
                             } else {
                                 feedbackHolder.fixFeedback(filename,feedbackId);
                             }
@@ -103,7 +104,7 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                 if (method.getName().length() == 1) {
                     holder.registerProblem(method.getNameIdentifier(), "Method names should be more than one character in length.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(method.getTextOffset(), "Method names should be more than one character in length.", filename));
+                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(Utils.getLineNumber(method), "Method names should be more than one character in length.", filename));
                 } else {
                     feedbackHolder.fixFeedback(filename, feedbackId);
                 }
@@ -116,7 +117,7 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                     if (p.getName().length() == 1) {
                         holder.registerProblem(p.getNameIdentifier(), "Parameter names should be more than one character in length.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        feedbackHolder.addFeedback(filename, feedbackId, new Feedback(p.getTextOffset(), "Parameter names should be more than one character in length.", filename));
+                        feedbackHolder.addFeedback(filename, feedbackId, new Feedback(Utils.getLineNumber(p), "Parameter names should be more than one character in length.", filename));
                     } else {
                         feedbackHolder.fixFeedback(filename, feedbackId);
                     }

@@ -337,8 +337,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                             ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
 
                     //TODO: add feedback like this instead of to problems holder
-                    //TODO: get line number (this is offset - not right)
-//                    feedbackHolder.addFeedback(statement.getContainingFile().getName(), new Feedback(statement.getTextOffset(), "All cases in switch are clones", statement.getContainingFile().getName()));
+//                    feedbackHolder.addFeedback(statement.getContainingFile().getName(), new Feedback(Utils.getLineNumber(statement), "All cases in switch are clones", statement.getContainingFile().getName()));
 
                     //TODO call fixFeedback when the error has been fixed
                 }

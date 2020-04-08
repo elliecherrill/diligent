@@ -67,7 +67,7 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
 
                 if (body != null && body.getStatementCount() >= MAX_METHOD_LENGTH) {
                     holder.registerProblem(Utils.removeWhitespaceUntilNext(body.getFirstBodyElement()), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(method.getTextOffset(), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename));
+                    feedbackHolder.addFeedback(filename, feedbackId, new Feedback(Utils.getLineNumber(method), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename));
                 } else {
                     feedbackHolder.fixFeedback(filename, feedbackId);
                 }

@@ -1,5 +1,7 @@
 import {
-    Button
+    Button,
+    Grid,
+    CircularProgress
 } from '@material-ui/core'
 import React, {useEffect, useState} from 'react'
 import colours from '../../../constants/colours'
@@ -13,9 +15,13 @@ const Home = (props) => {
     const [goToNewConfig, setGoToNewConfig] = useState(false)
     const [goToViewConfigs, setGoToViewsConfigs] = useState(false)
     const [configs, setConfigs] = useState(null)
+    const [loaded, setLoaded] = useState(false)
 
     useEffect(() => {
-        API.get_my_configs().then(r => setConfigs(r))
+        API.get_my_configs().then(r => {
+            setConfigs(r)
+            setLoaded(true)
+        })
     }, [])
 
     const downloadPlugin = () => {
@@ -26,6 +32,16 @@ const Home = (props) => {
                 console.log('FAILURE')
             }
         })
+    }
+
+    if (!loaded) {
+        return (<div>
+            <Grid container justify='center' >
+                <Grid item>
+                    <CircularProgress color={"secondary"}/>
+                </Grid>
+            </Grid>
+        </div>)
     }
 
     return (
@@ -57,15 +73,16 @@ const Home = (props) => {
                 >
                     Create A New Configuration
                 </Button>
-                <Button
-                    variant='outlined'
-                    color='secondary'
-                    disabled={!configs || configs.length === 0}
-                    onClick={() => setGoToViewsConfigs(true)}
-                    style={{marginLeft: '1.5%', marginRight: '1.5%'}}
-                >
-                    View Your Configurations
-                </Button>
+                {configs !== null && configs.length > 0 ?
+                    <Button
+                        variant='outlined'
+                        color='secondary'
+                        onClick={() => setGoToViewsConfigs(true)}
+                        style={{marginLeft: '1.5%', marginRight: '1.5%'}}
+                    >
+                        View Your Configurations
+                    </Button>
+                    : false}
                 <Button
                     variant='outlined'
                     color='secondary'

@@ -49,3 +49,7 @@ export function get_plugin() {
         return true
     }).catch(() => false)
 }
+
+export function delete_config(config_id) {
+    return axios.delete('/api/configuration/' + config_id, {headers: getHeaders()}).then(resp => resp.data)
+}

@@ -108,6 +108,9 @@ def get_checks(config_id):
 
     return jsonify(checks)
 
+@bp.route("/<config_id>", methods=["DELETE"])
+def delete_config(config_id):
+    return jsonify(Configuration.delete_by_id(ObjectId(config_id)))
 
 ##################################################################
 # U T I L I T I E S

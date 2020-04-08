@@ -74,3 +74,8 @@ class Configuration:
     def find_config_by_id(cls, config_id):
         return db.find_one("configuration", {"_id": config_id})
 
+    @classmethod
+    def delete_by_id(cls, config_id):
+        return db.delete("configuration", {"_id": config_id})
+
+

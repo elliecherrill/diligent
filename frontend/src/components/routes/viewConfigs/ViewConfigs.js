@@ -3,9 +3,22 @@ import colours from '../../../constants/colours'
 import styled from 'styled-components'
 import useStyles from './style'
 import * as API from '../../../api'
-import {TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper, Grid, CircularProgress} from '@material-ui/core'
 import {
-    DescriptionOutlined as DowloadIcon
+    TableContainer,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    Paper,
+    Grid,
+    CircularProgress,
+    Tooltip
+} from '@material-ui/core'
+import {
+    DescriptionOutlined as DowloadIcon,
+    Edit as EditIcon,
+    Clear as DeleteIcon
 } from '@material-ui/icons'
 import IconButton from '@material-ui/core/IconButton';
 
@@ -21,7 +34,7 @@ const createFile = c => {
 }
 
 const downloadFile = async (response) => {
-    const blob = new Blob([JSON.stringify(response)],{type:'application/json'})
+    const blob = new Blob([JSON.stringify(response)], {type: 'application/json'})
     const href = await URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = href
@@ -29,6 +42,10 @@ const downloadFile = async (response) => {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+}
+
+const deleteConfig = c => {
+    API.delete_config(c['_id']['$oid']).then(response => console.log("deleted"))
 }
 
 const ViewConfigs = () => {
@@ -59,7 +76,7 @@ const ViewConfigs = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>Name</TableCell>
-                            <TableCell align='right'>Download</TableCell>
+                            <TableCell align='right'>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -68,10 +85,22 @@ const ViewConfigs = () => {
                                 <TableCell component='th' scope='row'>
                                     {c.title}
                                 </TableCell>
-                                <TableCell align='right'>
-                                    <IconButton color='inherit' onClick={() => createFile(c)}>
-                                        <DowloadIcon />
-                                    </IconButton>
+                                <TableCell align='right' size='small'>
+                                    <Tooltip title="Download Configuration File">
+                                        <IconButton color='inherit' onClick={() => createFile(c)}>
+                                            <DowloadIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Edit Configuration">
+                                        <IconButton color='inherit'>
+                                            <EditIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Tooltip title="Delete Configuration">
+                                        <IconButton color='inherit' onClick={() => deleteConfig(c)}>
+                                            <DeleteIcon/>
+                                        </IconButton>
+                                    </Tooltip>
                                 </TableCell>
                             </TableRow>
                         ))}

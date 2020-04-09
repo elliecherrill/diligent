@@ -17,10 +17,16 @@ export default makeStyles(theme => ({
         backgroundColor: theme.palette.secondary.main
     },
     form: {
-        width: '100%',
-        marginTop: theme.spacing(1)
+        width: '80%',
+        marginRight: '10%',
+        marginLeft: '10%'
     },
     submit: {
         margin: theme.spacing(3, 0, 2)
+    },
+    loginContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignContent: 'center'
     }
 }))

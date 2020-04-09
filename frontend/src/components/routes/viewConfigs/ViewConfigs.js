@@ -13,7 +13,7 @@ import {
     Paper,
     Grid,
     CircularProgress,
-    Tooltip
+    Tooltip, Slide
 } from '@material-ui/core'
 import {
     DescriptionOutlined as DowloadIcon,
@@ -84,49 +84,53 @@ const ViewConfigs = () => {
 
     return (
         <Container>
-            <h1 className='title' style={{color: 'white', marginLeft: '5%'}}>Your Configurations</h1>
-            <TableContainer component={Paper} style={{margin: '5%', width: '90%'}}>
-                <Table className={classes.table} aria-label='simple table'>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Name</TableCell>
-                            <TableCell align='right'>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {configs.map(c => (
-                            <TableRow key={c['_id']}>
-                                <TableCell component='th' scope='row'>
-                                    {c.title}
-                                </TableCell>
-                                <TableCell align='right' size='small'>
-                                    <Tooltip title="Download Configuration File">
-                                        <IconButton color='inherit' onClick={() => createFile(c)}>
-                                            <DowloadIcon/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Edit Configuration">
-                                        <IconButton color='inherit'>
-                                            <EditIcon/>
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Delete Configuration">
-                                        <IconButton
-                                            color='inherit'
-                                            onClick={() => {
-                                                setDeleted(false)
-                                                setCurrentConfig(c)
-                                                setOpenDeleteAlert(true)
-                                            }}>
-                                            <DeleteIcon/>
-                                        </IconButton>
-                                    </Tooltip>
-                                </TableCell>
+            <Slide direction="down" in={configs} mountOnEnter unmountOnExit>
+                <h1 className='title' style={{color: 'white', marginLeft: '5%'}}>Your Configurations</h1>
+            </Slide>
+            <Slide direction="up" in={configs} mountOnEnter unmountOnExit>
+                <TableContainer component={Paper} style={{margin: '5%', width: '90%'}}>
+                    <Table className={classes.table} aria-label='simple table'>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell align='right'>Actions</TableCell>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                            {configs.map(c => (
+                                <TableRow key={c['_id']}>
+                                    <TableCell component='th' scope='row'>
+                                        {c.title}
+                                    </TableCell>
+                                    <TableCell align='right' size='small'>
+                                        <Tooltip title="Download Configuration File">
+                                            <IconButton color='inherit' onClick={() => createFile(c)}>
+                                                <DowloadIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Edit Configuration">
+                                            <IconButton color='inherit'>
+                                                <EditIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                        <Tooltip title="Delete Configuration">
+                                            <IconButton
+                                                color='inherit'
+                                                onClick={() => {
+                                                    setDeleted(false)
+                                                    setCurrentConfig(c)
+                                                    setOpenDeleteAlert(true)
+                                                }}>
+                                                <DeleteIcon/>
+                                            </IconButton>
+                                        </Tooltip>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Slide>
 
             <Alert
                 title={'Confirm Delete Configuration'}
@@ -134,7 +138,7 @@ const ViewConfigs = () => {
                 actions={[
                     {title: 'BACK', action: (() => setOpenDeleteAlert(false))},
                     {title: 'DELETE', action: deleteCurrConfig}
-                    ]}
+                ]}
                 open={openDeleteAlert}
             />
 

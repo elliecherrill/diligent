@@ -10,7 +10,7 @@ import {
 } from '@material-ui/core'
 import Alert from './Alert'
 import DeleteConfigSnackbar from './DeleteConfigSnackbar'
-import ConfigTable from "./ConfigTable";
+import ConfigTable from './ConfigTable'
 
 const Container = styled.div`
     margin: 7%;    
@@ -36,7 +36,7 @@ const ViewConfigs = () => {
     }, [refresh])
 
     const createFile = c => {
-        API.get_checks(c['_id']['$oid']).then(response => downloadFile(response))
+        API.get_checks_for_download(c['_id']['$oid']).then(response => downloadFile(response))
 
     }
 
@@ -93,7 +93,7 @@ const ViewConfigs = () => {
                 open={openDeleteAlert}
             />
 
-            {deleted ? <DeleteConfigSnackbar/> : false}
+            {deleted && <DeleteConfigSnackbar/>}
 
         </Container>
     )

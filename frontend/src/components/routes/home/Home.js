@@ -10,6 +10,7 @@ import {Redirect} from 'react-router-dom'
 import routes from '../../../constants/routes'
 import NewConfigSnackbar from './NewConfigSnackbar'
 import * as API from '../../../api'
+import EditConfigSnackbar from './EditConfigSnackbar'
 
 const Home = (props) => {
     document.body.style.backgroundColor = colours.PRIMARY
@@ -55,7 +56,7 @@ const Home = (props) => {
                                 Diligent
                             </h1>
                         </Fade>
-                        <Fade in={loaded} {...(loaded ? { timeout: 1000 } : {})}>
+                        <Fade in={loaded} {...(loaded ? {timeout: 1000} : {})}>
                             <h1 className='subtitle is-3'
                                 style={{
                                     fontSize: '2rem',
@@ -69,7 +70,7 @@ const Home = (props) => {
                     </div>
                 </div>
             </section>
-            <Fade in={loaded} {...(loaded ? { timeout: 2000 } : {})}>
+            <Fade in={loaded} {...(loaded ? {timeout: 2000} : {})}>
                 <div style={{display: 'flex', justifyContent: 'center'}}>
                     <Button
                         variant='outlined'
@@ -79,16 +80,16 @@ const Home = (props) => {
                     >
                         Create A New Configuration
                     </Button>
-                    {configs !== null && configs.length > 0 ?
-                        <Button
-                            variant='outlined'
-                            color='secondary'
-                            onClick={() => setGoToViewsConfigs(true)}
-                            style={{marginLeft: '1.5%', marginRight: '1.5%'}}
-                        >
-                            View Your Configurations
-                        </Button>
-                        : false}
+                    {configs !== null && configs.length > 0 &&
+                    <Button
+                        variant='outlined'
+                        color='secondary'
+                        onClick={() => setGoToViewsConfigs(true)}
+                        style={{marginLeft: '1.5%', marginRight: '1.5%'}}
+                    >
+                        View Your Configurations
+                    </Button>
+                    }
                     <Button
                         variant='outlined'
                         color='secondary'
@@ -100,11 +101,24 @@ const Home = (props) => {
                 </div>
             </Fade>
 
-            {goToNewConfig ? <Redirect push to={routes.NEW_CONFIG}/> : false}
-            {goToViewConfigs ? <Redirect push to={routes.VIEW_CONFIGS}/> : false}
-            {props.location.state ?
-                <NewConfigSnackbar key={props.location.state} title={props.location.state}
-                                   setGoToViewsConfigs={setGoToViewsConfigs}/> : false}
+            {goToNewConfig && <Redirect push to={routes.NEW_CONFIG}/>}
+            {goToViewConfigs && <Redirect push to={routes.VIEW_CONFIGS}/>}
+            {props.location.state &&
+            (props.location.state.new ?
+                    <NewConfigSnackbar
+                        key={props.location.state.title}
+                        title={props.location.state.title}
+                        setGoToViewsConfigs={setGoToViewsConfigs}
+                    />
+                    :
+                    (props.location.state.edit &&
+                        <EditConfigSnackbar
+                            key={props.location.state.title}
+                            title={props.location.state.title}
+                            setGoToViewsConfigs={setGoToViewsConfigs}
+                        />
+                    )
+            )}
             }
         </div>
     )

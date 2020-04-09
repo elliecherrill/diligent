@@ -163,11 +163,11 @@ class NewConfig extends React.Component {
                                     }
                                 }}
                             >
-                                Save Configuration
+                                SAVE CONFIGURATION
                             </Button>
 
-                            {this.state.goToHome ?
-                                <Redirect push to={{pathname: routes.HOME, state: this.state.title}}/> : false}
+                            {this.state.goToHome &&
+                                <Redirect push to={{pathname: routes.HOME, state: {title: this.state.title, new: true, edit: false}}}/>}
                         </div>
                     </div>
                 </Slide>

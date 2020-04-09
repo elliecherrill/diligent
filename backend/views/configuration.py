@@ -76,23 +76,23 @@ def get_my_configs():
     return jsonify(titles)
 
 
-@bp.route("/get_checks/<config_id>", methods=["GET"])
-def get_checks(config_id):
+@bp.route("/get_checks_for_download/<config_id>", methods=["GET"])
+def get_checks_for_download(config_id):
     config = Configuration.find_config_by_id(ObjectId(config_id))
 
     checks = {"high": list(), "medium": list(), "low": list()}
 
-    forFile = {	
-        #TODO 'config-1': '==-string',
+    forFile = {
+        # TODO 'config-1': '==-string',
         'config-2': 'inheritance',
         'config-3': 'interfaces',
-        #TODO 'config-4': 'streams',
-	    #TODO 'config-5': 'for-loops',
-	    #TODO 'config-6': 'while-loops',
+        # TODO 'config-4': 'streams',
+        # TODO 'config-5': 'for-loops',
+        # TODO 'config-6': 'while-loops',
         'config-7': 'camelcase',
         'config-8': 'screaming-snake-case',
-	    'config-9': 'redundant-else',
-	    'config-10': 'single-char-name',
+        'config-9': 'redundant-else',
+        'config-10': 'single-char-name',
         'config-11': 'method-length',
         'config-12': 'clone'
     }
@@ -108,9 +108,29 @@ def get_checks(config_id):
 
     return jsonify(checks)
 
+
+@bp.route("/get_checks/<config_id>", methods=["GET"])
+def get_checks(config_id):
+    config = Configuration.find_config_by_id(ObjectId(config_id))
+
+    checks = {"high": list(), "medium": list(), "low": list(), "title": config["title"]}
+
+    for highCheck in config["high"]:
+        checks["high"].append(highCheck["check"])
+
+    for mediumCheck in config["medium"]:
+        checks["medium"].append(mediumCheck["check"])
+
+    for lowCheck in config["low"]:
+        checks["low"].append(lowCheck["check"])
+
+    return jsonify(checks)
+
+
 @bp.route("/<config_id>", methods=["DELETE"])
 def delete_config(config_id):
     return jsonify(Configuration.delete_by_id(ObjectId(config_id)))
+
 
 ##################################################################
 # U T I L I T I E S

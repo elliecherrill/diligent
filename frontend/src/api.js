@@ -34,6 +34,10 @@ export function get_my_configs() {
     return axios.get('/api/configuration/get_my_configs', {headers: getHeaders()}).then(resp => resp.data)
 }
 
+export function get_checks_for_download(config_id) {
+    return axios.get('/api/configuration/get_checks_for_download/' + config_id, {headers: getHeaders()}).then(resp => resp.data)
+}
+
 export function get_checks(config_id) {
     return axios.get('/api/configuration/get_checks/' + config_id, {headers: getHeaders()}).then(resp => resp.data)
 }

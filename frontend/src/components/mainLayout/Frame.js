@@ -10,6 +10,7 @@ import useUserInformation from './topbar/userInfoHook'
 import useStyles from './style'
 import PageNotFound from '../routes/404/PageNotFound'
 import ViewConfigs from '../routes/viewConfigs/ViewConfigs'
+import EditConfig from '../routes/editConfig/EditConfig'
 
 const Frame = props => {
 
@@ -47,7 +48,7 @@ const Frame = props => {
                             <Route
                                 exact
                                 path={routes.NEW_CONFIG}
-                                render={routeProps => {
+                                render={() => {
                                     window.scrollTo(0, 0)
                                     return <NewConfig />
                                 }}
@@ -55,9 +56,17 @@ const Frame = props => {
                             <Route
                                 exact
                                 path={routes.VIEW_CONFIGS}
-                                render={routeProps => {
+                                render={() => {
                                     window.scrollTo(0, 0)
                                     return <ViewConfigs />
+                                }}
+                            />
+                            <Route
+                                exact
+                                path={routes.EDIT_CONFIG + '/:id'}
+                                render={() => {
+                                    window.scrollTo(0, 0)
+                                    return <EditConfig />
                                 }}
                             />
                             <Route

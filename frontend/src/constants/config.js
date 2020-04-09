@@ -25,3 +25,6 @@ export const initialConfigs = {
     },
     columnOrder: ['category-4', 'category-3', 'category-2', 'category-1']
 }
+
+export const allConfigs = ['config-2', 'config-3', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12']
+ //TODO: 'config-1', 'config-4', 'config-5', 'config-6',

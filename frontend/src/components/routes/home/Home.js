@@ -1,7 +1,8 @@
 import {
     Button,
     Grid,
-    CircularProgress
+    CircularProgress,
+    Fade
 } from '@material-ui/core'
 import React, {useEffect, useState} from 'react'
 import colours from '../../../constants/colours'
@@ -36,7 +37,7 @@ const Home = (props) => {
 
     if (!loaded) {
         return (<div>
-            <Grid container justify='center' >
+            <Grid container justify='center'>
                 <Grid item>
                     <CircularProgress color={"secondary"}/>
                 </Grid>
@@ -49,54 +50,61 @@ const Home = (props) => {
             <section className='hero is-large'>
                 <div className='hero-body'>
                     <div className='container'>
-                        <h1 className='title is-1' style={{fontSize: '5rem', textAlign: 'center', color: 'white'}}>
-                            Diligent
-                        </h1>
-                        <h1 className='subtitle is-3'
-                            style={{
-                                fontSize: '2rem',
-                                textAlign: 'center',
-                                color: 'rgb(220, 220, 220)',
-                                marginBottom: '5%'
-                            }}>
-                            A tool which does something.
-                        </h1>
+                        <Fade in={loaded}>
+                            <h1 className='title is-1' style={{fontSize: '5rem', textAlign: 'center', color: 'white'}}>
+                                Diligent
+                            </h1>
+                        </Fade>
+                        <Fade in={loaded} {...(loaded ? { timeout: 1000 } : {})}>
+                            <h1 className='subtitle is-3'
+                                style={{
+                                    fontSize: '2rem',
+                                    textAlign: 'center',
+                                    color: 'rgb(220, 220, 220)',
+                                    marginBottom: '5%'
+                                }}>
+                                A tool which does something.
+                            </h1>
+                        </Fade>
                     </div>
                 </div>
             </section>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-                <Button
-                    variant='outlined'
-                    color='secondary'
-                    onClick={() => setGoToNewConfig(true)}
-                    style={{marginRight: '1.5%'}}
-                >
-                    Create A New Configuration
-                </Button>
-                {configs !== null && configs.length > 0 ?
+            <Fade in={loaded} {...(loaded ? { timeout: 2000 } : {})}>
+                <div style={{display: 'flex', justifyContent: 'center'}}>
                     <Button
                         variant='outlined'
                         color='secondary'
-                        onClick={() => setGoToViewsConfigs(true)}
-                        style={{marginLeft: '1.5%', marginRight: '1.5%'}}
+                        onClick={() => setGoToNewConfig(true)}
+                        style={{marginRight: '1.5%'}}
                     >
-                        View Your Configurations
+                        Create A New Configuration
                     </Button>
-                    : false}
-                <Button
-                    variant='outlined'
-                    color='secondary'
-                    onClick={() => downloadPlugin()}
-                    style={{marginLeft: '1.5%'}}
-                >
-                    Download Diligent Plugin
-                </Button>
-            </div>
+                    {configs !== null && configs.length > 0 ?
+                        <Button
+                            variant='outlined'
+                            color='secondary'
+                            onClick={() => setGoToViewsConfigs(true)}
+                            style={{marginLeft: '1.5%', marginRight: '1.5%'}}
+                        >
+                            View Your Configurations
+                        </Button>
+                        : false}
+                    <Button
+                        variant='outlined'
+                        color='secondary'
+                        onClick={() => downloadPlugin()}
+                        style={{marginLeft: '1.5%'}}
+                    >
+                        Download Diligent Plugin
+                    </Button>
+                </div>
+            </Fade>
 
             {goToNewConfig ? <Redirect push to={routes.NEW_CONFIG}/> : false}
             {goToViewConfigs ? <Redirect push to={routes.VIEW_CONFIGS}/> : false}
             {props.location.state ?
-                <NewConfigSnackbar key={props.location.state} title={props.location.state} setGoToViewsConfigs={setGoToViewsConfigs}/> : false}
+                <NewConfigSnackbar key={props.location.state} title={props.location.state}
+                                   setGoToViewsConfigs={setGoToViewsConfigs}/> : false}
             }
         </div>
     )

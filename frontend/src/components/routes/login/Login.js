@@ -12,6 +12,7 @@ import authentication from '../../../utils/authenticationService'
 import routes from '../../../constants/routes'
 import colours from '../../../constants/colours'
 import theme from '../../../theme'
+import logo from '../../../images/diligent.svg'
 
 export default props => {
     document.body.style.backgroundColor = 'inherit'
@@ -43,16 +44,20 @@ export default props => {
                 <div className={classes.loginContainer}>
                     <div className='hero-body' style={{width: '100%'}}>
                         <div className='container'>
-                            <h1 className='title is-1'
-                                style={{fontSize: '4rem', textAlign: 'center', color: colours.PRIMARY}}>
-                                Diligent
-                            </h1>
+                            <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                                <img src={logo} alt={'Diligent logo'} style={{width: '10%', marginRight: '5%'}}/>
+                                <h1 className='title is-1'
+                                    style={{fontSize: '4rem', textAlign: 'center', color: colours.PRIMARY}}>
+                                    Diligent
+                                </h1>
+                            </div>
                             <h1 className='subtitle is-3'
                                 style={{
                                     fontSize: '2rem',
                                     textAlign: 'center',
                                     color: theme.palette.primary.light,
-                                    marginBottom: '5%'
+                                    marginBottom: '5%',
+                                    marginLeft: '5%'
                                 }}>
                                 A tool which does something.
                             </h1>

@@ -7,10 +7,12 @@ export default makeStyles(theme => ({
         }
     },
     paper: {
-        marginTop: theme.spacing(8),
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center'
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        paddingBottom: theme.spacing(10)
     },
     avatar: {
         margin: theme.spacing(1),

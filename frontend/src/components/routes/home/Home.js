@@ -14,6 +14,8 @@ import EditConfigSnackbar from './EditConfigSnackbar'
 
 const Home = (props) => {
     document.body.style.backgroundColor = colours.PRIMARY
+    props.setGoToHome(false)
+
     const [goToNewConfig, setGoToNewConfig] = useState(false)
     const [goToViewConfigs, setGoToViewsConfigs] = useState(false)
     const [configs, setConfigs] = useState(null)

@@ -3,6 +3,8 @@ import styled from 'styled-components'
 import ConfigComponent from './ConfigComponent'
 import {Droppable} from 'react-beautiful-dnd'
 import colours from '../../../constants/colours'
+import {Info as InfoIcon} from '@material-ui/icons'
+import {Tooltip} from '@material-ui/core'
 
 const Container = styled.div`
     margin: 8px;
@@ -41,6 +43,22 @@ class InnerList extends React.Component {
 }
 
 export default class Column extends React.Component {
+    getInfo = (title) => {
+        if (title === 'High Priority') {
+            return 'TODO: Explain what high priority means'
+        }
+
+        if (title === 'Medium Priority') {
+            return 'TODO: Explain what medium priority means'
+        }
+
+        if (title === 'Low Priority') {
+            return 'TODO: Explain what low priority means'
+        }
+
+        return 'TODO: Explain what not in use means'
+    }
+
     render() {
         return (
             <Container
@@ -48,7 +66,12 @@ export default class Column extends React.Component {
                 isMediumPriority={this.props.column.title === 'Medium Priority'}
                 isLowPriority={this.props.column.title === 'Low Priority'}
             >
-                <Title>{this.props.column.title}</Title>
+                <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                    <Title>{this.props.column.title}</Title>
+                    <Tooltip title={this.getInfo(this.props.column.title)}>
+                        <InfoIcon color='primary'/>
+                    </Tooltip>
+                </div>
                 <Droppable droppableId={this.props.column.id}>
                     {(provided, snapshot) => (
                         <ConfigList

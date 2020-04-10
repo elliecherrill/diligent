@@ -97,16 +97,21 @@ def get_checks_for_download(config_id):
     forFile = {
         # TODO 'config-1': '==-string',
         'config-2': 'inheritance',
-        'config-3': 'interfaces',
-        # TODO 'config-4': 'streams',
-        # TODO 'config-5': 'for-loops',
-        # TODO 'config-6': 'while-loops',
-        'config-7': 'camelcase',
-        'config-8': 'screaming-snake-case',
-        'config-9': 'redundant-else',
-        'config-10': 'single-char-name',
-        'config-11': 'method-length',
-        'config-12': 'clone'
+        'config-3': 'no-inheritance',
+        'config-4': 'interfaces',
+        'config-5': 'no-interfaces',
+        # TODO 'config-6': 'streams',
+        # TODO 'config-7': 'no-streams',
+        # TODO 'config-8': 'for-loops',
+        # TODO 'config-9': 'no-for-loops',
+        # TODO 'config-10': 'while-loops',
+        # TODO 'config-11': 'no-while-loops',
+        'config-12': 'camelcase',
+        'config-13': 'screaming-snake-case',
+        'config-14': 'redundant-else',
+        'config-15': 'single-char-name',
+        'config-16': 'method-length',
+        'config-17': 'clone'
     }
 
     for highCheck in config["high"]:

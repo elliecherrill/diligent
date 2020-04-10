@@ -44,7 +44,7 @@ def get_current_user():
 
 @bp.route("/new_config", methods=["POST"])
 @jwt_required
-def create_new_quiz():
+def create_new_config():
     json = request.json
     title = json["title"]
     creator = get_jwt_identity()
@@ -52,11 +52,16 @@ def create_new_quiz():
     medium = json["medium"]
     low = json["low"]
 
+    courseCode = json["courseCode"]
+    exerciseNum = json["exerciseNum"]
+
     config = Configuration(title=title,
                            creator=creator,
                            high=high,
                            medium=medium,
-                           low=low).save()
+                           low=low,
+                           courseCode=courseCode,
+                           exerciseNum=exerciseNum).save()
 
     response = jsonify({"id": str(config.inserted_id)})
 

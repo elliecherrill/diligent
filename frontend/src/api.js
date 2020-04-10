@@ -13,12 +13,14 @@ function getHeaders() {
     }
 }
 
-export function create_new_config(title, highPriorityChecks, mediumPriorityChecks, lowPriorityChecks) {
+export function create_new_config(title, highPriorityChecks, mediumPriorityChecks, lowPriorityChecks, courseCode, exerciseNum) {
     let config = {
         'title': title,
         'high': highPriorityChecks.map(check => formatCheck(check)),
         'medium': mediumPriorityChecks.map(check => formatCheck(check)),
-        'low': lowPriorityChecks.map(check => formatCheck(check))
+        'low': lowPriorityChecks.map(check => formatCheck(check)),
+        'courseCode': courseCode,
+        'exerciseNum': exerciseNum
     }
 
     return axios.post('/api/configuration/new_config', config, {headers: getHeaders()})

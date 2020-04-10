@@ -49,12 +49,14 @@ class User:
 
 class Configuration:
 
-    def __init__(self, title, creator, high, medium, low):
+    def __init__(self, title, creator, high, medium, low, courseCode, exerciseNum):
         self.title = title
         self.creator = creator
         self.high = high
         self.medium = medium
         self.low = low
+        self.courseCode = courseCode
+        self.exerciseNum = exerciseNum
 
     def save(self):
         """Save instance to DB"""
@@ -63,7 +65,9 @@ class Configuration:
             "creator": self.creator,
             "high": self.high,
             "medium": self.medium,
-            "low": self.low
+            "low": self.low,
+            "courseCode": self.courseCode,
+            "exerciseNum": self.exerciseNum
         })
 
     @classmethod

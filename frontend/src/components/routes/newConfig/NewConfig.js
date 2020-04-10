@@ -4,17 +4,40 @@ import Column from './Column'
 import {DragDropContext} from 'react-beautiful-dnd'
 import styled from 'styled-components'
 import colours from '../../../constants/colours'
-import {Button, Slide, TextField} from '@material-ui/core'
+import {
+    Button,
+    Slide,
+    TextField,
+    Tooltip,
+    IconButton,
+    MenuItem,
+    Menu, Fade
+} from '@material-ui/core'
 import * as API from '../../../api'
 import routes from '../../../constants/routes'
 import {Redirect} from 'react-router-dom'
+import {
+    NoteAdd as AddDetailIcon,
+    Clear as DeleteIcon
+} from '@material-ui/icons'
 
 const Container = styled.div`
     display: flex;
 `
 
 class NewConfig extends React.Component {
-    state = {...initialConfigs, title: '', titleError: false, goToHome: false}
+    state = {
+        ...initialConfigs,
+        title: '',
+        titleError: false,
+        goToHome: false,
+        anchorEl: null,
+
+        addCourseCode: false,
+        courseCode: '',
+        addExerciseNum: false,
+        exerciseNum: '',
+    }
 
     onDragEnd = result => {
         const {destination, source, draggableId} = result
@@ -106,6 +129,38 @@ class NewConfig extends React.Component {
         return true
     }
 
+    handleMenuClose = () => {
+        this.setState({...this.state, anchorEl: null})
+    }
+
+    addCourseCode = () => {
+        this.setState({...this.state, anchorEl: null, addCourseCode: true})
+    }
+
+    addExerciseNum = () => {
+        this.setState({...this.state, anchorEl: null, addExerciseNum: true})
+    }
+
+    saveConfig = () => {
+        const courseCode = this.state.addCourseCode ? this.state.courseCode : null
+        const exerciseNum = this.state.addExerciseNum ? this.state.exerciseNum : null
+
+        API.create_new_config(
+            this.state.title,
+            this.getHighPriorityChecks(),
+            this.getMediumPriorityChecks(),
+            this.getLowPriorityChecks(),
+            courseCode,
+            exerciseNum
+        ).then(() => {
+            const newState = {
+                ...this.state,
+                goToHome: true
+            }
+            this.setState(newState)
+        })
+    }
+
     render() {
         document.body.style.backgroundColor = colours.PRIMARY
         return (
@@ -127,47 +182,126 @@ class NewConfig extends React.Component {
                     </div>
                 </Slide>
                 <Slide direction="up" in={true} mountOnEnter unmountOnExit>
-                    <div style={{width: '100%', backgroundColor: 'white', padding: '5%', marginTop: '5%'}}>
-                        <div style={{display: 'flex', justifyContent: 'center'}}>
-                            <TextField
-                                required
-                                label='Configuration Name'
-                                variant='outlined'
-                                color='primary'
-                                autoComplete='off'
-                                style={{marginRight: '2%'}}
-                                id={'title-input'}
-                                error={this.state.titleError}
-                                helperText={this.state.titleError ? 'Name of Configuration cannot be empty.' : ''}
-                                onChange={(e) => {
-                                    const newState = {
-                                        ...this.state,
-                                        title: e.target.value,
-                                        titleError: false
-                                    }
-                                    this.setState(newState)
-                                }}
-                            />
-                            <Button
-                                variant='contained'
-                                color='primary'
-                                onClick={() => {
-                                    if (this.isValid()) {
-                                        API.create_new_config(this.state.title, this.getHighPriorityChecks(), this.getMediumPriorityChecks(), this.getLowPriorityChecks()).then(() => {
-                                            const newState = {
-                                                ...this.state,
-                                                goToHome: true
-                                            }
-                                            this.setState(newState)
-                                        })
-                                    }
-                                }}
-                            >
-                                SAVE CONFIGURATION
-                            </Button>
+                    <div style={{backgroundColor: 'white', padding: '5%', marginTop: '5%'}}>
+                        <div style={{display: 'flex', flexDirection: 'column'}}>
+                            <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+                                <TextField
+                                    required
+                                    label='Configuration Name'
+                                    variant='outlined'
+                                    color='primary'
+                                    autoComplete='off'
+                                    style={{marginLeft: '5%'}}
+                                    id={'title-input'}
+                                    error={this.state.titleError}
+                                    helperText={this.state.titleError ? 'Name of Configuration cannot be empty.' : ''}
+                                    onChange={(e) => {
+                                        const newState = {
+                                            ...this.state,
+                                            title: e.target.value,
+                                            titleError: false
+                                        }
+                                        this.setState(newState)
+                                    }}
+                                />
+                                <div style={{marginLeft: '2%'}}>
+                                    <Tooltip title="Add More Details">
+                                        <IconButton
+                                            color='primary'
+                                            onClick={(e) => this.setState({...this.state, anchorEl: e.currentTarget})}
+                                        >
+                                            <AddDetailIcon/>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <Menu
+                                        id="simple-menu"
+                                        anchorEl={this.state.anchorEl}
+                                        keepMounted
+                                        open={Boolean(this.state.anchorEl)}
+                                        onClose={this.handleMenuClose}
+                                    >
+                                        <MenuItem onClick={this.addCourseCode}>Add Course Code</MenuItem>
+                                        <MenuItem onClick={this.addExerciseNum}>Add Exercise Number</MenuItem>
+                                    </Menu>
+                                </div>
+                            </div>
+                            {(this.state.addCourseCode || this.state.addExerciseNum) &&
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                marginTop: '2%'
+                            }}>
+                                <Fade in={this.state.addCourseCode}>
+                                    <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+                                        <TextField
+                                            label='Course Code'
+                                            variant='outlined'
+                                            color='primary'
+                                            autoComplete='off'
+                                            style={{marginLeft: '1%', marginRight: '1%'}}
+                                            id={'course-code-input'}
+                                            helperText={'For Example: CO161'}
+                                            onChange={(e) => {
+                                                this.setState({...this.state, courseCode: e.target.value})
+                                            }}
+                                        />
+                                        <div>
+                                            <IconButton
+                                                color='primary'
+                                                onClick={() => this.setState({...this.state, addCourseCode: false})}
+                                            >
+                                                <DeleteIcon/>
+                                            </IconButton>
+                                        </div>
+                                    </div>
+                                </Fade>
+                                <Fade in={this.state.addExerciseNum}>
+                                    <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+                                        <TextField
+                                            label='Exercise Number'
+                                            variant='outlined'
+                                            color='primary'
+                                            autoComplete='off'
+                                            style={{marginLeft: '1%', marginRight: '1%'}}
+                                            id={'ex-num-input'}
+                                            helperText={'For Example: 17 Java Spreadsheet'}
+                                            onChange={(e) => {
+                                                this.setState({...this.state, exerciseNum: e.target.value})
+                                            }}
+                                        />
+                                        <div>
+                                            <IconButton
+                                                color='primary'
+                                                onClick={() => this.setState({...this.state, addExerciseNum: false})}
+                                            >
+                                                <DeleteIcon/>
+                                            </IconButton>
+                                        </div>
+                                    </div>
+                                </Fade>
+                            </div>
+                            }
+
+                            <div style={{display: 'flex', justifyContent: 'center', marginTop: '2%'}}>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    onClick={() => {
+                                        if (this.isValid()) {
+                                            this.saveConfig()
+                                        }
+                                    }}
+                                >
+                                    SAVE CONFIGURATION
+                                </Button>
+                            </div>
 
                             {this.state.goToHome &&
-                                <Redirect push to={{pathname: routes.HOME, state: {title: this.state.title, new: true, edit: false}}}/>}
+                            <Redirect push to={{
+                                pathname: routes.HOME,
+                                state: {title: this.state.title, new: true, edit: false}
+                            }}/>}
                         </div>
                     </div>
                 </Slide>

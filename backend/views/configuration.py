@@ -123,7 +123,14 @@ def get_checks_for_download(config_id):
 def get_checks(config_id):
     config = Configuration.find_config_by_id(ObjectId(config_id))
 
-    checks = {"high": list(), "medium": list(), "low": list(), "title": config["title"]}
+    checks = {
+        "high": list(),
+        "medium": list(),
+        "low": list(),
+        "title": config["title"],
+        "courseCode": config["courseCode"],
+        "exerciseNum": config["exerciseNum"]
+    }
 
     for highCheck in config["high"]:
         checks["high"].append(highCheck["check"])

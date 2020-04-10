@@ -165,7 +165,7 @@ class NewConfig extends React.Component {
         document.body.style.backgroundColor = colours.PRIMARY
         return (
             <div>
-                <Slide direction="down" in={true} mountOnEnter unmountOnExit>
+                <Slide direction='down' in={true} mountOnEnter unmountOnExit>
                     <div style={{paddingLeft: '5%', paddingRight: '5%'}}>
                         <DragDropContext
                             onDragEnd={this.onDragEnd}
@@ -181,7 +181,7 @@ class NewConfig extends React.Component {
                         </DragDropContext>
                     </div>
                 </Slide>
-                <Slide direction="up" in={true} mountOnEnter unmountOnExit>
+                <Slide direction='up' in={true} mountOnEnter unmountOnExit>
                     <div style={{backgroundColor: 'white', padding: '5%', marginTop: '5%'}}>
                         <div style={{display: 'flex', flexDirection: 'column'}}>
                             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
@@ -205,7 +205,7 @@ class NewConfig extends React.Component {
                                     }}
                                 />
                                 <div style={{marginLeft: '2%'}}>
-                                    <Tooltip title="Add More Details">
+                                    <Tooltip title='Add More Details'>
                                         <IconButton
                                             color='primary'
                                             disabled={this.state.addExerciseNum && this.state.addCourseCode}
@@ -216,7 +216,7 @@ class NewConfig extends React.Component {
                                     </Tooltip>
                                     {(!this.state.addExerciseNum || !this.state.addCourseCode) &&
                                     <Menu
-                                        id="simple-menu"
+                                        id='simple-menu'
                                         anchorEl={this.state.anchorEl}
                                         keepMounted
                                         open={Boolean(this.state.anchorEl)}

@@ -19,7 +19,10 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         alignItems: 'center',
         color: theme.palette.primary.main
-    }
+    },
+    typography: {
+        padding: theme.spacing(2),
+    },
 }))
 
 export default useStyles

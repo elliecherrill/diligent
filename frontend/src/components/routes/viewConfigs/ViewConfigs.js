@@ -93,7 +93,7 @@ const ViewConfigs = () => {
                 open={openDeleteAlert}
             />
 
-            {deleted && <DeleteConfigSnackbar/>}
+            {deleted && <DeleteConfigSnackbar title={currentConfig['title']}/>}
 
         </Container>
     )

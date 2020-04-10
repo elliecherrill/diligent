@@ -8,7 +8,7 @@ import {
 } from '@material-ui/icons'
 
 
-const DeleteConfigSnackbar = () => {
+const DeleteConfigSnackbar = ({title}) => {
     const classes = useStyles()
     const [open, setOpen] = useState(true)
 
@@ -30,7 +30,7 @@ const DeleteConfigSnackbar = () => {
                 message={
                     <span id="client-snackbar" className={classes.newConfigSnackbarMessage}>
                     <DeleteIcon className={clsx(classes.snackbarIcon, classes.snackbarIconVariant)}/>
-                    Deleted Configuration
+                    Deleted Configuration: {title}
                 </span>
                 }
                 action={[

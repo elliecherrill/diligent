@@ -202,7 +202,7 @@ class NewConfig extends React.Component {
                     </div>
                 </Slide>
                 <Slide direction='up' in={true} mountOnEnter unmountOnExit>
-                    <div style={{backgroundColor: 'white', padding: '5%', marginTop: '5%'}}>
+                    <div style={{backgroundColor: 'white', padding: '3%', marginTop: '5%'}}>
                         <div style={{display: 'flex', flexDirection: 'column'}}>
                             <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
                                 <TextField

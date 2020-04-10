@@ -82,7 +82,7 @@ export default class Column extends React.Component {
                             isHighPriority={this.props.column.title === 'High Priority'}
                             isMediumPriority={this.props.column.title === 'Medium Priority'}
                             isLowPriority={this.props.column.title === 'Low Priority'}
-                            style={{maxHeight: '50vh', overflow: 'auto'}}
+                            style={{maxHeight: '40vh', overflow: 'auto'}}
                         >
                             <InnerList configs={this.props.configs}/>
                             {provided.placeholder}

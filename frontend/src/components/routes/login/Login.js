@@ -45,9 +45,9 @@ export default props => {
                     <div className='hero-body' style={{width: '100%'}}>
                         <div className='container'>
                             <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-                                <img src={logo} alt={'Diligent logo'} style={{width: '10%', marginRight: '5%'}}/>
+                                <img src={logo} alt={'Diligent logo'} style={{width: '10%', marginRight: '5%', marginBottom: '5%'}}/>
                                 <h1 className='title is-1'
-                                    style={{fontSize: '4rem', textAlign: 'center', color: colours.PRIMARY}}>
+                                    style={{fontSize: '4rem', textAlign: 'center', color: colours.PRIMARY, marginTop: '5%'}}>
                                     Diligent
                                 </h1>
                             </div>

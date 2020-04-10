@@ -31,6 +31,7 @@ class NewConfig extends React.Component {
         ...initialConfigs,
         title: '',
         titleError: false,
+        emptyConfigError: false,
         goToHome: false,
         anchorEl: null,
 
@@ -119,11 +120,21 @@ class NewConfig extends React.Component {
     }
 
     isValid = () => {
-        //TODO: Add more validity checks - have they already got one with this name? have they selected any checks? (don't want to create an empty config)
         if (this.state.title === '') {
             const newState = {
                 ...this.state,
                 titleError: true
+            }
+            this.setState(newState)
+            return false
+        }
+
+        if (this.getHighPriorityChecks().length === 0 &&
+            this.getMediumPriorityChecks().length === 0 &&
+            this.getLowPriorityChecks().length === 0) {
+            const newState = {
+                ...this.state,
+                emptyConfigError: true
             }
             this.setState(newState)
             return false
@@ -321,9 +332,24 @@ class NewConfig extends React.Component {
                                 title={'Conflict Configuration'}
                                 content={'One of your configurations is already called \'' + this.state.title + '\'. Please choose a unique configuration name.'}
                                 actions={[
-                                    {title: 'OK', action: (() => this.setState({...this.state, duplicateTitle: false}))},
+                                    {
+                                        title: 'OK',
+                                        action: (() => this.setState({...this.state, duplicateTitle: false}))
+                                    },
                                 ]}
                                 open={this.state.duplicateTitle}
+                            />
+
+                            <Alert
+                                title={'Empty Configuration'}
+                                content={'You have not selected any checks. Please select some checks for the tool to perform when using this configuration.'}
+                                actions={[
+                                    {
+                                        title: 'OK',
+                                        action: (() => this.setState({...this.state, emptyConfigError: false}))
+                                    },
+                                ]}
+                                open={this.state.emptyConfigError}
                             />
 
                         </div>

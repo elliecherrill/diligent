@@ -26,15 +26,14 @@ const DeleteConfigSnackbar = ({title}) => {
             autoHideDuration={6000}>
             <SnackbarContent
                 className={classes.newConfigSnackbar}
-                aria-describedby="client-snackbar"
                 message={
-                    <span id="client-snackbar" className={classes.newConfigSnackbarMessage}>
+                    <span id='client-snackbar' className={classes.newConfigSnackbarMessage}>
                     <DeleteIcon className={clsx(classes.snackbarIcon, classes.snackbarIconVariant)}/>
                     Deleted Configuration: {title}
                 </span>
                 }
                 action={[
-                    <IconButton key="close" aria-label="close" color="inherit" onClick={handleClose}>
+                    <IconButton key='close' aria-label='close' color='inherit' onClick={handleClose}>
                         <CloseIcon className={classes.snackbarIcon}/>
                     </IconButton>
                 ]}

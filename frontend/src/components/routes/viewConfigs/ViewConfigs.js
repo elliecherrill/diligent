@@ -72,7 +72,7 @@ const ViewConfigs = () => {
 
     return (
         <Container>
-            <Slide direction="down" in={configs !== null} mountOnEnter unmountOnExit>
+            <Slide direction='down' in={configs !== null} mountOnEnter unmountOnExit>
                 <h1 className='title' style={{color: 'white', marginLeft: '5%'}}>Your Configurations</h1>
             </Slide>
             <ConfigTable

@@ -20,7 +20,7 @@ import {
     NoteAdd as AddDetailIcon,
     Clear as DeleteIcon
 } from '@material-ui/icons'
-import Alert from "../viewConfigs/Alert";
+import Alert from '../viewConfigs/Alert'
 
 const Container = styled.div`
     display: flex;
@@ -30,10 +30,13 @@ class NewConfig extends React.Component {
     state = {
         ...initialConfigs,
         title: '',
-        titleError: false,
-        emptyConfigError: false,
+
         goToHome: false,
         anchorEl: null,
+
+        titleError: false,
+        emptyConfigError: false,
+        inverseError: false,
 
         addCourseCode: false,
         courseCode: '',
@@ -119,6 +122,58 @@ class NewConfig extends React.Component {
         return this.state.categories['category-3'].configIds
     }
 
+    inverseChecksSelected = () => {
+        const unusedChecks = this.state.categories['category-4'].configIds
+        if (!unusedChecks.includes('config-2') && !unusedChecks.includes('config-3')) {
+            return true
+        }
+
+        if (!unusedChecks.includes('config-4') && !unusedChecks.includes('config-5')) {
+            return true
+        }
+
+        //TODO: uncomment
+        // if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
+        //     return true
+        // }
+        //
+        // if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
+        //     return true
+        // }
+        //
+        // if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
+        //     return true
+        // }
+
+        return false
+    }
+
+    getInverseChecks = () => {
+        const unusedChecks = this.state.categories['category-4'].configIds
+        if (!unusedChecks.includes('config-2') && !unusedChecks.includes('config-3')) {
+            return [initialConfigs.configs['config-2'].content, initialConfigs.configs['config-3'].content]
+        }
+
+        if (!unusedChecks.includes('config-4') && !unusedChecks.includes('config-5')) {
+            return [initialConfigs.configs['config-4'].content, initialConfigs.configs['config-5'].content]
+        }
+
+        //TODO: uncomment
+        // if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
+        //    return [initialConfigs.configs['config-6'].content, initialConfigs.configs['config-7'].content]
+        // }
+        //
+        // if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
+        //     return [initialConfigs.configs['config-8'].content, initialConfigs.configs['config-9'].content]
+        // }
+        //
+        // if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
+        // return [initialConfigs.configs['config-10'].content, initialConfigs.configs['config-11'].content]
+        // }
+
+        return []
+    }
+
     isValid = () => {
         if (this.state.title === '') {
             const newState = {
@@ -135,6 +190,15 @@ class NewConfig extends React.Component {
             const newState = {
                 ...this.state,
                 emptyConfigError: true
+            }
+            this.setState(newState)
+            return false
+        }
+
+        if (this.inverseChecksSelected()) {
+            const newState = {
+                ...this.state,
+                inverseError: true
             }
             this.setState(newState)
             return false
@@ -350,6 +414,18 @@ class NewConfig extends React.Component {
                                     },
                                 ]}
                                 open={this.state.emptyConfigError}
+                            />
+
+                            <Alert
+                                title={'Inverse Checks Selected'}
+                                content={'You have selected \'' + this.getInverseChecks()[0] + '\' and \'' + this.getInverseChecks()[1] + '\'. Since these checks are the inverse of one another, please select at most one of them.'}
+                                actions={[
+                                    {
+                                        title: 'OK',
+                                        action: (() => this.setState({...this.state, inverseError: false}))
+                                    },
+                                ]}
+                                open={this.state.inverseError}
                             />
 
                         </div>

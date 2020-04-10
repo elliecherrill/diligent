@@ -56,7 +56,7 @@ const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpen
             return 'None'
         }
 
-        let formattedString = '';
+        let formattedString = ''
 
         for (let i = 0; i < list.length - 1; i++) {
             formattedString += list[i] + ', '

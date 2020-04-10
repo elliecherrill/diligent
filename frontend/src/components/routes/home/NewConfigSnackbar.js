@@ -26,21 +26,21 @@ const NewConfigSnackbar = ({title, setGoToViewsConfigs}) => {
             autoHideDuration={6000}>
             <SnackbarContent
                 className={classes.newConfigSnackbar}
-                aria-describedby="client-snackbar"
+                aria-describedby='client-snackbar'
                 message={
-                    <span id="client-snackbar" className={classes.newConfigSnackbarMessage}>
+                    <span id='client-snackbar' className={classes.newConfigSnackbarMessage}>
                     <NewIcon className={clsx(classes.snackbarIcon, classes.snackbarIconVariant)}/>
                     New Configuration: {title}
                 </span>
                 }
                 action={[
-                    <Button color="primary" size="small" onClick={() => {
+                    <Button color='primary' size='small' onClick={() => {
                         handleClose()
                         setGoToViewsConfigs(true)
                     }}>
                         VIEW
                     </Button>,
-                    <IconButton key="close" aria-label="close" color="inherit" onClick={handleClose}>
+                    <IconButton key='close' aria-label='close' color='inherit' onClick={handleClose}>
                         <CloseIcon className={classes.snackbarIcon}/>
                     </IconButton>
                 ]}

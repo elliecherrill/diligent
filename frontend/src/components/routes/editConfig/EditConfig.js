@@ -23,6 +23,7 @@ import {
     Clear as DeleteIcon,
     NoteAdd as AddDetailIcon
 } from '@material-ui/icons'
+import Alert from '../viewConfigs/Alert'
 
 const Container = styled.div`
     display: flex;
@@ -45,6 +46,10 @@ const EditConfig = () => {
     const [exerciseNum, setExerciseNum] = useState('')
 
     const [anchorEl, setAnchorEl] = useState(null)
+
+    const [emptyConfigError, setEmptyConfigError] = useState(false)
+    const [inverseError, setInverseError] = useState(false)
+
 
     useEffect(() => {
         API.get_checks(id['id']).then(r => {
@@ -160,6 +165,74 @@ const EditConfig = () => {
         return categories['category-3'].configIds
     }
 
+    const inverseChecksSelected = () => {
+        const unusedChecks = categories['category-4'].configIds
+        if (!unusedChecks.includes('config-2') && !unusedChecks.includes('config-3')) {
+            return true
+        }
+
+        if (!unusedChecks.includes('config-4') && !unusedChecks.includes('config-5')) {
+            return true
+        }
+
+        //TODO: uncomment
+        // if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
+        //     return true
+        // }
+        //
+        // if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
+        //     return true
+        // }
+        //
+        // if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
+        //     return true
+        // }
+
+        return false
+    }
+
+    const getInverseChecks = () => {
+        const unusedChecks = categories['category-4'].configIds
+        if (!unusedChecks.includes('config-2') && !unusedChecks.includes('config-3')) {
+            return [initialConfigs.configs['config-2'].content, initialConfigs.configs['config-3'].content]
+        }
+
+        if (!unusedChecks.includes('config-4') && !unusedChecks.includes('config-5')) {
+            return [initialConfigs.configs['config-4'].content, initialConfigs.configs['config-5'].content]
+        }
+
+        //TODO: uncomment
+        // if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
+        //    return [initialConfigs.configs['config-6'].content, initialConfigs.configs['config-7'].content]
+        // }
+        //
+        // if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
+        //     return [initialConfigs.configs['config-8'].content, initialConfigs.configs['config-9'].content]
+        // }
+        //
+        // if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
+        // return [initialConfigs.configs['config-10'].content, initialConfigs.configs['config-11'].content]
+        // }
+
+        return []
+    }
+
+    const isValid = () => {
+        if (getHighPriorityChecks().length === 0 &&
+            getMediumPriorityChecks().length === 0 &&
+            getLowPriorityChecks().length === 0) {
+            setEmptyConfigError(true)
+            return false
+        }
+
+        if (inverseChecksSelected()) {
+            setInverseError(true)
+            return false
+        }
+
+        return true
+    }
+
     const saveConfig = () => {
         const courseCodeValue = (addCourseCode && courseCode !== '') ? courseCode : null
         const exerciseNumValue = (addExerciseNum && exerciseNum !== '') ? exerciseNum : null
@@ -258,7 +331,11 @@ const EditConfig = () => {
                     <Button
                         variant='outlined'
                         color='secondary'
-                        onClick={() => saveConfig()}
+                        onClick={() => {
+                            if (isValid()) {
+                                saveConfig()
+                            }
+                        }}
                     >
                         Save Changes
                     </Button>
@@ -329,7 +406,11 @@ const EditConfig = () => {
                             <Button
                                 variant='contained'
                                 color='primary'
-                                onClick={() => saveConfig()}
+                                onClick={() => {
+                                    if (isValid()) {
+                                        saveConfig()
+                                    }
+                                }}
                             >
                                 Save Changes
                             </Button>
@@ -343,6 +424,30 @@ const EditConfig = () => {
                 pathname: routes.HOME,
                 state: {title: title, new: false, edit: true}
             }}/>}
+
+            <Alert
+                title={'Empty Configuration'}
+                content={'You have not selected any checks. Please select some checks for the tool to perform when using this configuration.'}
+                actions={[
+                    {
+                        title: 'OK',
+                        action: (() => setEmptyConfigError(false))
+                    },
+                ]}
+                open={emptyConfigError}
+            />
+
+            <Alert
+                title={'Inverse Checks Selected'}
+                content={'You have selected \'' + getInverseChecks()[0] + '\' and \'' + getInverseChecks()[1] + '\'. Since these checks are the inverse of one another, please select at most one of them.'}
+                actions={[
+                    {
+                        title: 'OK',
+                        action: (() => setInverseError(false))
+                    },
+                ]}
+                open={inverseError}
+            />
         </div>
     )
 }

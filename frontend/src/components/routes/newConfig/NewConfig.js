@@ -208,11 +208,13 @@ class NewConfig extends React.Component {
                                     <Tooltip title="Add More Details">
                                         <IconButton
                                             color='primary'
+                                            disabled={this.state.addExerciseNum && this.state.addCourseCode}
                                             onClick={(e) => this.setState({...this.state, anchorEl: e.currentTarget})}
                                         >
                                             <AddDetailIcon/>
                                         </IconButton>
                                     </Tooltip>
+                                    {(!this.state.addExerciseNum || !this.state.addCourseCode) &&
                                     <Menu
                                         id="simple-menu"
                                         anchorEl={this.state.anchorEl}
@@ -220,9 +222,10 @@ class NewConfig extends React.Component {
                                         open={Boolean(this.state.anchorEl)}
                                         onClose={this.handleMenuClose}
                                     >
-                                        <MenuItem onClick={this.addCourseCode}>Add Course Code</MenuItem>
-                                        <MenuItem onClick={this.addExerciseNum}>Add Exercise Number</MenuItem>
+                                        {!this.state.addCourseCode && <MenuItem onClick={this.addCourseCode}>Add Course Code</MenuItem>}
+                                        {!this.state.addExerciseNum && <MenuItem onClick={this.addExerciseNum}>Add Exercise Number</MenuItem>}
                                     </Menu>
+                                    }
                                 </div>
                             </div>
                             {(this.state.addCourseCode || this.state.addExerciseNum) &&

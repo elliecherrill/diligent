@@ -39,7 +39,7 @@ const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpen
                         </TableHead>
                         <TableBody>
                             {configs.map(c => (
-                                <TableRow key={c['_id']}>
+                                <TableRow key={c['_id']['$oid']}>
                                     <TableCell component='th' scope='row'>
                                         {c.title}
                                     </TableCell>

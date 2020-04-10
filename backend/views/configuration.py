@@ -55,6 +55,10 @@ def create_new_config():
     courseCode = json["courseCode"]
     exerciseNum = json["exerciseNum"]
 
+    existingWithTitle = Configuration.find_config_by_title(creator, title)
+    if (existingWithTitle.count() > 0):
+        return Response({"success": False}, 409, mimetype="application/json")
+
     config = Configuration(title=title,
                            creator=creator,
                            high=high,
@@ -63,9 +67,7 @@ def create_new_config():
                            courseCode=courseCode,
                            exerciseNum=exerciseNum).save()
 
-    response = jsonify({"id": str(config.inserted_id)})
-
-    return response
+    return Response({"success": True}, 200, mimetype="application/json")
 
 
 @bp.route("/get_my_configs", methods=["GET"])

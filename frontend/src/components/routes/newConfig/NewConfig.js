@@ -20,6 +20,7 @@ import {
     NoteAdd as AddDetailIcon,
     Clear as DeleteIcon
 } from '@material-ui/icons'
+import Alert from "../viewConfigs/Alert";
 
 const Container = styled.div`
     display: flex;
@@ -37,6 +38,8 @@ class NewConfig extends React.Component {
         courseCode: '',
         addExerciseNum: false,
         exerciseNum: '',
+
+        duplicateTitle: false
     }
 
     onDragEnd = result => {
@@ -158,6 +161,12 @@ class NewConfig extends React.Component {
                 goToHome: true
             }
             this.setState(newState)
+        }).catch(() => {
+            const newState = {
+                ...this.state,
+                duplicateTitle: true
+            }
+            this.setState(newState)
         })
     }
 
@@ -222,8 +231,10 @@ class NewConfig extends React.Component {
                                         open={Boolean(this.state.anchorEl)}
                                         onClose={this.handleMenuClose}
                                     >
-                                        {!this.state.addCourseCode && <MenuItem onClick={this.addCourseCode}>Add Course Code</MenuItem>}
-                                        {!this.state.addExerciseNum && <MenuItem onClick={this.addExerciseNum}>Add Exercise Number</MenuItem>}
+                                        {!this.state.addCourseCode &&
+                                        <MenuItem onClick={this.addCourseCode}>Add Course Code</MenuItem>}
+                                        {!this.state.addExerciseNum &&
+                                        <MenuItem onClick={this.addExerciseNum}>Add Exercise Number</MenuItem>}
                                     </Menu>
                                     }
                                 </div>
@@ -296,7 +307,7 @@ class NewConfig extends React.Component {
                                         }
                                     }}
                                 >
-                                    SAVE CONFIGURATION
+                                    Save Configuration
                                 </Button>
                             </div>
 
@@ -305,6 +316,16 @@ class NewConfig extends React.Component {
                                 pathname: routes.HOME,
                                 state: {title: this.state.title, new: true, edit: false}
                             }}/>}
+
+                            <Alert
+                                title={'Conflict Configuration'}
+                                content={'One of your configurations is already called \'' + this.state.title + '\'. Please choose a unique configuration name.'}
+                                actions={[
+                                    {title: 'OK', action: (() => this.setState({...this.state, duplicateTitle: false}))},
+                                ]}
+                                open={this.state.duplicateTitle}
+                            />
+
                         </div>
                     </div>
                 </Slide>

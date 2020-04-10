@@ -82,4 +82,8 @@ class Configuration:
     def delete_by_id(cls, config_id):
         return db.delete("configuration", {"_id": config_id})
 
+    @classmethod
+    def find_config_by_title(cls, username, title):
+        return db.find("configuration", {"creator": username, "title": title})
+
 

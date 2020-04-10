@@ -8,13 +8,13 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Tooltip
+    Tooltip,
 } from '@material-ui/core'
 import IconButton from '@material-ui/core/IconButton'
 import {
     Clear as DeleteIcon,
     DescriptionOutlined as DowloadIcon,
-    Edit as EditIcon
+    Edit as EditIcon,
 } from '@material-ui/icons'
 import useStyles from './style'
 import routes from '../../../constants/routes'
@@ -32,6 +32,8 @@ const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpen
                         <TableHead>
                             <TableRow>
                                 <TableCell>Name</TableCell>
+                                <TableCell>Course Code</TableCell>
+                                <TableCell>Exercise Number</TableCell>
                                 <TableCell align='right'>Actions</TableCell>
                             </TableRow>
                         </TableHead>
@@ -40,6 +42,12 @@ const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpen
                                 <TableRow key={c['_id']}>
                                     <TableCell component='th' scope='row'>
                                         {c.title}
+                                    </TableCell>
+                                    <TableCell component='th' scope='row'>
+                                        {c.courseCode}
+                                    </TableCell>
+                                    <TableCell component='th' scope='row'>
+                                        {c.exerciseNum}
                                     </TableCell>
                                     <TableCell align='right' size='small'>
                                         <Tooltip title="Download Configuration File">

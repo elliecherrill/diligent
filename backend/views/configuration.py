@@ -76,7 +76,12 @@ def get_my_configs():
 
     titles = []
     for config in configs:
-        titles.append({"_id": config["_id"], "title": config["title"]})
+        titles.append({
+            "_id": config["_id"],
+            "title": config["title"],
+            "courseCode": config["courseCode"],
+            "exerciseNum": config["exerciseNum"]
+        })
 
     return jsonify(titles)
 

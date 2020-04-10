@@ -18,17 +18,12 @@ import {
     Description as DowloadIcon,
     Edit as EditIcon,
     Visibility as ViewIcon,
-    VisibilityOff as HiddenIcon
 } from '@material-ui/icons'
 import useStyles from './style'
 import routes from '../../../constants/routes'
 import {Redirect} from 'react-router-dom'
 import * as API from '../../../api'
 import {initialConfigs} from '../../../constants/config'
-
-const getInitialView = (configs) => {
-    return configs.map(c => false)
-}
 
 const getInitialAnchors = (configs) => {
     return configs.map(c => null)
@@ -37,7 +32,6 @@ const getInitialAnchors = (configs) => {
 const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpenDeleteAlert}) => {
     const classes = useStyles()
     const [editConfig, setEditConfig] = useState(null)
-    const [view, setView] = useState(getInitialView(configs))
     const [anchorEl, setAnchorEl] = useState(getInitialAnchors(configs))
 
     const [highChecks, setHighChecks] = useState([])
@@ -50,10 +44,6 @@ const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpen
     const [loaded, setLoaded] = useState(true)
 
     const handlePopoverClose = index => {
-        const newView = view
-        newView[index] = !view[index]
-        setView(newView)
-
         const newAnchors = anchorEl
         newAnchors[index] = null
         setAnchorEl(newAnchors)
@@ -86,10 +76,6 @@ const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpen
                 setMostRecentConfig(configs[index]['_id']['$oid'])
             }).then(() => setLoaded(true))
         }
-
-        const newView = view
-        newView[index] = !view[index]
-        setView(newView)
 
         const newAnchors = anchorEl
         newAnchors[index] = element.currentTarget
@@ -124,12 +110,12 @@ const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpen
                                         {c.exerciseNum}
                                     </TableCell>
                                     <TableCell align='right' size='small'>
-                                        <Tooltip title='See Configuration'>
+                                        <Tooltip title='Quick View Configuration'>
                                             <IconButton
                                                 onClick={(e) => handleViewClick(e, index)}
                                                 color='inherit'
                                             >
-                                                {view[index] ? <HiddenIcon/> : <ViewIcon/>}
+                                                <ViewIcon/>
                                             </IconButton>
                                         </Tooltip>
                                         <Popover

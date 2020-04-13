@@ -20,7 +20,7 @@ public final class Utils {
     private static boolean configNotFound = false;
 
     public static PsiElement removeWhitespaceUntilPrev(PsiElement prev) {
-        while (prev instanceof PsiWhiteSpace) {
+        while (prev instanceof PsiWhiteSpace || prev instanceof PsiComment) {
             prev = prev.getPrevSibling();
         }
 

@@ -140,4 +140,33 @@ public final class Utils {
     public static SmartPsiElementPointer<PsiElement> getPointer(PsiElement element) {
         return SmartPointerManager.createPointer(element);
     }
+
+    private static boolean isString(PsiType type) {
+        return type.getCanonicalText().equals("java.lang.String");
+    }
+
+    public static boolean isImmutable(PsiType type) {
+        // Type is primitive
+        if (type instanceof PsiPrimitiveType) {
+            return true;
+        }
+
+        // Type is String
+        if (isString(type)) {
+            return true;
+        }
+
+        //TODO: go through examples with rob - should this only be empty arrays??
+        // Type is array of non-primitive
+        if (type instanceof PsiArrayType) {
+            PsiArrayType arrayType = (PsiArrayType) type;
+            if (isString(arrayType.getComponentType())) {
+                return false;
+            } else {
+                return !(arrayType.getComponentType() instanceof PsiPrimitiveType);
+            }
+        }
+
+        return false;
+    }
 }

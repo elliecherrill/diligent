@@ -42,8 +42,9 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
 
-        if (!Utils.isInspectionOn(holder,"screaming-snake-case")) {
-            return new JavaElementVisitor() {};
+        if (!Utils.isInspectionOn(holder, "screaming-snake-case")) {
+            return new JavaElementVisitor() {
+            };
         }
 
         return new JavaElementVisitor() {
@@ -61,7 +62,36 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                 feedbackHolder.writeToFile();
             }
 
+            @Override
+            public void visitClass(PsiClass aClass) {
+                super.visitClass(aClass);
+
+                if (!aClass.isEnum()) {
+                    return;
+                }
+
+                // Check all enum constants are in SCREAMING_SNAKE_CASE
+                String filename = aClass.getContainingFile().getName();
+
+                for (PsiField field : aClass.getAllFields()) {
+                    if (field instanceof PsiEnumConstant) {
+                        PsiEnumConstant enumConstant = (PsiEnumConstant) field;
+                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(enumConstant), "screaming-snake-case", PsiStmtType.ENUM);
+
+                        if (!Utils.isUpperSnakeCase(enumConstant.getName())) {
+                            Feedback feedback = new Feedback(Utils.getLineNumber(enumConstant), "Enum constants should be in SCREAMING_SNAKE_CASE.", filename);
+                            feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                        } else {
+                            feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+                        }
+                    }
+                }
+
+            }
+
             //TODO: Ask whether this should be for variables as well?
+            //TODO: https://google.github.io/styleguide/javaguide.html#s5.2.4-constant-names
+            // TODO: does it need to cover all cases in above^
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
@@ -70,8 +100,14 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                     return;
                 }
 
-                if (field.getModifierList() != null) {
-                    if (field.getModifierList().hasModifierProperty("final") && field.getModifierList().hasModifierProperty("static")) {
+                PsiModifierList modifierList = field.getModifierList();
+
+                if (modifierList != null) {
+                    if (!Utils.isImmutable(field.getType())) {
+                        return;
+                    }
+
+                    if (modifierList.hasModifierProperty(PsiModifier.FINAL) && modifierList.hasModifierProperty(PsiModifier.STATIC)) {
                         FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "screaming-snake-case", PsiStmtType.FIELD);
                         String filename = field.getContainingFile().getName();
 

@@ -69,9 +69,13 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                     return;
                 }
 
-                if (field.getModifierList() != null) {
-                    if (field.getModifierList().hasModifierProperty("final")) {
-                        return;
+                // If immutable and has modifiers 'static final' then don't need to check for camelCase
+                PsiModifierList modifierList = field.getModifierList();
+                if (modifierList != null) {
+                    if ((modifierList.hasModifierProperty(PsiModifier.FINAL)) && (modifierList.hasModifierProperty(PsiModifier.STATIC))) {
+                        if (Utils.isImmutable(field.getType())) {
+                            return;
+                        }
                     }
                 }
 

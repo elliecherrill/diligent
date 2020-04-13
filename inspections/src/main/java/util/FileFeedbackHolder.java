@@ -56,8 +56,6 @@ public class FileFeedbackHolder {
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();
             sb.append(f.toHTMLString());
-            sb.append(entry.getKey().toString());
-            sb.append(f.toString());
         }
 
         return sb.toString();

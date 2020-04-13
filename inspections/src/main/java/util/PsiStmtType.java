@@ -5,5 +5,6 @@ public enum PsiStmtType {
     LOCAL_VAR,
     IF,
     METHOD,
-    PARAMETER
+    PARAMETER,
+    ENUM
 }

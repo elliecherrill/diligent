@@ -62,6 +62,11 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
+
+                if (field instanceof PsiEnumConstant) {
+                    return;
+                }
+
                 PsiElement prev = field.getPrevSibling();
                 boolean registerProblem = false;
 

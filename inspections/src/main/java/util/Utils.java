@@ -17,7 +17,7 @@ import java.io.IOException;
 
 public final class Utils {
 
-    private static final String CAMEL_CASE = "([a-z]+[A-Z]*\\w*)+";
+    private static final String CAMEL_CASE = "([a-z]+[0-9]*[A-Z]*[^\\W_]*)+";
     private static final String UPPER_SNAKE_CASE = "([A-Z]+_?)+";
     private static final Notifier NOTIFIER = new Notifier();
     private static boolean configNotFound = false;
@@ -60,17 +60,17 @@ public final class Utils {
         PsiDocumentManager psiDocumentManager = PsiDocumentManager.getInstance(project);
         Document document = psiDocumentManager.getDocument(containingFile);
         int textOffset = element.getTextOffset();
-        int lineNumber = document.getLineNumber(textOffset) + 1;
 
-        return lineNumber;
+        assert document != null;
+
+        return document.getLineNumber(textOffset) + 1;
     }
 
     public static String getProjectPath(PsiElement element) {
         PsiFile containingFile = element.getContainingFile();
         Project project = containingFile.getProject();
-        String projectPath = project.getBasePath();
 
-        return projectPath;
+        return project.getBasePath();
     }
 
     public static boolean isInspectionOn(ProblemsHolder holder, String inspectionName) {

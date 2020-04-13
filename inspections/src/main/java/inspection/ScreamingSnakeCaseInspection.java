@@ -8,9 +8,7 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.Feedback;
-import util.FeedbackHolder;
-import util.Utils;
+import util.*;
 
 public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -63,6 +61,7 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                 feedbackHolder.writeToFile();
             }
 
+            //TODO: Ask whether this should be for variables as well?
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
@@ -73,12 +72,12 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
 
                 if (field.getModifierList() != null) {
                     if (field.getModifierList().hasModifierProperty("final") && field.getModifierList().hasModifierProperty("static")) {
-                        String feedbackId = field.hashCode() + "screaming-snake-case";
+                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "screaming-snake-case", PsiStmtType.FIELD);
                         String filename = field.getContainingFile().getName();
 
                         if (!Utils.isUpperSnakeCase(field.getName())) {
-                            holder.registerProblem(field.getNameIdentifier(), "Constant field names should be in SCREAMING_SNAKE_CASE.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                            feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(field), "Constant field names should be in SCREAMING_SNAKE_CASE.", filename));
+                            Feedback feedback = new Feedback(Utils.getLineNumber(field), "Constant field names should be in SCREAMING_SNAKE_CASE.", filename);
+                            feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                         }

@@ -45,6 +45,8 @@ public class ProjectFeedbackHolder {
                 String filename = (String) file.getKey();
                 FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
 
+                fileFeedbackHolder.updateDeleted();
+
                 String template = getOutputTemplate();
                 template = template.replace("$files", getAllFilesAsHTMLString(filename));
                 template = template.replace("$feedback", fileFeedbackHolder.getFeedbackAsHTMLString());
@@ -62,7 +64,7 @@ public class ProjectFeedbackHolder {
         isCurrent = true;
     }
 
-    public void addFeedback(String filename, String feedbackId, Feedback feedback) {
+    public void addFeedback(String filename, FeedbackIdentifier feedbackId, Feedback feedback) {
         FileFeedbackHolder fileFeedbackHolder = files.get(filename);
         if (fileFeedbackHolder == null) {
             fileFeedbackHolder = new FileFeedbackHolder(filename);
@@ -73,7 +75,7 @@ public class ProjectFeedbackHolder {
         isCurrent = false;
     }
 
-    public void fixFeedback(String filename, String feedbackId) {
+    public void fixFeedback(String filename, FeedbackIdentifier feedbackId) {
         FileFeedbackHolder fileFeedbackHolder = files.get(filename);
         if (fileFeedbackHolder == null) {
             return;

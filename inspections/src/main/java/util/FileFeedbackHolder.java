@@ -5,25 +5,26 @@ import java.util.Map;
 
 public class FileFeedbackHolder {
 
-    private final Map<String, Feedback> feedback;
+    private final Map<FeedbackIdentifier, Feedback> feedback;
     private final String filename;
     private final String filepath;
 
     public FileFeedbackHolder(String filename) {
         feedback = new HashMap<>();
         this.filename = filename;
-        this.filepath = filename.replace(".java", "") + ".html";
+        this.filepath = filename.replace(".java", ".html");
     }
 
     public String getFilepath() {
         return filepath;
     }
 
-    public void addFeedback(String id, Feedback newFeedback) {
+    public void addFeedback(FeedbackIdentifier id, Feedback newFeedback) {
+        feedback.remove(id);
         feedback.put(id, newFeedback);
     }
 
-    public void fixFeedback(String id) {
+    public void fixFeedback(FeedbackIdentifier id) {
         Feedback f = feedback.get(id);
 
         if (f == null) {
@@ -33,12 +34,30 @@ public class FileFeedbackHolder {
         f.setToFixed();
     }
 
+    public void updateDeleted() {
+        for (Map.Entry entry : feedback.entrySet()) {
+            Feedback f = (Feedback) entry.getValue();
+
+            if (f.isFixed()) {
+                continue;
+            }
+
+            FeedbackIdentifier feedbackId = (FeedbackIdentifier) entry.getKey();
+
+            if (feedbackId.isDeleted()) {
+                f.setToFixed();
+            }
+        }
+    }
+
     public String getFeedbackAsHTMLString() {
         StringBuilder sb = new StringBuilder();
 
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();
             sb.append(f.toHTMLString());
+            sb.append(entry.getKey().toString());
+            sb.append(f.toString());
         }
 
         return sb.toString();

@@ -25,7 +25,7 @@ public class FeedbackHolder {
         }
     }
 
-    public void addFeedback(Project project, String filename, String feedbackId, Feedback feedback) {
+    public void addFeedback(Project project, String filename, FeedbackIdentifier feedbackId, Feedback feedback) {
         ProjectFeedbackHolder projectFeedbackHolder = projects.get(project);
 
         if (projectFeedbackHolder == null) {
@@ -36,7 +36,7 @@ public class FeedbackHolder {
         projects.put(project, projectFeedbackHolder);
     }
 
-    public void fixFeedback(Project project, String filename, String feedbackId) {
+    public void fixFeedback(Project project, String filename, FeedbackIdentifier feedbackId) {
         ProjectFeedbackHolder projectFeedbackHolder = projects.get(project);
         if (projectFeedbackHolder == null) {
             return;

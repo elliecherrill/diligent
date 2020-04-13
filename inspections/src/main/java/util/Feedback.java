@@ -25,6 +25,8 @@ public class Feedback {
         sb.append(lineNumber);
         sb.append(" : ");
         sb.append(errorMsg);
+        sb.append(" : ");
+        sb.append(isFixed);
 
         return sb.toString();
     }
@@ -62,6 +64,10 @@ public class Feedback {
 
     public void setToFixed() {
         isFixed = true;
+    }
+
+    public void setToNotFixed() {
+        isFixed = false;
     }
 
     // TODO: when to call this?

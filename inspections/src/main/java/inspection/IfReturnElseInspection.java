@@ -7,9 +7,7 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import util.Feedback;
-import util.FeedbackHolder;
-import util.Utils;
+import util.*;
 
 public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
@@ -70,7 +68,7 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                 }
 
                 String filename = statement.getContainingFile().getName();
-                String feedbackId = statement.hashCode() + "redundant-else";
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "redundant-else", PsiStmtType.IF);
 
                 // Check if there is an else case
                 if (statement.getElseBranch() != null) {
@@ -87,9 +85,8 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                     }
 
                     if (endsWithReturn) {
-                        holder.registerProblem(statement.getElseElement().getOriginalElement(),
-                                "Unnecessary 'else' branch", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(statement), "Unnecessary 'else' branch", filename));
+                        Feedback feedback = new Feedback(Utils.getLineNumber(statement), "Unnecessary 'else' branch", filename);
+                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }

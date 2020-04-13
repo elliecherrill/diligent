@@ -8,9 +8,7 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.Feedback;
-import util.FeedbackHolder;
-import util.Utils;
+import util.*;
 
 public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -94,11 +92,11 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
                 }
 
                 String filename = field.getContainingFile().getName();
-                String feedbackId = field.hashCode() + "fields-first";
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "fields-first", PsiStmtType.FIELD);
 
                 if (registerProblem) {
-                    holder.registerProblem(field.getNameIdentifier(), "Declare fields at the top", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(field), "Declare fields at the top", filename));
+                    Feedback feedback = new Feedback(Utils.getLineNumber(field), "Declare fields at the top", filename);
+                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }

@@ -136,4 +136,8 @@ public final class Utils {
 
         return false;
     }
+
+    public static SmartPsiElementPointer<PsiElement> getPointer(PsiElement element) {
+        return SmartPointerManager.createPointer(element);
+    }
 }

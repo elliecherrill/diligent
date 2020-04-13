@@ -4,7 +4,7 @@
   <version>1.0.0</version>
   <description>TODO: (update) A tool which does something.</description>
   <vendor>Helena Cherrill</vendor>
-  <idea-version since-build="139.0" />
+  <idea-version since-build="174.0" />
   <depends>com.intellij.modules.java</depends>
   <application-components>
     <component>

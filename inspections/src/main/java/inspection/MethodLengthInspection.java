@@ -8,9 +8,7 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.Feedback;
-import util.FeedbackHolder;
-import util.Utils;
+import util.*;
 
 public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -46,8 +44,9 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
 
-        if (!Utils.isInspectionOn(holder,"method-length")) {
-            return new JavaElementVisitor() {};
+        if (!Utils.isInspectionOn(holder, "method-length")) {
+            return new JavaElementVisitor() {
+            };
         }
 
         return new JavaElementVisitor() {
@@ -76,11 +75,11 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
                 PsiCodeBlock body = method.getBody();
 
                 String filename = method.getContainingFile().getName();
-                String feedbackId = method.hashCode() + "method-length";
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "method-length", PsiStmtType.METHOD);
 
                 if (body != null && body.getStatementCount() >= MAX_METHOD_LENGTH) {
-                    holder.registerProblem(Utils.removeWhitespaceUntilNext(body.getFirstBodyElement()), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(method), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename));
+                    Feedback feedback = new Feedback(Utils.getLineNumber(method), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename);
+                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }

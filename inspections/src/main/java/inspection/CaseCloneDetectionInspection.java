@@ -56,12 +56,20 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
+                if (Utils.hasErrorsInFile(file)) {
+                    return;
+                }
+
                 feedbackHolder.writeToFile();
             }
 
             @Override
             public void visitSwitchStatement(PsiSwitchStatement statement) {
                 super.visitSwitchStatement(statement);
+
+                if (Utils.hasErrorsInFile(statement)) {
+                    return;
+                }
 
                 PsiCodeBlock switchBody = statement.getBody();
 

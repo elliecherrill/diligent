@@ -83,6 +83,12 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
 //            feedbackHolder.addFeedback(holder.getProject(), file.getName(), new Feedback(0, "Inheritance is not being used in this file.", file.getName()));
 //            feedbackHolder.writeToFile();
             //TODO add fixfeedback (once it's been fixed)
+
+
+//            TODO
+//            if (Utils.hasErrorsInFile(statement)) {
+//                return;
+//            }
         }
     }
 }

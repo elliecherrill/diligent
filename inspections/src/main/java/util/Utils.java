@@ -3,10 +3,7 @@ package util;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -109,6 +106,32 @@ public final class Utils {
             }
             configNotFound = true;
             return false;
+        }
+
+        return false;
+    }
+
+    public static boolean hasErrorsInFile(PsiElement element) {
+        PsiFile file;
+
+        if (element instanceof PsiFile) {
+            file = (PsiFile) element;
+        } else {
+            file = element.getContainingFile();
+        }
+
+        return hasErrors(file);
+    }
+
+    private static boolean hasErrors(PsiElement element) {
+        if (element instanceof PsiErrorElement) {
+            return true;
+        }
+
+        for (PsiElement child : element.getChildren()) {
+            if (hasErrors(child)) {
+                return true;
+            }
         }
 
         return false;

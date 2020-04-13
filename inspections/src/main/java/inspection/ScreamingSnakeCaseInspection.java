@@ -56,12 +56,20 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
+                if (Utils.hasErrorsInFile(file)) {
+                    return;
+                }
+
                 feedbackHolder.writeToFile();
             }
 
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
+
+                if (Utils.hasErrorsInFile(field)) {
+                    return;
+                }
 
                 if (field.getModifierList() != null) {
                     if (field.getModifierList().hasModifierProperty("final") && field.getModifierList().hasModifierProperty("static")) {

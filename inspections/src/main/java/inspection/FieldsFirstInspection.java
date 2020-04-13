@@ -56,12 +56,20 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
+                if (Utils.hasErrorsInFile(file)) {
+                    return;
+                }
+
                 feedbackHolder.writeToFile();
             }
 
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
+
+                if (Utils.hasErrorsInFile(field)) {
+                    return;
+                }
 
                 if (field instanceof PsiEnumConstant) {
                     return;

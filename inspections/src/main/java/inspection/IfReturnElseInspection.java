@@ -1,7 +1,9 @@
 package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
-import com.intellij.codeInspection.*;
+import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.ProblemHighlightType;
+import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
@@ -52,15 +54,26 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
+                if (Utils.hasErrorsInFile(file)) {
+                    return;
+                }
+
                 feedbackHolder.writeToFile();
             }
 
             @Override
             public void visitIfStatement(PsiIfStatement statement) {
                 super.visitIfStatement(statement);
+
+                if (Utils.hasErrorsInFile(statement)) {
+                    return;
+                }
+
+                String filename = statement.getContainingFile().getName();
+                String feedbackId = statement.hashCode() + "redundant-else";
+
                 // Check if there is an else case
                 if (statement.getElseBranch() != null) {
-                    // Is the last line of the body a return statement?
                     PsiBlockStatement thenStmt = (PsiBlockStatement) statement.getThenBranch();
                     PsiCodeBlock thenBody = thenStmt.getCodeBlock();
                     PsiStatement[] stmts = thenBody.getStatements();
@@ -69,19 +82,19 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                     for (PsiStatement stmt : stmts) {
                         if (stmt instanceof PsiReturnStatement) {
                             endsWithReturn = true;
+                            break;
                         }
                     }
 
-                    String filename = statement.getContainingFile().getName();
-                    String feedbackId = statement.hashCode() + "redundant-else";
-
-                    if (endsWithReturn && statement.getElseBranch() != null) {
+                    if (endsWithReturn) {
                         holder.registerProblem(statement.getElseElement().getOriginalElement(),
                                 "Unnecessary 'else' branch", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, new Feedback(Utils.getLineNumber(statement), "Unnecessary 'else' branch", filename));
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
+                } else {
+                    feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }
             }
 

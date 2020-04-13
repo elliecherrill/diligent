@@ -58,12 +58,20 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
+                if (Utils.hasErrorsInFile(file)) {
+                    return;
+                }
+
                 feedbackHolder.writeToFile();
             }
 
             @Override
             public void visitMethod(PsiMethod method) {
                 super.visitMethod(method);
+
+                if (Utils.hasErrorsInFile(method)) {
+                    return;
+                }
 
                 PsiCodeBlock body = method.getBody();
 

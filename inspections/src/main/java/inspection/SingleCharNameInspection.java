@@ -56,12 +56,20 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
+                if (Utils.hasErrorsInFile(file)) {
+                    return;
+                }
+
                 feedbackHolder.writeToFile();
             }
 
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
+
+                if (Utils.hasErrorsInFile(field)) {
+                    return;
+                }
 
                 String feedbackId = field.hashCode() + "single-char-name";
                 String filename = field.getContainingFile().getName();
@@ -77,6 +85,10 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
             @Override
             public void visitDeclarationStatement(PsiDeclarationStatement statement) {
                 super.visitDeclarationStatement(statement);
+
+                if (Utils.hasErrorsInFile(statement)) {
+                    return;
+                }
 
                 PsiElement[] elements = statement.getDeclaredElements();
                 for (PsiElement e : elements) {
@@ -102,6 +114,10 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
             @Override
             public void visitMethod(PsiMethod method) {
                 super.visitMethod(method);
+
+                if (Utils.hasErrorsInFile(method)) {
+                    return;
+                }
 
                 // Method names
                 String feedbackId = method.hashCode() + "single-char-name";

@@ -55,6 +55,10 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
+                if (Utils.hasErrorsInFile(file)) {
+                    return;
+                }
+
                 feedbackHolder.writeToFile();
             }
 
@@ -63,6 +67,11 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
             @Override
             public void visitClass(PsiClass aClass) {
                 super.visitClass(aClass);
+
+                if (Utils.hasErrorsInFile(aClass)) {
+                    return;
+                }
+
                 boolean forLoopFound = false;
 
                 PsiClass[] innerClasses = aClass.getAllInnerClasses();

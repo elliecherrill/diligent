@@ -56,12 +56,20 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
             public void visitFile(@NotNull PsiFile file) {
                 super.visitFile(file);
 
+                if (Utils.hasErrorsInFile(file)) {
+                    return;
+                }
+
                 feedbackHolder.writeToFile();
             }
 
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
+
+                if (Utils.hasErrorsInFile(field)) {
+                    return;
+                }
 
                 if (field.getModifierList() != null) {
                     if (field.getModifierList().hasModifierProperty("final")) {
@@ -83,6 +91,10 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
             @Override
             public void visitDeclarationStatement(PsiDeclarationStatement statement) {
                 super.visitDeclarationStatement(statement);
+
+                if (Utils.hasErrorsInFile(statement)) {
+                    return;
+                }
 
                 PsiElement[] elements = statement.getDeclaredElements();
                 for (PsiElement e : elements) {
@@ -106,6 +118,10 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
             @Override
             public void visitMethod(PsiMethod method) {
                 super.visitMethod(method);
+
+                if (Utils.hasErrorsInFile(method)) {
+                    return;
+                }
 
                 // Method names
                 String feedbackId = method.hashCode() + "camelcase";

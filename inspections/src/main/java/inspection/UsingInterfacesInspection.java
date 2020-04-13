@@ -75,6 +75,11 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
 //                feedbackHolder.writeToFile();
                 //TODO add fixfeedback (once it's been fixed)
 
+
+                //            TODO
+//            if (Utils.hasErrorsInFile(statement)) {
+//                return;
+//            }
             }
         };
     }

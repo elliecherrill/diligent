@@ -111,7 +111,8 @@ def get_checks_for_download(config_id):
         'config-14': 'redundant-else',
         'config-15': 'single-char-name',
         'config-16': 'method-length',
-        'config-17': 'clone'
+        'config-17': 'clone',
+        'config-18': 'fields-first'
     }
 
     for highCheck in config["high"]:

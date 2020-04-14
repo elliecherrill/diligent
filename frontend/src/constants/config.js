@@ -18,6 +18,7 @@ export const initialConfigs = {
         'config-16': {id: 'config-16', content: 'No methods longer than 20 statements'},
         'config-17': {id: 'config-17', content: 'No clones'},
         'config-18': {id: 'config-18', content: 'Field declarations at the top of a class'},
+        'config-19': {id: 'config-19', content: 'No redundant \'this\' keywords'}
     },
     categories: {
         'category-1': {id: 'category-1', title: 'High Priority', configIds: []},
@@ -26,11 +27,11 @@ export const initialConfigs = {
         'category-4': {
             id: 'category-4',
             title: 'Don\'t Check',
-            configIds: ['config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18']
+            configIds: ['config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18', 'config-19']
         }, //TODO: 'config-1',
     },
     columnOrder: ['category-4', 'category-3', 'category-2', 'category-1']
 }
 
-export const allConfigs = ['config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18']
+export const allConfigs = ['config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18', 'config-19']
 //TODO: 'config-1',

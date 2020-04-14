@@ -31,8 +31,8 @@ public final class InspectionRegistration implements ApplicationComponent, Inspe
                 UsingForLoopsInspection.class,
                 UsingInheritanceInspection.class,
                 UsingInterfacesInspection.class,
-//                UsingStreamsInspection.class,
-//                UsingWhileLoopsInspection.class
+                UsingStreamsInspection.class,
+                UsingWhileLoopsInspection.class
         };
 
     }

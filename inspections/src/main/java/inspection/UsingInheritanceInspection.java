@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import util.*;
 
+//TODO: Extract commonality out (this, interfaces)
+//TODO: And to some extent the loops / streams
 public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspectionTool {
 
     @Override

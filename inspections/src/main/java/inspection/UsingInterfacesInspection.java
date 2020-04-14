@@ -2,14 +2,12 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.FeedbackHolder;
-import util.Utils;
+import util.*;
 
 public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -42,45 +40,88 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder,"interfaces")) {
-            return new JavaElementVisitor() {};
+        if (Utils.isInspectionOn(holder,"interfaces")) {
+            return new InterfacesVisitor(holder, true);
         }
 
-        return new JavaElementVisitor() {
+        if (Utils.isInspectionOn(holder,"no-interfaces")) {
+            return new InterfacesVisitor(holder, false);
+        }
 
-            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+        return new JavaElementVisitor() {};
+    }
 
-            // Check if interfaces are used anywhere in *this* file (not considering inner classes)
-            // How would you do this project wide?
-            @Override
-            public void visitJavaFile(PsiJavaFile file) {
-                super.visitJavaFile(file);
+    private static class InterfacesVisitor extends JavaElementVisitor {
 
-                // TODO: Finish this
+        private final ProblemsHolder holder;
+        private final FeedbackHolder feedbackHolder;
+        private final boolean expectingInterfaces;
 
-                PsiElement[] children = file.getChildren();
-                for (PsiElement child : children) {
-                    if (child instanceof PsiClass) {
-                        PsiClass childClass = (PsiClass) child;
-                        PsiReferenceList implementsList = childClass.getImplementsList();
-                        if (Utils.containsImplements(implementsList.getText())) {
-                            return;
-                        }
-                    }
+        private boolean interfacesFound;
+
+        public InterfacesVisitor(ProblemsHolder holder, boolean expectingInterfaces) {
+            this.holder = holder;
+            this.expectingInterfaces = expectingInterfaces;
+
+            feedbackHolder = FeedbackHolder.getInstance();
+            interfacesFound = false;
+        }
+
+        @Override
+        public void visitClass(PsiClass aClass) {
+            super.visitClass(aClass);
+
+            if (Utils.hasErrorsInFile(aClass)) {
+                return;
+            }
+
+            if (aClass.isInterface()) {
+                interfacesFound = true;
+                return;
+            }
+
+            PsiReferenceList implementsList = aClass.getImplementsList();
+
+            if (implementsList != null) {
+                if (Utils.containsImplements(implementsList.getText())) {
+                    interfacesFound = true;
+                    return;
+                }
+            }
+
+            for (PsiElement child : aClass.getAllInnerClasses()) {
+                child.accept(this);
+            }
+        }
+
+        @Override
+        public void visitJavaFile(PsiJavaFile file) {
+            super.visitJavaFile(file);
+
+            if (Utils.hasErrorsInFile(file)) {
+                return;
+            }
+
+            if (expectingInterfaces) {
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"interfaces", PsiStmtType.FILE);
+
+                if (!interfacesFound) {
+                    Feedback feedback = new Feedback(-1, "Interfaces are not being used in this file.", file.getName());
+                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                } else {
+                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
                 }
 
-                holder.registerProblem(file.getOriginalElement(), "Interfaces are not being used in this file.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-//                feedbackHolder.addFeedback(holder.getProject(), file.getName(), new Feedback(0, "Interfaces is not being used in this file.", file.getName()));
-//                feedbackHolder.writeToFile();
-                //TODO add fixfeedback (once it's been fixed)
+            } else {
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"no-interfaces", PsiStmtType.FILE);
 
-
-                //            TODO
-//            if (Utils.hasErrorsInFile(statement)) {
-//                return;
-//            }
+                if (interfacesFound) {
+                    Feedback feedback = new Feedback(-1, "Interfaces are being used in this file.", file.getName());
+                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                } else {
+                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                }
             }
-        };
+        }
     }
 }

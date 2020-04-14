@@ -42,11 +42,11 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
 
-        if (Utils.isInspectionOn(holder,"inheritance")) {
+        if (Utils.isInspectionOn(holder, "inheritance")) {
             return new InheritanceVisitor(holder, true);
         }
 
-        if (Utils.isInspectionOn(holder,"no-inheritance")) {
+        if (Utils.isInspectionOn(holder, "no-inheritance")) {
             return new InheritanceVisitor(holder, false);
         }
 
@@ -82,13 +82,12 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
             if (extendsList != null) {
                 if (Utils.containsExtends(extendsList.getText())) {
                     inheritanceFound = true;
+                    return;
                 }
             }
 
-            if (!inheritanceFound) {
-                for (PsiElement child : aClass.getAllInnerClasses()) {
-                    child.accept(this);
-                }
+            for (PsiElement child : aClass.getAllInnerClasses()) {
+                child.accept(this);
             }
         }
 
@@ -101,18 +100,17 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
             }
 
             if (expectingInheritance) {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"inheritance", PsiStmtType.FILE);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "inheritance", PsiStmtType.FILE);
 
                 if (!inheritanceFound) {
                     Feedback feedback = new Feedback(-1, "Inheritance is not being used in this file.", file.getName());
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
-                    holder.registerProblem(file.getOriginalElement(), "Inheritance is being used in this file.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
                 }
 
             } else {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"no-inheritance", PsiStmtType.FILE);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-inheritance", PsiStmtType.FILE);
 
                 if (inheritanceFound) {
                     Feedback feedback = new Feedback(-1, "Inheritance is being used in this file.", file.getName());

@@ -30,7 +30,7 @@ public final class InspectionRegistration implements ApplicationComponent, Inspe
                 SingleCharNameInspection.class,
 //                UsingForLoopsInspection.class,
                 UsingInheritanceInspection.class,
-//                UsingInterfacesInspection.class,
+                UsingInterfacesInspection.class,
 //                UsingStreamsInspection.class,
 //                UsingWhileLoopsInspection.class
         };

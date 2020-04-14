@@ -7,8 +7,7 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.FeedbackHolder;
-import util.Utils;
+import util.*;
 
 public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -40,51 +39,76 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
 
     @NotNull
     @Override
-    // TODO: Finish this
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder,"for-loops")) {
-            return new JavaElementVisitor() {};
+        if (Utils.isInspectionOn(holder, "for-loops")) {
+            return new ForVisitor(holder, true);
         }
 
-        return new JavaElementVisitor() {
+        if (Utils.isInspectionOn(holder, "no-for-loops")) {
+            return new ForVisitor(holder, false);
+        }
 
-            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+        return new JavaElementVisitor() {};
+    }
 
-            @Override
-            public void visitFile(@NotNull PsiFile file) {
-                super.visitFile(file);
+    private class ForVisitor extends JavaElementVisitor {
 
-                if (Utils.hasErrorsInFile(file)) {
-                    return;
-                }
+        private final ProblemsHolder holder;
+        private final FeedbackHolder feedbackHolder;
+        private final boolean expectingFor;
 
-                feedbackHolder.writeToFile();
+        private boolean forFound;
+
+        public ForVisitor(ProblemsHolder holder, boolean expectingFor) {
+            this.holder = holder;
+            this.expectingFor = expectingFor;
+
+            feedbackHolder = FeedbackHolder.getInstance();
+            forFound = false;
+        }
+
+        @Override
+        public void visitForeachStatement(PsiForeachStatement statement) {
+            super.visitForeachStatement(statement);
+
+            forFound = true;
+        }
+
+        @Override
+        public void visitForStatement(PsiForStatement statement) {
+            super.visitForStatement(statement);
+
+            forFound = true;
+        }
+
+        @Override
+        public void visitJavaFile(PsiJavaFile file) {
+            super.visitJavaFile(file);
+
+            if (Utils.hasErrorsInFile(file)) {
+                return;
             }
 
-            // Check if for loop is used anywhere in this class
-            // How would you do this project wide?
-            @Override
-            public void visitClass(PsiClass aClass) {
-                super.visitClass(aClass);
+            if (expectingFor) {
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "for-loops", PsiStmtType.FILE);
 
-                if (Utils.hasErrorsInFile(aClass)) {
-                    return;
+                if (!forFound) {
+                    Feedback feedback = new Feedback(-1, "For loops are not being used in this file.", file.getName());
+                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                } else {
+                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
                 }
 
-                boolean forLoopFound = false;
+            } else {
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-for-loops", PsiStmtType.FILE);
 
-                PsiClass[] innerClasses = aClass.getAllInnerClasses();
-                PsiMethod[] methods = aClass.getAllMethods();
-                PsiMethod[] constructors = aClass.getConstructors();
-
-                // Check all inner classes
-                for (PsiClass innerClass : innerClasses) {
+                if (forFound) {
+                    Feedback feedback = new Feedback(-1, "For loops are being used in this file.", file.getName());
+                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                } else {
+                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
                 }
-
-                // Check all methods
-
             }
-        };
+        }
     }
 }

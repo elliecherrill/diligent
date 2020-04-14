@@ -28,7 +28,7 @@ public final class InspectionRegistration implements ApplicationComponent, Inspe
                 MethodLengthInspection.class,
                 ScreamingSnakeCaseInspection.class,
                 SingleCharNameInspection.class,
-//                UsingForLoopsInspection.class,
+                UsingForLoopsInspection.class,
                 UsingInheritanceInspection.class,
                 UsingInterfacesInspection.class,
 //                UsingStreamsInspection.class,

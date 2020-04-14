@@ -121,6 +121,8 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
                 }
             }
+
+            feedbackHolder.writeToFile();
         }
     }
 }

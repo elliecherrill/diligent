@@ -125,6 +125,8 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
                 }
             }
+
+            feedbackHolder.writeToFile();
         }
     }
 }

@@ -123,6 +123,8 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
                 }
             }
+
+            feedbackHolder.writeToFile();
         }
     }
 }

@@ -114,6 +114,8 @@ public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectio
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
                 }
             }
+
+            feedbackHolder.writeToFile();
         }
     }
 }

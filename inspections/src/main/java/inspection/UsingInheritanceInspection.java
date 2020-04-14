@@ -8,8 +8,7 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.FeedbackHolder;
-import util.Utils;
+import util.*;
 
 public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -43,52 +42,85 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
 
-        if (!Utils.isInspectionOn(holder,"inheritance")) {
-            return new JavaElementVisitor() {};
+        if (Utils.isInspectionOn(holder,"inheritance")) {
+            return new InheritanceVisitor(holder, true);
         }
 
-        return new InheritanceVisitor(holder);
+        if (Utils.isInspectionOn(holder,"no-inheritance")) {
+            return new InheritanceVisitor(holder, false);
+        }
+
+        return new JavaElementVisitor() {};
     }
 
     private static class InheritanceVisitor extends JavaElementVisitor {
 
         private final ProblemsHolder holder;
-        FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+        private final FeedbackHolder feedbackHolder;
+        private final boolean expectingInheritance;
 
-        public InheritanceVisitor(ProblemsHolder holder) {
+        private boolean inheritanceFound;
+
+        public InheritanceVisitor(ProblemsHolder holder, boolean expectingInheritance) {
             this.holder = holder;
+            this.expectingInheritance = expectingInheritance;
+
+            feedbackHolder = FeedbackHolder.getInstance();
+            inheritanceFound = false;
         }
 
-        // Check if inheritance is used anywhere in *this* file (not considering inner classes)
-        // How would you do this project wide?
-        // TODO: Finish this
+        @Override
+        public void visitClass(PsiClass aClass) {
+            super.visitClass(aClass);
+
+            if (Utils.hasErrorsInFile(aClass)) {
+                return;
+            }
+
+            PsiReferenceList extendsList = aClass.getExtendsList();
+
+            if (extendsList != null) {
+                if (Utils.containsExtends(extendsList.getText())) {
+                    inheritanceFound = true;
+                }
+            }
+
+            if (!inheritanceFound) {
+                for (PsiElement child : aClass.getAllInnerClasses()) {
+                    child.accept(this);
+                }
+            }
+        }
+
         @Override
         public void visitJavaFile(PsiJavaFile file) {
             super.visitJavaFile(file);
 
-            PsiElement[] children = file.getChildren();
-            for (PsiElement child : children) {
-                if (child instanceof PsiClass) {
-                    PsiClass childClass = (PsiClass) child;
-                    child.accept(this);
-                    PsiReferenceList extendsList = childClass.getExtendsList();
-                    if (Utils.containsExtends(extendsList.getText())) {
-                        return;
-                    }
-                }
+            if (Utils.hasErrorsInFile(file)) {
+                return;
             }
 
-            //TODO: make sure names and checks match up (i.e. is inheritance being used or *not* being used?
-            holder.registerProblem(file.getOriginalElement(), "Inheritance is not being used in this file.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-//            feedbackHolder.addFeedback(holder.getProject(), file.getName(), new Feedback(0, "Inheritance is not being used in this file.", file.getName()));
-//            feedbackHolder.writeToFile();
-            //TODO add fixfeedback (once it's been fixed)
+            if (expectingInheritance) {
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"inheritance", PsiStmtType.FILE);
 
+                if (!inheritanceFound) {
+                    Feedback feedback = new Feedback(-1, "Inheritance is not being used in this file.", file.getName());
+                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                } else {
+                    holder.registerProblem(file.getOriginalElement(), "Inheritance is being used in this file.", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                }
 
-//            TODO
-//            if (Utils.hasErrorsInFile(statement)) {
-//                return;
-//            }
+            } else {
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"no-inheritance", PsiStmtType.FILE);
+
+                if (inheritanceFound) {
+                    Feedback feedback = new Feedback(-1, "Inheritance is being used in this file.", file.getName());
+                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                } else {
+                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                }
+            }
         }
     }
 }

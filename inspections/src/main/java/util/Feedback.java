@@ -36,10 +36,19 @@ public class Feedback {
         return "<div id=\"feedbackcontainer\">\n" +
                 "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                 "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
-                "       <p> " + filename + " > " + lineNumber + " </p>\n" +
+                "       <p> " + filename + " > " + getLineNumberFormatted() + " </p>\n" +
                 "   </div>\n" +
                 getIgnoreAdviceButton() +
                 "</div>";
+    }
+
+    private String getLineNumberFormatted() {
+        if (lineNumber >= 0) {
+            return String.valueOf(lineNumber);
+        }
+
+        //TODO: change this
+        return "WHOLE FILE";
     }
 
     private String getColour() {

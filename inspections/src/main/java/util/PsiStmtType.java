@@ -6,5 +6,6 @@ public enum PsiStmtType {
     IF,
     METHOD,
     PARAMETER,
-    ENUM
+    ENUM,
+    FILE
 }

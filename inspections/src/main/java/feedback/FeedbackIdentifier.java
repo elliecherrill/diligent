@@ -52,6 +52,10 @@ public class FeedbackIdentifier {
             PsiStmtType otherType = otherFeedbackId.getType();
             PsiElement otherElement = otherFeedbackId.getInitialElement();
 
+            if ((type == PsiStmtType.LEFT_THIS_EXPR || type == PsiStmtType.RIGHT_THIS_EXPR) && otherType == type) {
+                return otherFeedbackId.getFeedbackType().equals(feedbackType);
+            }
+
             return otherType == type &&
                     otherElement.getText().equals(initialElement.getText()) &&
                     otherFeedbackId.getFeedbackType().equals(feedbackType);

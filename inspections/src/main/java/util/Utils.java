@@ -183,4 +183,123 @@ public final class Utils {
 
         return false;
     }
+
+    public static String getThisId(PsiThisExpression expression) {
+        PsiElement sibling = expression.getNextSibling();
+
+        do {
+            if (sibling instanceof PsiIdentifier) {
+                PsiIdentifier id = (PsiIdentifier) sibling;
+                return id.getText();
+            }
+            sibling = sibling.getNextSibling();
+        } while (sibling != null);
+
+        return null;
+    }
+
+    public static PsiThisExpression getThisExpression(PsiExpression expression) {
+        if (expression instanceof PsiReferenceExpression) {
+            PsiReferenceExpression refExpr = (PsiReferenceExpression) expression;
+
+            if (refExpr.getQualifierExpression() instanceof PsiThisExpression) {
+                return (PsiThisExpression) refExpr.getQualifierExpression();
+            }
+        }
+
+        return null;
+    }
+
+    public static boolean isInScope(String var, PsiCodeBlock block) {
+        PsiMethod method = getContainingMethod(block);
+
+        if (method == null) {
+            return false;
+        }
+
+        // Need to check parameters of containing method
+        PsiParameterList paramList = method.getParameterList();
+        PsiParameter[] params = paramList.getParameters();
+        for (PsiParameter p : params) {
+            if (p.getName().equals(var)) {
+                return true;
+            }
+        }
+
+        // Need to check local variables within the method
+        PsiCodeBlock body = method.getBody();
+        if (body == null) {
+            return false;
+        }
+
+        return containsLocalVariable(var, body);
+    }
+
+    private static PsiMethod getContainingMethod(PsiCodeBlock block) {
+        PsiElement parent = block.getParent();
+        do {
+            if (parent instanceof PsiMethod) {
+                return (PsiMethod) parent;
+            }
+            parent = parent.getParent();
+        } while (parent != null);
+
+        return null;
+    }
+
+    private static boolean containsLocalVariable(String var, PsiCodeBlock block) {
+        for (PsiStatement stat : block.getStatements()) {
+            if (stat instanceof PsiDeclarationStatement) {
+                PsiDeclarationStatement declStat = (PsiDeclarationStatement) stat;
+
+                for (PsiElement elem : declStat.getDeclaredElements()) {
+                    if (elem instanceof PsiLocalVariable) {
+                        PsiLocalVariable localVar = (PsiLocalVariable) elem;
+
+                        if (localVar.getName().equals(var)) {
+                            return true;
+                        }
+                    }
+                }
+            } else if (stat instanceof PsiLoopStatement) {
+                PsiLoopStatement loopStat = (PsiLoopStatement) stat;
+
+                if (loopStat.getBody() instanceof PsiBlockStatement) {
+                    PsiBlockStatement loopBody = (PsiBlockStatement) loopStat.getBody();
+
+                    return containsLocalVariable(var, loopBody.getCodeBlock());
+                }
+
+            } else if (stat instanceof PsiSwitchStatement) {
+                PsiSwitchStatement switchStat = (PsiSwitchStatement) stat;
+
+                if (switchStat.getBody() instanceof PsiBlockStatement) {
+                    PsiBlockStatement switchBody = (PsiBlockStatement) switchStat.getBody();
+
+                    return containsLocalVariable(var, switchBody.getCodeBlock());
+                }
+
+            } else if (stat instanceof PsiIfStatement) {
+                PsiIfStatement ifStat = (PsiIfStatement) stat;
+
+                if (ifStat.getThenBranch() instanceof PsiBlockStatement) {
+                    PsiBlockStatement thenBody = (PsiBlockStatement) ifStat.getThenBranch();
+
+                    if (containsLocalVariable(var, thenBody.getCodeBlock())) {
+                        return true;
+                    }
+                }
+
+                if (ifStat.getElseBranch() instanceof PsiBlockStatement) {
+                    PsiBlockStatement elseBody = (PsiBlockStatement) ifStat.getElseBranch();
+
+                    if (containsLocalVariable(var, elseBody.getCodeBlock())) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 }

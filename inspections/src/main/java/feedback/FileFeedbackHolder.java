@@ -1,5 +1,7 @@
 package feedback;
 
+import util.PsiStmtType;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +22,17 @@ public class FileFeedbackHolder {
     }
 
     public void addFeedback(FeedbackIdentifier id, Feedback newFeedback) {
+        if (id.getType() == PsiStmtType.LEFT_THIS_EXPR || id.getType() == PsiStmtType.RIGHT_THIS_EXPR) {
+            for (Map.Entry entry : feedback.entrySet()) {
+                FeedbackIdentifier entryId = (FeedbackIdentifier) entry.getKey();
+
+                if (entryId.getType() == id.getType() && entryId.getInitialElement().equals(id.getInitialElement())) {
+                    feedback.remove(entryId);
+                }
+
+            }
+        }
+
         feedback.remove(id);
         feedback.put(id, newFeedback);
     }
@@ -51,7 +64,7 @@ public class FileFeedbackHolder {
     }
 
     public String getFeedbackAsHTMLString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
 
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();

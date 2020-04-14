@@ -7,5 +7,7 @@ public enum PsiStmtType {
     METHOD,
     PARAMETER,
     ENUM,
-    FILE
+    FILE,
+    LEFT_THIS_EXPR,
+    RIGHT_THIS_EXPR
 }

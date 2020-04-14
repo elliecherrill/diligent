@@ -395,7 +395,7 @@ public final class CodeCloneUtils {
     }
 
     public static String output(String[] str) {
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
 
         for (String s : str) {
             sb.append(s);

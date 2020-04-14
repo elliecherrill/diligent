@@ -87,7 +87,7 @@ public class ProjectFeedbackHolder {
     }
 
     private String getAllFilesAsHTMLString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
 
         for (Map.Entry file : files.entrySet()) {
             FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
@@ -98,7 +98,7 @@ public class ProjectFeedbackHolder {
     }
 
     private String getAllFilesAsHTMLString(String selectedFile) {
-        StringBuilder sb = new StringBuilder();
+        StringBuffer sb = new StringBuffer();
 
         for (Map.Entry file : files.entrySet()) {
             String filename = (String) file.getKey();

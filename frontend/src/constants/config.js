@@ -5,12 +5,12 @@ export const initialConfigs = {
         'config-3': {id: 'config-3', content: 'No use of inheritance'},
         'config-4': {id: 'config-4', content: 'Use of interfaces'},
         'config-5': {id: 'config-5', content: 'No use of interfaces'},
-        // TODO: 'config-6': { id: 'config-6', content: 'Use of streams'},
-        // TODO: 'config-7': { id: 'config-7', content: 'No use of streams'},
-        // TODO: 'config-8': { id: 'config-8', content: 'Use of for loops'},
-        // TODO: 'config-9': { id: 'config-9', content: 'No use of for loops'},
-        // TODO: 'config-10': { id: 'config-10', content: 'Use of while loops'},
-        // TODO: 'config-11': { id: 'config-11', content: 'No use of while loops'},
+        'config-6': {id: 'config-6', content: 'Use of streams'},
+        'config-7': {id: 'config-7', content: 'No use of streams'},
+        'config-8': {id: 'config-8', content: 'Use of for loops'},
+        'config-9': {id: 'config-9', content: 'No use of for loops'},
+        'config-10': {id: 'config-10', content: 'Use of while loops'},
+        'config-11': {id: 'config-11', content: 'No use of while loops'},
         'config-12': {id: 'config-12', content: 'Use of camelCase (as default)'},
         'config-13': {id: 'config-13', content: 'Use of SCREAMING_SNAKE_CASE (for static final)'},
         'config-14': {id: 'config-14', content: 'No redundant else cases'},
@@ -26,11 +26,11 @@ export const initialConfigs = {
         'category-4': {
             id: 'category-4',
             title: 'Don\'t Check',
-            configIds: ['config-2', 'config-3', 'config-4', 'config-5', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18']
-        }, //TODO: 'config-1',  'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11'
+            configIds: ['config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18']
+        }, //TODO: 'config-1',
     },
     columnOrder: ['category-4', 'category-3', 'category-2', 'category-1']
 }
 
-export const allConfigs = ['config-2', 'config-3', 'config-4', 'config-5', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18']
-//TODO: 'config-1',  'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11'
+export const allConfigs = ['config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18']
+//TODO: 'config-1',

@@ -175,18 +175,17 @@ const EditConfig = () => {
             return true
         }
 
-        //TODO: uncomment
-        // if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
-        //     return true
-        // }
-        //
-        // if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
-        //     return true
-        // }
-        //
-        // if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
-        //     return true
-        // }
+        if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
+            return true
+        }
+
+        if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
+            return true
+        }
+
+        if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
+            return true
+        }
 
         return false
     }
@@ -201,18 +200,17 @@ const EditConfig = () => {
             return [initialConfigs.configs['config-4'].content, initialConfigs.configs['config-5'].content]
         }
 
-        //TODO: uncomment
-        // if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
-        //    return [initialConfigs.configs['config-6'].content, initialConfigs.configs['config-7'].content]
-        // }
-        //
-        // if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
-        //     return [initialConfigs.configs['config-8'].content, initialConfigs.configs['config-9'].content]
-        // }
-        //
-        // if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
-        // return [initialConfigs.configs['config-10'].content, initialConfigs.configs['config-11'].content]
-        // }
+        if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
+           return [initialConfigs.configs['config-6'].content, initialConfigs.configs['config-7'].content]
+        }
+
+        if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
+            return [initialConfigs.configs['config-8'].content, initialConfigs.configs['config-9'].content]
+        }
+
+        if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
+        return [initialConfigs.configs['config-10'].content, initialConfigs.configs['config-11'].content]
+        }
 
         return []
     }

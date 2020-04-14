@@ -4,6 +4,9 @@ import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
+import feedback.Feedback;
+import feedback.FeedbackHolder;
+import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -52,7 +55,7 @@ public final class UsingWhileLoopsInspection extends AbstractBaseJavaLocalInspec
         return new JavaElementVisitor() {};
     }
 
-    private class WhileVisitor extends JavaElementVisitor {
+    private static class WhileVisitor extends JavaElementVisitor {
 
         private final ProblemsHolder holder;
         private final FeedbackHolder feedbackHolder;
@@ -72,12 +75,20 @@ public final class UsingWhileLoopsInspection extends AbstractBaseJavaLocalInspec
         public void visitWhileStatement(PsiWhileStatement statement) {
             super.visitWhileStatement(statement);
 
+            if (Utils.hasErrorsInFile(statement)) {
+                return;
+            }
+
             whileFound = true;
         }
 
         @Override
         public void visitDoWhileStatement(PsiDoWhileStatement statement) {
             super.visitDoWhileStatement(statement);
+
+            if (Utils.hasErrorsInFile(statement)) {
+                return;
+            }
 
             whileFound = true;
         }

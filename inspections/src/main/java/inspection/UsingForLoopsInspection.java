@@ -2,8 +2,12 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
+import feedback.Feedback;
+import feedback.FeedbackHolder;
+import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +55,7 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
         return new JavaElementVisitor() {};
     }
 
-    private class ForVisitor extends JavaElementVisitor {
+    private static class ForVisitor extends JavaElementVisitor {
 
         private final ProblemsHolder holder;
         private final FeedbackHolder feedbackHolder;
@@ -71,12 +75,20 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
         public void visitForeachStatement(PsiForeachStatement statement) {
             super.visitForeachStatement(statement);
 
+            if (Utils.hasErrorsInFile(statement)) {
+                return;
+            }
+
             forFound = true;
         }
 
         @Override
         public void visitForStatement(PsiForStatement statement) {
             super.visitForStatement(statement);
+
+            if (Utils.hasErrorsInFile(statement)) {
+                return;
+            }
 
             forFound = true;
         }

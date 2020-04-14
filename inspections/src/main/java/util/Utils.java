@@ -169,4 +169,18 @@ public final class Utils {
 
         return false;
     }
+
+    public static boolean isStream(PsiReferenceExpression expression) {
+        for (PsiElement child : expression.getChildren()) {
+            if (child instanceof PsiIdentifier) {
+                PsiIdentifier id = (PsiIdentifier) child;
+                String idText = id.getText();
+                if (idText.equals("stream") || idText.equals("Stream") || idText.equals("IntStream") || idText.equals("ParallelStream")) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

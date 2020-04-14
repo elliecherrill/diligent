@@ -5,6 +5,7 @@ import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
+import feedback.FeedbackHolder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import util.*;

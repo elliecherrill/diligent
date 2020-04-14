@@ -4,6 +4,9 @@ import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
+import feedback.Feedback;
+import feedback.FeedbackHolder;
+import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
@@ -72,16 +75,15 @@ public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectio
         public void visitReferenceExpression(PsiReferenceExpression expression) {
             super.visitReferenceExpression(expression);
 
-            for (PsiElement child : expression.getChildren()) {
-                if (child instanceof PsiIdentifier) {
-                    PsiIdentifier id = (PsiIdentifier) child;
-                    //TODO: move this to utils
-                    if (id.getText().equals("stream") || id.getText().equals("Stream") || id.getText().equals("IntStream") || id.getText().equals("ParallelStream")) {
-                        streamFound = true;
-                        return;
-                    }
-                }
+            if (Utils.hasErrorsInFile(expression)) {
+                return;
             }
+
+            if (streamFound) {
+                return;
+            }
+
+            streamFound = Utils.isStream(expression);
         }
 
         @Override

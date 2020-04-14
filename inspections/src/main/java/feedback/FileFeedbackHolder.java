@@ -1,7 +1,7 @@
-package util;
+package feedback;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FileFeedbackHolder {
 
@@ -10,7 +10,7 @@ public class FileFeedbackHolder {
     private final String filepath;
 
     public FileFeedbackHolder(String filename) {
-        feedback = new HashMap<>();
+        feedback = new ConcurrentHashMap<>();
         this.filename = filename;
         this.filepath = filename.replace(".java", ".html");
     }

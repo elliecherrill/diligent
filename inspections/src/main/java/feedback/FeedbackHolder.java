@@ -1,9 +1,9 @@
-package util;
+package feedback;
 
 import com.intellij.openapi.project.Project;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FeedbackHolder {
 
@@ -11,7 +11,7 @@ public class FeedbackHolder {
     private final Map<Project, ProjectFeedbackHolder> projects;
 
     private FeedbackHolder() {
-        projects = new HashMap<>();
+        projects = new ConcurrentHashMap<>();
     }
 
     public static FeedbackHolder getInstance() {

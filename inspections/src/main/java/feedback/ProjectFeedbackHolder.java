@@ -1,14 +1,15 @@
-package util;
+package feedback;
 
 import com.intellij.openapi.project.Project;
 import org.apache.commons.io.FileUtils;
+import util.Notifier;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProjectFeedbackHolder {
 
@@ -24,7 +25,7 @@ public class ProjectFeedbackHolder {
     private boolean isCurrent;
 
     public ProjectFeedbackHolder(Project project) {
-        files = new HashMap<>();
+        files = new ConcurrentHashMap<>();
         this.projectPath = project.getBasePath();
         this.project = project;
         isCurrent = true;

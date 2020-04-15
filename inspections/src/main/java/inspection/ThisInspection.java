@@ -96,7 +96,7 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                 }
             }
 
-            private void inspectThisExpression(PsiExpression expr, PsiCodeBlock block, PsiStatement stat, String filename, FeedbackIdentifier feedbackId,) {
+            private void inspectThisExpression(PsiExpression expr, PsiCodeBlock block, PsiStatement stat, String filename, FeedbackIdentifier feedbackId) {
                 PsiThisExpression thisExpr = Utils.getThisExpression(expr);
                 if (thisExpr != null) {
                     String thisVar = Utils.getThisId(thisExpr);

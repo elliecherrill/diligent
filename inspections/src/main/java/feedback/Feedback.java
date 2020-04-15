@@ -1,12 +1,17 @@
 package feedback;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class Feedback {
 
     private final int lineNumber;
     private final String errorMsg;
     private final String filename;
+
     private boolean isFixed;
     private boolean isHidden;
+    private LocalDateTime lastUpdated;
 
     public Feedback(int lineNumber, String errorMsg, String filename) {
         this.lineNumber = lineNumber;
@@ -14,6 +19,7 @@ public class Feedback {
         this.filename = filename;
         isFixed = false;
         isHidden = false;
+        lastUpdated = LocalDateTime.now();
     }
 
     @Override
@@ -36,7 +42,7 @@ public class Feedback {
         return "<div id=\"feedbackcontainer\">\n" +
                 "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                 "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
-                "       <p> " + filename + " > " + getLineNumberFormatted() + " </p>\n" +
+                "       <p> File: " + filename + " > Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " </p>\n" +
                 "   </div>\n" +
                 getIgnoreAdviceButton() +
                 "</div>";
@@ -49,6 +55,11 @@ public class Feedback {
 
         //TODO: change this
         return "WHOLE FILE";
+    }
+
+    private String getLastUpdatedFormatted() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm dd/MM/yy");
+        return dtf.format(lastUpdated);
     }
 
     private String getColour() {
@@ -73,10 +84,12 @@ public class Feedback {
 
     public void setToFixed() {
         isFixed = true;
+        lastUpdated = LocalDateTime.now();
     }
 
     public void setToNotFixed() {
         isFixed = false;
+        lastUpdated = LocalDateTime.now();
     }
 
     // TODO: when to call this?

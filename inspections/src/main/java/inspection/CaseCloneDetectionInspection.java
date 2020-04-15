@@ -54,7 +54,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
             return new CloneVisitor(holder);
         }
 
-        return new JavaElementVisitor() {};
+        return new JavaElementVisitor() {
+        };
     }
 
     private static class CloneVisitor extends JavaElementVisitor {
@@ -280,6 +281,13 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         continue;
                     }
 
+                    // If statements are considered similar if
+                    // 1. They are identical
+                    // 2. They have identical conditions and similar bodies
+                    // 3. They have identical bodies and similar conditions
+
+                    //TODO: what about else cases?
+
                     if (Arrays.equals(entryValue, otherEntryValue)) {
                         updateCloneSet(entryKey, otherEntryKey);
                         updateCloneSet(otherEntryKey, entryKey);
@@ -287,16 +295,17 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                         continue;
                     }
 
+                    //TODO: Finish this - I don't think sameIfCondition is working...
                     if (CodeCloneUtils.sameIfCondition(entryValue, otherEntryValue)) {
-                        update = true;
-                    } else if (CodeCloneUtils.conditionChangeInLhs(entryValue, otherEntryValue)) {
-                        update = true;
-                    } else if (CodeCloneUtils.conditionChangeInRhs(entryValue, otherEntryValue)) {
-                        update = true;
-                    }
-
-                    if (CodeCloneUtils.sameIfBody(entryValue, otherEntryValue)) {
-                        update = true;
+                        if (haveSimilarBodies(entryKey, otherEntryKey)) {
+                            update = true;
+                        }
+                    } else if (CodeCloneUtils.sameIfBody(entryValue, otherEntryValue)) {
+                        if (CodeCloneUtils.conditionChangeInLhs(entryValue, otherEntryValue)) {
+                            update = true;
+                        } else if (CodeCloneUtils.conditionChangeInRhs(entryValue, otherEntryValue)) {
+                            update = true;
+                        }
                     }
 
                     if (update) {
@@ -305,6 +314,41 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                     }
                 }
             }
+        }
+
+        //TODO: finish this - use clone detection
+        private boolean haveSimilarBodies(PsiIfStatement ifStmt, PsiIfStatement otherIfStmt) {
+            PsiStatement body = ifStmt.getThenBranch();
+            PsiStatement otherBody = otherIfStmt.getThenBranch();
+
+            boolean emptyBody = false;
+            boolean otherEmptyBody = false;
+
+            if (body instanceof PsiBlockStatement) {
+                PsiBlockStatement blockStmtBody = (PsiBlockStatement) body;
+                PsiCodeBlock codeBlockBody = blockStmtBody.getCodeBlock();
+                if (codeBlockBody.getStatements().length == 0) {
+                    emptyBody = true;
+                }
+            }
+
+            if (otherBody instanceof PsiBlockStatement) {
+                PsiBlockStatement otherBlockStmtBody = (PsiBlockStatement) otherBody;
+                PsiCodeBlock otherCodeBlockBody = otherBlockStmtBody.getCodeBlock();
+                if (otherCodeBlockBody.getStatements().length == 0) {
+                    otherEmptyBody = true;
+                }
+            }
+
+            if (emptyBody != otherEmptyBody) {
+                return false;
+            }
+
+            if (emptyBody) {
+                return true;
+            }
+
+            return false;
         }
 
         private void compareAssignments() {
@@ -465,7 +509,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 return declarationCloneMap.getOrDefault(declStmt, Collections.emptySet());
             }
 
-            assert true: "Unknown statement type";
+            assert true : "Unknown statement type";
             return null;
         }
 

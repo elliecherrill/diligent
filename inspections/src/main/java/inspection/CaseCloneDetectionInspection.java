@@ -2,13 +2,17 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
+import feedback.Feedback;
 import feedback.FeedbackHolder;
+import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.CodeCloneUtils;
+import util.Pair;
+import util.PsiStmtType;
+import util.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,11 +52,9 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
 
         if (Utils.isInspectionOn(holder, "clone")) {
             return new CloneVisitor(holder);
-
         }
 
-        return new JavaElementVisitor() {
-        };
+        return new JavaElementVisitor() {};
     }
 
     private static class CloneVisitor extends JavaElementVisitor {
@@ -153,180 +155,10 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 }
             }
 
-            // Compare all assignment expressions
-            for (Map.Entry<PsiAssignmentExpression, String[]> assExpr : assignmentMap.entrySet()) {
-                for (Map.Entry<PsiAssignmentExpression, String[]> otherAssExpr : assignmentMap.entrySet()) {
-                    PsiAssignmentExpression entryKey = assExpr.getKey();
-                    PsiAssignmentExpression otherEntryKey = otherAssExpr.getKey();
-
-                    String[] entryValue = assExpr.getValue();
-                    String[] otherEntryValue = otherAssExpr.getValue();
-
-                    boolean update = false;
-
-                    if (entryKey.equals(otherEntryKey)) {
-                        continue;
-                    }
-
-                    if (Arrays.equals(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey,
-                                "Duplicate assignment expression in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
-
-                        continue;
-                    }
-
-                    if (CodeCloneUtils.changeInLiteral(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey,
-                                "Similar assignment expression in switch case - differs by RHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        update = true;
-                    }
-
-                    if (CodeCloneUtils.changeInOp(entryValue, otherEntryValue)) {
-                        holder.registerProblem(otherEntryKey, "Similar assignment expression in switch case - differs by op (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        update = true;
-                    }
-
-                    if (update) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
-                    }
-                }
-            }
-
-            // Compare all if statements
-            for (Map.Entry<PsiIfStatement, String[]> ifStmt : ifStmtMap.entrySet()) {
-                for (Map.Entry<PsiIfStatement, String[]> otherIfStmt : ifStmtMap.entrySet()) {
-                    PsiIfStatement entryKey = ifStmt.getKey();
-                    PsiIfStatement otherEntryKey = otherIfStmt.getKey();
-
-                    String[] entryValue = ifStmt.getValue();
-                    String[] otherEntryValue = otherIfStmt.getValue();
-
-                    boolean update = false;
-
-                    if (entryKey.equals(otherEntryKey)) {
-                        continue;
-                    }
-
-                    if (Arrays.equals(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey,
-                                "Duplicate 'if' statement in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
-
-                        continue;
-                    }
-
-                    if (CodeCloneUtils.sameIfCondition(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey.getCondition(),
-                                "Same 'if' condition in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        update = true;
-                    } else if (CodeCloneUtils.conditionChangeInLhs(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey.getCondition(),
-                                "Similar 'if' condition in switch case - differs by LHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        update = true;
-                    } else if (CodeCloneUtils.conditionChangeInRhs(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey.getCondition(),
-                                "Similar 'if' condition in switch case - differs by RHS (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        update = true;
-                    }
-
-                    if (CodeCloneUtils.sameIfBody(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey.getThenBranch(),
-                                "Same 'if' body (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        update = true;
-                    }
-
-                    if (update) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
-                    }
-                }
-            }
-
-            // Compare all declarations
-            for (Map.Entry<PsiDeclarationStatement, String[]> declStmt : declarationMap.entrySet()) {
-                for (Map.Entry<PsiDeclarationStatement, String[]> otherDeclStmt : declarationMap.entrySet()) {
-                    PsiDeclarationStatement entryKey = declStmt.getKey();
-                    PsiDeclarationStatement otherEntryKey = otherDeclStmt.getKey();
-
-                    String[] entryValue = declStmt.getValue();
-                    String[] otherEntryValue = otherDeclStmt.getValue();
-
-                    boolean update = false;
-
-                    if (entryKey.equals(otherEntryKey)) {
-                        continue;
-                    }
-
-                    if (Arrays.equals(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey,
-                                "Duplicate declaration statement in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
-                        continue;
-                    }
-
-                    if (CodeCloneUtils.declChangeInVarName(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey,
-                                "Similar declaration statement in switch case - differs by variable name (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        update = true;
-                    }
-
-                    if (update) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
-                    }
-                }
-            }
-
-            // Compare all method calls
-            for (Map.Entry<PsiMethodCallExpression, String[]> methodCall : methodCallMap.entrySet()) {
-                for (Map.Entry<PsiMethodCallExpression, String[]> otherMethodCall : methodCallMap.entrySet()) {
-                    PsiMethodCallExpression entryKey = methodCall.getKey();
-                    PsiMethodCallExpression otherEntryKey = otherMethodCall.getKey();
-
-                    String[] entryValue = methodCall.getValue();
-                    String[] otherEntryValue = otherMethodCall.getValue();
-
-                    if (entryKey.equals(otherEntryKey)) {
-                        continue;
-                    }
-
-                    if (Arrays.equals(entryValue, otherEntryValue)) {
-                        holder.registerProblem(entryKey,
-                                "Duplicate method call in switch case (" + entryKey.getText() + " " + otherEntryKey.getText() + ")",
-                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
-
-                        continue;
-                    }
-                }
-            }
+            compareAssignments();
+            compareIfStatements();
+            compareDeclarations();
+            compareMethodCalls();
 
             List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).boxed().collect(Collectors.toList());
             List<Set<Integer>> clones = new ArrayList<>(cases.length);
@@ -364,23 +196,152 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 intersection.add(i);
 
                 clones.add(intersection);
-
-//                    if (!intersection.isEmpty()) {
-//                        holder.registerProblem(cases[i][0],
-//                                "Clone 'case' block (clone of " + intersection + " )",
-//                                ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-//                    }
             }
 
+            String filename = statement.getContainingFile().getName();
+            FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "clone", PsiStmtType.SWITCH);
+
             if (transitiveClosureOfClones(clones, rangeOfCases)) {
-                holder.registerProblem(statement,
-                        "All cases in switch statement are clones of one another",
-                        ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                Feedback feedback = new Feedback(Utils.getLineNumber(statement), "All cases in switch statement are clones of one another.", filename);
+                feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+            } else {
+                feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+            }
+        }
 
-                //TODO: add feedback like this instead of to problems holder
-//                    feedbackHolder.addFeedback(holder.getProject(), statement.getContainingFile().getName(), new Feedback(Utils.getLineNumber(statement), "All cases in switch are clones", statement.getContainingFile().getName()));
+        private void compareMethodCalls() {
+            for (Map.Entry<PsiMethodCallExpression, String[]> methodCall : methodCallMap.entrySet()) {
+                for (Map.Entry<PsiMethodCallExpression, String[]> otherMethodCall : methodCallMap.entrySet()) {
+                    PsiMethodCallExpression entryKey = methodCall.getKey();
+                    PsiMethodCallExpression otherEntryKey = otherMethodCall.getKey();
 
-                //TODO call fixFeedback when the error has been fixed
+                    String[] entryValue = methodCall.getValue();
+                    String[] otherEntryValue = otherMethodCall.getValue();
+
+                    if (entryKey.equals(otherEntryKey)) {
+                        continue;
+                    }
+
+                    if (Arrays.equals(entryValue, otherEntryValue)) {
+                        updateCloneSet(entryKey, otherEntryKey);
+                        updateCloneSet(otherEntryKey, entryKey);
+
+                        continue;
+                    }
+                }
+            }
+        }
+
+        private void compareDeclarations() {
+            for (Map.Entry<PsiDeclarationStatement, String[]> declStmt : declarationMap.entrySet()) {
+                for (Map.Entry<PsiDeclarationStatement, String[]> otherDeclStmt : declarationMap.entrySet()) {
+                    PsiDeclarationStatement entryKey = declStmt.getKey();
+                    PsiDeclarationStatement otherEntryKey = otherDeclStmt.getKey();
+
+                    String[] entryValue = declStmt.getValue();
+                    String[] otherEntryValue = otherDeclStmt.getValue();
+
+                    boolean update = false;
+
+                    if (entryKey.equals(otherEntryKey)) {
+                        continue;
+                    }
+
+                    if (Arrays.equals(entryValue, otherEntryValue)) {
+                        updateCloneSet(entryKey, otherEntryKey);
+                        updateCloneSet(otherEntryKey, entryKey);
+                        continue;
+                    }
+
+                    if (CodeCloneUtils.declChangeInVarName(entryValue, otherEntryValue)) {
+                        update = true;
+                    }
+
+                    if (update) {
+                        updateCloneSet(entryKey, otherEntryKey);
+                        updateCloneSet(otherEntryKey, entryKey);
+                    }
+                }
+            }
+        }
+
+        private void compareIfStatements() {
+            for (Map.Entry<PsiIfStatement, String[]> ifStmt : ifStmtMap.entrySet()) {
+                for (Map.Entry<PsiIfStatement, String[]> otherIfStmt : ifStmtMap.entrySet()) {
+                    PsiIfStatement entryKey = ifStmt.getKey();
+                    PsiIfStatement otherEntryKey = otherIfStmt.getKey();
+
+                    String[] entryValue = ifStmt.getValue();
+                    String[] otherEntryValue = otherIfStmt.getValue();
+
+                    boolean update = false;
+
+                    if (entryKey.equals(otherEntryKey)) {
+                        continue;
+                    }
+
+                    if (Arrays.equals(entryValue, otherEntryValue)) {
+                        updateCloneSet(entryKey, otherEntryKey);
+                        updateCloneSet(otherEntryKey, entryKey);
+
+                        continue;
+                    }
+
+                    if (CodeCloneUtils.sameIfCondition(entryValue, otherEntryValue)) {
+                        update = true;
+                    } else if (CodeCloneUtils.conditionChangeInLhs(entryValue, otherEntryValue)) {
+                        update = true;
+                    } else if (CodeCloneUtils.conditionChangeInRhs(entryValue, otherEntryValue)) {
+                        update = true;
+                    }
+
+                    if (CodeCloneUtils.sameIfBody(entryValue, otherEntryValue)) {
+                        update = true;
+                    }
+
+                    if (update) {
+                        updateCloneSet(entryKey, otherEntryKey);
+                        updateCloneSet(otherEntryKey, entryKey);
+                    }
+                }
+            }
+        }
+
+        private void compareAssignments() {
+            for (Map.Entry<PsiAssignmentExpression, String[]> assExpr : assignmentMap.entrySet()) {
+                for (Map.Entry<PsiAssignmentExpression, String[]> otherAssExpr : assignmentMap.entrySet()) {
+                    PsiAssignmentExpression entryKey = assExpr.getKey();
+                    PsiAssignmentExpression otherEntryKey = otherAssExpr.getKey();
+
+                    String[] entryValue = assExpr.getValue();
+                    String[] otherEntryValue = otherAssExpr.getValue();
+
+                    boolean update = false;
+
+                    if (entryKey.equals(otherEntryKey)) {
+                        continue;
+                    }
+
+                    if (Arrays.equals(entryValue, otherEntryValue)) {
+                        updateCloneSet(entryKey, otherEntryKey);
+                        updateCloneSet(otherEntryKey, entryKey);
+
+                        continue;
+                    }
+
+                    if (CodeCloneUtils.changeInLiteral(entryValue, otherEntryValue)) {
+                        update = true;
+                    }
+
+                    if (CodeCloneUtils.changeInOp(entryValue, otherEntryValue)) {
+                        update = true;
+                    }
+
+                    if (update) {
+                        updateCloneSet(entryKey, otherEntryKey);
+                        updateCloneSet(otherEntryKey, entryKey);
+                    }
+                }
             }
         }
 
@@ -485,25 +446,26 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
                 if (expr instanceof PsiAssignmentExpression) {
                     PsiAssignmentExpression assExpr = (PsiAssignmentExpression) expr;
-                    return assignmentCloneMap.get(assExpr);
+                    return assignmentCloneMap.getOrDefault(assExpr, Collections.emptySet());
                 }
 
                 if (expr instanceof PsiMethodCallExpression) {
                     PsiMethodCallExpression callExpr = (PsiMethodCallExpression) expr;
-                    return methodCallCloneMap.get(callExpr);
+                    return methodCallCloneMap.getOrDefault(callExpr, Collections.emptySet());
                 }
             }
 
             if (stat instanceof PsiIfStatement) {
                 PsiIfStatement ifStmt = (PsiIfStatement) stat;
-                return ifStmtCloneMap.get(ifStmt);
+                return ifStmtCloneMap.getOrDefault(ifStmt, Collections.emptySet());
             }
 
             if (stat instanceof PsiDeclarationStatement) {
                 PsiDeclarationStatement declStmt = (PsiDeclarationStatement) stat;
-                return declarationCloneMap.get(declStmt);
+                return declarationCloneMap.getOrDefault(declStmt, Collections.emptySet());
             }
 
+            assert true: "Unknown statement type";
             return null;
         }
 

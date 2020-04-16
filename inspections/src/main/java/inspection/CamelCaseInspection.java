@@ -79,7 +79,7 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 PsiModifierList modifierList = field.getModifierList();
                 if (modifierList != null) {
                     if ((modifierList.hasModifierProperty(PsiModifier.FINAL)) && (modifierList.hasModifierProperty(PsiModifier.STATIC))) {
-                        if (Utils.isImmutable(field.getType())) {
+                        if (Utils.isImmutable(field.getType(), field)) {
                             return;
                         }
                     }

@@ -145,7 +145,7 @@ public final class Utils {
         return type.getCanonicalText().equals("java.lang.String");
     }
 
-    public static boolean isImmutable(PsiType type) {
+    public static boolean isImmutable(PsiType type, PsiField field) {
         // Type is primitive
         if (type instanceof PsiPrimitiveType) {
             return true;
@@ -156,14 +156,21 @@ public final class Utils {
             return true;
         }
 
-        //TODO: go through examples with rob - should this only be empty arrays??
-        // Type is array of non-primitive
+        // Type is array and it is empty
         if (type instanceof PsiArrayType) {
             PsiArrayType arrayType = (PsiArrayType) type;
-            if (isString(arrayType.getComponentType())) {
+            PsiExpression init = field.getInitializer();
+            if (init == null) {
                 return false;
-            } else {
-                return !(arrayType.getComponentType() instanceof PsiPrimitiveType);
+            }
+
+            if (init instanceof PsiArrayInitializerExpression) {
+                PsiArrayInitializerExpression arrayInit = (PsiArrayInitializerExpression) init;
+                PsiExpression[] inits = arrayInit.getInitializers();
+
+                if (inits.length == 0) {
+                    return true;
+                }
             }
         }
 

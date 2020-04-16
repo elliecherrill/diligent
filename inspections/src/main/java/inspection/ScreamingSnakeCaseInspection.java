@@ -91,9 +91,6 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
 
             }
 
-            //TODO: Ask whether this should be for variables as well?
-            //TODO: https://google.github.io/styleguide/javaguide.html#s5.2.4-constant-names
-            // TODO: does it need to cover all cases in above^
             @Override
             public void visitField(PsiField field) {
                 super.visitField(field);
@@ -105,7 +102,7 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                 PsiModifierList modifierList = field.getModifierList();
 
                 if (modifierList != null) {
-                    if (!Utils.isImmutable(field.getType())) {
+                    if (!Utils.isImmutable(field.getType(), field)) {
                         return;
                     }
 

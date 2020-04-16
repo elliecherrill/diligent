@@ -4,13 +4,12 @@ import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
-import feedback.Feedback;
 import feedback.FeedbackHolder;
-import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.TipType;
+import util.Utils;
 
 //TODO: Extract commonality out (this, for loops, streams)
 public final class UsingWhileLoopsInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -101,24 +100,19 @@ public final class UsingWhileLoopsInspection extends AbstractBaseJavaLocalInspec
                 return;
             }
 
+            String filename = file.getName();
+
             if (expectingWhile) {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "while-loops", PsiStmtType.FILE);
-
                 if (!whileFound) {
-                    Feedback feedback = new Feedback(-1, "While loops are not being used in this file.", file.getName(), "file-while-loops");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.WHILE_LOOPS, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.WHILE_LOOPS, filename);
                 }
-
             } else {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-while-loops", PsiStmtType.FILE);
-
                 if (whileFound) {
-                    Feedback feedback = new Feedback(-1, "While loops are being used in this file.", file.getName(), "file-no-while-loops");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.NO_WHILE_LOOPS, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.NO_WHILE_LOOPS, filename);
                 }
             }
 

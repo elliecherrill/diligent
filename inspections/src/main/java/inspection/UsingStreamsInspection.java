@@ -3,14 +3,16 @@ package inspection;
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.psi.*;
-import feedback.Feedback;
+import com.intellij.psi.JavaElementVisitor;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.PsiJavaFile;
+import com.intellij.psi.PsiReferenceExpression;
 import feedback.FeedbackHolder;
-import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.TipType;
+import util.Utils;
 
 //TODO: Extract commonality out (this, for loops, while loops)
 public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -94,24 +96,20 @@ public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectio
                 return;
             }
 
-            if (expectingStream) {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "streams", PsiStmtType.FILE);
+            String filename = file.getName();
 
+            if (expectingStream) {
                 if (!streamFound) {
-                    Feedback feedback = new Feedback(-1, "Streams are not being used in this file.", file.getName(), "file-streams");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.STREAMS, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.STREAMS, filename);
                 }
 
             } else {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-streams", PsiStmtType.FILE);
-
                 if (streamFound) {
-                    Feedback feedback = new Feedback(-1, "Streams are being used in this file.", file.getName(), "file-no-streams");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.NO_STREAMS, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.NO_STREAMS, filename);
                 }
             }
 

@@ -86,9 +86,4 @@ public class Feedback {
         isFixed = true;
         lastUpdated = LocalDateTime.now();
     }
-
-    public void setToNotFixed() {
-        isFixed = false;
-        lastUpdated = LocalDateTime.now();
-    }
 }

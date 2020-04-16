@@ -4,13 +4,12 @@ import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
-import feedback.Feedback;
 import feedback.FeedbackHolder;
-import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.TipType;
+import util.Utils;
 
 //TODO: Extract commonality out (this, interfaces)
 //TODO: And to some extent the loops / streams
@@ -103,24 +102,19 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
                 return;
             }
 
+            String filename = file.getName();
+
             if (expectingInheritance) {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "inheritance", PsiStmtType.FILE);
-
                 if (!inheritanceFound) {
-                    Feedback feedback = new Feedback(-1, "Inheritance is not being used in this file.", file.getName(), "file-inheritance");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.INHERITANCE, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.INHERITANCE, filename);
                 }
-
             } else {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-inheritance", PsiStmtType.FILE);
-
                 if (inheritanceFound) {
-                    Feedback feedback = new Feedback(-1, "Inheritance is being used in this file.", file.getName(), "file-no-inheritance");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.NO_INHERITANCE, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.NO_INHERITANCE, filename);
                 }
             }
 

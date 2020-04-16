@@ -1,6 +1,7 @@
 package feedback;
 
 import com.intellij.openapi.project.Project;
+import util.TipType;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,5 +43,24 @@ public class FeedbackHolder {
             return;
         }
         projectFeedbackHolder.fixFeedback(filename, feedbackId);
+    }
+
+    public void addTip(Project project, TipType tipType, String filename) {
+        ProjectFeedbackHolder projectFeedbackHolder = projects.get(project);
+
+        if (projectFeedbackHolder == null) {
+            projectFeedbackHolder = new ProjectFeedbackHolder(project);
+        }
+
+        projectFeedbackHolder.addTip(tipType, filename);
+        projects.put(project, projectFeedbackHolder);
+    }
+
+    public void fixTip(Project project, TipType tipType, String filename) {
+        ProjectFeedbackHolder projectFeedbackHolder = projects.get(project);
+        if (projectFeedbackHolder == null) {
+            return;
+        }
+        projectFeedbackHolder.fixTip(tipType, filename);
     }
 }

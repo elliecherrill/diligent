@@ -3,6 +3,7 @@ package feedback;
 import com.intellij.openapi.project.Project;
 import org.apache.commons.io.FileUtils;
 import util.Notifier;
+import util.TipType;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,14 +22,17 @@ public class ProjectFeedbackHolder {
     private final Map<String, FileFeedbackHolder> files;
     private final String projectPath;
     private final Project project;
+    private final TipHolder tipHolder;
 
     private boolean isCurrent;
 
     public ProjectFeedbackHolder(Project project) {
-        files = new ConcurrentHashMap<>();
-        this.projectPath = project.getBasePath();
         this.project = project;
+
+        files = new ConcurrentHashMap<>();
+        projectPath = project.getBasePath();
         isCurrent = true;
+        tipHolder = new TipHolder();
     }
 
     public void updateReport() {
@@ -41,6 +45,18 @@ public class ProjectFeedbackHolder {
             frameTemplate = frameTemplate.replace("$files", getAllFilesAsHTMLString());
             File frameHtmlFile = new File(projectPath + "/" + FILEPATH);
             FileUtils.writeStringToFile(frameHtmlFile, frameTemplate, CHARSET);
+
+            if (!tipHolder.isCurrent()) {
+                String template = getOutputTemplate();
+                template = template.replace("$files", getAllFilesAsHTMLString("project-tips"));
+                template = template.replace("$feedback", tipHolder.getTipsAsHTMLString());
+                template = template.replace("$project", project.getName());
+                template = template.replace("$current_file", "project-tips");
+                File newHtmlFile = new File(projectPath + "/" + TEMPLATE_FILEPATH.replace("$filename", "project-tips.html"));
+                FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
+
+                tipHolder.update();
+            }
 
             for (Map.Entry file : files.entrySet()) {
                 String filename = (String) file.getKey();
@@ -87,8 +103,24 @@ public class ProjectFeedbackHolder {
         isCurrent = false;
     }
 
+    public void addTip(TipType tipType, String filename){
+        tipHolder.addTip(tipType, filename);
+
+        isCurrent = false;
+    }
+
+    public void fixTip(TipType tipType, String filename) {
+        tipHolder.fixTip(tipType, filename);
+
+        isCurrent = false;
+    }
+
     private String getAllFilesAsHTMLString() {
         StringBuffer sb = new StringBuffer();
+
+        if (!tipHolder.isEmpty()) {
+            sb.append(tipHolder.toHTMLString());
+        }
 
         for (Map.Entry file : files.entrySet()) {
             FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
@@ -100,6 +132,14 @@ public class ProjectFeedbackHolder {
 
     private String getAllFilesAsHTMLString(String selectedFile) {
         StringBuffer sb = new StringBuffer();
+
+        if (!tipHolder.isEmpty()) {
+            if (selectedFile.equals("project-tips")) {
+                sb.append(tipHolder.toSelectedHTMLString());
+            } else {
+                sb.append(tipHolder.toHTMLString());
+            }
+        }
 
         for (Map.Entry file : files.entrySet()) {
             String filename = (String) file.getKey();

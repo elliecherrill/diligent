@@ -2,16 +2,14 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
-import feedback.Feedback;
 import feedback.FeedbackHolder;
-import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.TipType;
+import util.Utils;
 
 public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -101,24 +99,19 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
                 return;
             }
 
+            String filename = file.getName();
+
             if (expectingFor) {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "for-loops", PsiStmtType.FILE);
-
                 if (!forFound) {
-                    Feedback feedback = new Feedback(-1, "For loops are not being used in this file.", file.getName(), "file-for-loops");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.FOR_LOOPS, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.FOR_LOOPS, filename);
                 }
-
             } else {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-for-loops", PsiStmtType.FILE);
-
                 if (forFound) {
-                    Feedback feedback = new Feedback(-1, "For loops are being used in this file.", file.getName(), "file-no-for-loops");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.NO_FOR_LOOPS, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.NO_FOR_LOOPS, filename);
                 }
             }
 

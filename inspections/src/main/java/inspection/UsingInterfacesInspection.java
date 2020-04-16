@@ -4,13 +4,12 @@ import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
-import feedback.Feedback;
 import feedback.FeedbackHolder;
-import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.TipType;
+import util.Utils;
 
 public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -105,24 +104,19 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
                 return;
             }
 
+            String filename = file.getName();
+
             if (expectingInterfaces) {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"interfaces", PsiStmtType.FILE);
-
                 if (!interfacesFound) {
-                    Feedback feedback = new Feedback(-1, "Interfaces are not being used in this file.", file.getName(), "file-interfaces");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.INTERFACES, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.INTERFACES, filename);
                 }
-
             } else {
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"no-interfaces", PsiStmtType.FILE);
-
                 if (interfacesFound) {
-                    Feedback feedback = new Feedback(-1, "Interfaces are being used in this file.", file.getName(), "file-no-interfaces");
-                    feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
+                    feedbackHolder.addTip(holder.getProject(), TipType.NO_INTERFACES, filename);
                 } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
+                    feedbackHolder.fixTip(holder.getProject(), TipType.NO_INTERFACES, filename);
                 }
             }
 

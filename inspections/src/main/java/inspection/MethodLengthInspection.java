@@ -80,7 +80,8 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "method-length", PsiStmtType.METHOD);
 
                 if (body != null && body.getStatementCount() >= MAX_METHOD_LENGTH) {
-                    Feedback feedback = new Feedback(Utils.getLineNumber(method), "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename);
+                    int line = Utils.getLineNumber(method);
+                    Feedback feedback = new Feedback(line, "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename, line + "-method-length");
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

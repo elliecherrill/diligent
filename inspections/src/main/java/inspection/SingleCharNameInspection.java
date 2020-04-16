@@ -75,7 +75,8 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 String filename = field.getContainingFile().getName();
 
                 if (field.getName().length() == 1) {
-                    Feedback feedback = new Feedback(Utils.getLineNumber(field), "Field names should be more than one character in length.", filename);
+                    int line = Utils.getLineNumber(field);
+                    Feedback feedback = new Feedback(line, "Field names should be more than one character in length.", filename, line + "-" + field.getName() + "-single-char-name");
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename,feedbackId);
@@ -91,6 +92,8 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 }
 
                 PsiElement[] elements = statement.getDeclaredElements();
+
+                int index = 0;
                 for (PsiElement e : elements) {
                     // Local variables (not in for loops)
                     if (e instanceof PsiLocalVariable) {
@@ -101,13 +104,16 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                         if (!(statement.getParent() instanceof PsiForeachStatement || statement.getParent() instanceof PsiForStatement)) {
                             if (localElement.getName().length() == 1) {
-                                Feedback feedback = new Feedback(Utils.getLineNumber(localElement), "Variable names should be more than one character in length.", filename);
+                                int line = Utils.getLineNumber(localElement);
+                                Feedback feedback = new Feedback(line, "Variable names should be more than one character in length.", filename, line + "-" + index + "-single-char-name");
                                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                             } else {
                                 feedbackHolder.fixFeedback(holder.getProject(), filename,feedbackId);
                             }
                         }
                     }
+
+                    index++;
                 }
             }
 
@@ -124,7 +130,8 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 String filename = method.getContainingFile().getName();
 
                 if (method.getName().length() == 1) {
-                    Feedback feedback = new Feedback(Utils.getLineNumber(method), "Method names should be more than one character in length.", filename);
+                    int line = Utils.getLineNumber(method);
+                    Feedback feedback = new Feedback(line, "Method names should be more than one character in length.", filename, line + "-single-char-name");
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -133,15 +140,20 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 // Parameter names
                 PsiParameterList paramList = method.getParameterList();
                 PsiParameter[] params = paramList.getParameters();
+
+                int index = 0;
                 for (PsiParameter p : params) {
                     feedbackId = new FeedbackIdentifier(Utils.getPointer(p), "single-char-name", PsiStmtType.PARAMETER);
 
                     if (p.getName().length() == 1) {
-                        Feedback feedback = new Feedback(Utils.getLineNumber(p), "Parameter names should be more than one character in length.", filename);
+                        int line = Utils.getLineNumber(p);
+                        Feedback feedback = new Feedback(line, "Parameter names should be more than one character in length.", filename, line + "-" + index + "-single-char-name");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
+
+                    index++;
                 }
             }
         };

@@ -109,7 +109,7 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"interfaces", PsiStmtType.FILE);
 
                 if (!interfacesFound) {
-                    Feedback feedback = new Feedback(-1, "Interfaces are not being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "Interfaces are not being used in this file.", file.getName(), "file-interfaces");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
@@ -119,7 +119,7 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file),"no-interfaces", PsiStmtType.FILE);
 
                 if (interfacesFound) {
-                    Feedback feedback = new Feedback(-1, "Interfaces are being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "Interfaces are being used in this file.", file.getName(), "file-no-interfaces");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);

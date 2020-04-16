@@ -98,7 +98,7 @@ public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectio
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "streams", PsiStmtType.FILE);
 
                 if (!streamFound) {
-                    Feedback feedback = new Feedback(-1, "Streams are not being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "Streams are not being used in this file.", file.getName(), "file-streams");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
@@ -108,7 +108,7 @@ public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectio
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-streams", PsiStmtType.FILE);
 
                 if (streamFound) {
-                    Feedback feedback = new Feedback(-1, "Streams are being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "Streams are being used in this file.", file.getName(), "file-no-streams");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);

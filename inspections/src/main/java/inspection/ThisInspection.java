@@ -102,7 +102,8 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                     String thisVar = Utils.getThisId(thisExpr);
                     if (thisVar != null) {
                         if (!Utils.isInScope(thisVar, block)) {
-                            Feedback feedback = new Feedback(Utils.getLineNumber(stat), "Unnecessary 'this' keyword", filename);
+                            int line = Utils.getLineNumber(stat);
+                            Feedback feedback = new Feedback(line, "Unnecessary 'this' keyword", filename, line + "-this");
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

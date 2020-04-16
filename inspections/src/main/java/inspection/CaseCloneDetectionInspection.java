@@ -203,7 +203,8 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
             FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "clone", PsiStmtType.SWITCH);
 
             if (transitiveClosureOfClones(clones, rangeOfCases)) {
-                Feedback feedback = new Feedback(Utils.getLineNumber(statement), "All cases in switch statement are clones of one another.", filename);
+                int line = Utils.getLineNumber(statement);
+                Feedback feedback = new Feedback(line, "All cases in switch statement are clones of one another.", filename, line + "-clone");
                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
             } else {
                 feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

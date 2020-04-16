@@ -107,7 +107,7 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "inheritance", PsiStmtType.FILE);
 
                 if (!inheritanceFound) {
-                    Feedback feedback = new Feedback(-1, "Inheritance is not being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "Inheritance is not being used in this file.", file.getName(), "file-inheritance");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
@@ -117,7 +117,7 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-inheritance", PsiStmtType.FILE);
 
                 if (inheritanceFound) {
-                    Feedback feedback = new Feedback(-1, "Inheritance is being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "Inheritance is being used in this file.", file.getName(), "file-no-inheritance");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);

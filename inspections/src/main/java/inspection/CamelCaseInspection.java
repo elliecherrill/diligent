@@ -89,7 +89,8 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field),"camelcase", PsiStmtType.FIELD);
 
                 if (!Utils.isCamelCase(field.getName())) {
-                    Feedback feedback = new Feedback(Utils.getLineNumber(field), "Field names should be in camelCase.", filename);
+                    int line = Utils.getLineNumber(field);
+                    Feedback feedback = new Feedback(line, "Field names should be in camelCase.", filename, line + "-camelcase");
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -114,7 +115,8 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                         FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(localElement),"camelcase", PsiStmtType.LOCAL_VAR);
 
                         if (!(Utils.isCamelCase(localElement.getName()))) {
-                            Feedback feedback = new Feedback(Utils.getLineNumber(statement), "Variable names should be in camelCase.", filename);
+                            int line = Utils.getLineNumber(statement);
+                            Feedback feedback = new Feedback(line, "Variable names should be in camelCase.", filename, line + "-" + localElement.getName() + "-camelcase");
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -137,7 +139,8 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
 
                 if (!method.isConstructor()) {
                     if (!(Utils.isCamelCase(method.getName()))) {
-                        Feedback feedback = new Feedback(Utils.getLineNumber(method), "Method names should be in camelCase.", filename);
+                        int line = Utils.getLineNumber(method);
+                        Feedback feedback = new Feedback(line, "Method names should be in camelCase.", filename, line + "-camelcase");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -151,7 +154,8 @@ public final class CamelCaseInspection extends AbstractBaseJavaLocalInspectionTo
                 for (PsiParameter p : params) {
                     feedbackId = new FeedbackIdentifier(Utils.getPointer(p),"camelcase", PsiStmtType.PARAMETER);
                     if (!(Utils.isCamelCase(p.getName()))) {
-                        Feedback feedback = new Feedback(Utils.getLineNumber(p), "Parameter names should be in camelCase.", filename);
+                        int line = Utils.getLineNumber(p);
+                        Feedback feedback = new Feedback(line, "Parameter names should be in camelCase.", filename, line + "-" + p.getName() + "-camelcase");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

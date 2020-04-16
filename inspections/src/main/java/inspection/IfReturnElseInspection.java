@@ -87,7 +87,8 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                     }
 
                     if (endsWithReturn) {
-                        Feedback feedback = new Feedback(Utils.getLineNumber(statement), "Unnecessary 'else' branch", filename);
+                        int line = Utils.getLineNumber(statement);
+                        Feedback feedback = new Feedback(line, "Unnecessary 'else' branch", filename, line + "-redundant-else");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

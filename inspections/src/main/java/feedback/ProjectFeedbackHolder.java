@@ -51,18 +51,19 @@ public class ProjectFeedbackHolder {
                 String template = getOutputTemplate();
                 template = template.replace("$files", getAllFilesAsHTMLString(filename));
                 template = template.replace("$feedback", fileFeedbackHolder.getFeedbackAsHTMLString());
+                template = template.replace("$project", project.getName());
+                template = template.replace("$current_file", filename);
                 File newHtmlFile = new File(projectPath + "/" + TEMPLATE_FILEPATH.replace("$filename", fileFeedbackHolder.getFilepath()));
                 FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
             }
 
-            NOTIFIER.notify(project, "Diligent", "Updated <a href=\"" + projectPath + "/" + FILEPATH + "\"> Diligent Feedback Report </a>");
+            String browserLink = "http://localhost:63342/" + project.getName() + "/" + FILEPATH;
+            NOTIFIER.notify(project, "Diligent", "Updated <a href=\"" + browserLink + "\"> Diligent Feedback Report </a>");
 
-
+            isCurrent = true;
         } catch (IOException | IndexOutOfBoundsException e) {
             System.err.println(e);
         }
-
-        isCurrent = true;
     }
 
     public void addFeedback(String filename, FeedbackIdentifier feedbackId, Feedback feedback) {
@@ -169,7 +170,7 @@ public class ProjectFeedbackHolder {
                 "            display: flex;\n" +
                 "            flex-direction: column;\n" +
                 "        }\n" +
-                "        #feedbackcontainer {\n" +
+                "        div.feedbackcontainer {\n" +
                 "            display: flex;\n" +
                 "            flex-direction: row;\n" +
                 "            align-items: center;\n" +
@@ -182,7 +183,7 @@ public class ProjectFeedbackHolder {
                 "            padding: 1%;\n" +
                 "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
                 "        }\n" +
-                "        #ignorebutton {\n" +
+                "        button.ignorebutton {\n" +
                 "            background-color: #34558b;\n" +
                 "            color: white;\n" +
                 "            border: none;\n" +
@@ -221,6 +222,38 @@ public class ProjectFeedbackHolder {
                 "        </div>\n" +
                 "    </div>\n" +
                 "</div>\n" +
+                "<script>\n" +
+                "    window.onload = init();\n" +
+                "    \n" +
+                "    function init() {\n" +
+                "        var fileMap = JSON.parse(localStorage.getItem(\"$project\"));\n" +
+                "        if (fileMap !== null) {\n" +
+                "            var hidden = fileMap[\"$current_file\"];\n" +
+                "            for (var i = 0; i < hidden.length; i++) {\n" +
+                "                var x = document.getElementById(hidden[i]);\n" +
+                "                if (x.style.display === \"none\") {\n" +
+                "                    x.style.display = \"block\";\n" +
+                "                } else {\n" +
+                "                    x.style.display = \"none\";\n" +
+                "                }\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "\n" +
+                "    function ignoreAdvice(div_id) {\n" +
+                "        var fileMap = JSON.parse(localStorage.getItem(\"$project\"));\n" +
+                "        if (fileMap === null) {\n" +
+                "            var hidden = [div_id];\n" +
+                "            var newFileMap = {\"$current_file\" : hidden};\n" +
+                "        } else {\n" +
+                "            var hidden = fileMap[\"$current_file\"];\n" +
+                "            hidden.push(div_id);\n" +
+                "            var newFileMap = {...fileMap, \"$current_file\" : hidden};\n" +
+                "        }\n" +
+                "        localStorage.setItem(\"$project\", JSON.stringify(newFileMap));\n" +
+                "        window.location.reload();\n" +
+                "    }\n" +
+                "</script> \n" +
                 "</body>\n" +
                 "</html>";
     }

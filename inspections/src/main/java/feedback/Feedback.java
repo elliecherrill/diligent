@@ -8,17 +8,18 @@ public class Feedback {
     private final int lineNumber;
     private final String errorMsg;
     private final String filename;
+    private final String id;
 
     private boolean isFixed;
-    private boolean isHidden;
     private LocalDateTime lastUpdated;
 
-    public Feedback(int lineNumber, String errorMsg, String filename) {
+    public Feedback(int lineNumber, String errorMsg, String filename, String id) {
         this.lineNumber = lineNumber;
         this.errorMsg = errorMsg;
         this.filename = filename;
+        this.id = id;
+
         isFixed = false;
-        isHidden = false;
         lastUpdated = LocalDateTime.now();
     }
 
@@ -37,12 +38,11 @@ public class Feedback {
         return sb.toString();
     }
 
-    // TODO: How to feedback when Ignore Advice button has been pressed and *use* this?
     public String toHTMLString() {
-        return "<div id=\"feedbackcontainer\">\n" +
+        return "<div class=\"feedbackcontainer\" id=\"" + id + "\">\n" +
                 "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                 "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
-                "       <p> File: " + filename + " > Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " </p>\n" +
+                "       <p> Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " </p>\n" +
                 "   </div>\n" +
                 getIgnoreAdviceButton() +
                 "</div>";
@@ -69,7 +69,7 @@ public class Feedback {
     private String getIgnoreAdviceButton() {
         if (!isFixed) {
             return "<div style=\"margin-left: 2.5%;\">\n" +
-                    "   <button id=\"ignorebutton\">\n" +
+                    "   <button class=\"ignorebutton\" id=\"" + id + "\" onclick=\"ignoreAdvice(id)\">\n" +
                     "       Ignore Advice\n" +
                     "   </button>\n" +
                     "</div>\n";
@@ -90,10 +90,5 @@ public class Feedback {
     public void setToNotFixed() {
         isFixed = false;
         lastUpdated = LocalDateTime.now();
-    }
-
-    // TODO: when to call this?
-    public void setToHidden() {
-        isHidden = true;
     }
 }

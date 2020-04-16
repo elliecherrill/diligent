@@ -105,7 +105,7 @@ public final class UsingWhileLoopsInspection extends AbstractBaseJavaLocalInspec
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "while-loops", PsiStmtType.FILE);
 
                 if (!whileFound) {
-                    Feedback feedback = new Feedback(-1, "While loops are not being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "While loops are not being used in this file.", file.getName(), "file-while-loops");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
@@ -115,7 +115,7 @@ public final class UsingWhileLoopsInspection extends AbstractBaseJavaLocalInspec
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-while-loops", PsiStmtType.FILE);
 
                 if (whileFound) {
-                    Feedback feedback = new Feedback(-1, "While loops are being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "While loops are being used in this file.", file.getName(), "file-no-while-loops");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);

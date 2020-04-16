@@ -105,7 +105,7 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "for-loops", PsiStmtType.FILE);
 
                 if (!forFound) {
-                    Feedback feedback = new Feedback(-1, "For loops are not being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "For loops are not being used in this file.", file.getName(), "file-for-loops");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);
@@ -115,7 +115,7 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(file), "no-for-loops", PsiStmtType.FILE);
 
                 if (forFound) {
-                    Feedback feedback = new Feedback(-1, "For loops are being used in this file.", file.getName());
+                    Feedback feedback = new Feedback(-1, "For loops are being used in this file.", file.getName(), "file-no-for-loops");
                     feedbackHolder.addFeedback(holder.getProject(), file.getName(), feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), file.getName(), feedbackId);

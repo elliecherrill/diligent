@@ -18,20 +18,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalInspectionTool {
+public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
     @NotNull
     public String getDisplayName() {
         return "Similar code in switch cases";
     }
 
-    public CaseCloneDetectionInspection() {
+    public CaseCloneInspection() {
     }
 
     @Override
     @NotNull
     public String getShortName() {
-        return "CaseCloneDetection";
+        return "CaseClone";
     }
 
     @Override
@@ -80,7 +80,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
         private Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap;
         private Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap;
 
-        public CloneVisitor(ProblemsHolder holder) {
+        CloneVisitor(ProblemsHolder holder) {
             this.holder = holder;
             feedbackHolder = FeedbackHolder.getInstance();
 
@@ -126,6 +126,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 return;
             }
 
+            //TODO: I think can merge getCaseBlocks and iteration below to reduce complexity
             PsiStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
 
             // Iterate through all statements and add to corresponding LOCATION and STRING REP maps
@@ -135,8 +136,6 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                     if (stat != null) {
                         // Calculate string representation and add to map
                         StatType type = addStatToMap(stat);
-
-                        assert type != null : "Unexpected PsiStatement type found.";
 
                         // Add to location map
                         Pair<Integer, Integer> location = new Pair<>(i, j);
@@ -483,6 +482,7 @@ public final class CaseCloneDetectionInspection extends AbstractBaseJavaLocalIns
                 return StatType.DECLARATION;
             }
 
+            assert true : "Unknown statement type";
             return null;
         }
 

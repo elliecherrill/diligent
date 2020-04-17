@@ -2,15 +2,12 @@ package util;
 
 import com.intellij.psi.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public final class CodeCloneUtils {
 
     public static PsiStatement[][] getCaseBlocks(PsiCodeBlock body) {
-        // How to not iterate through twice?
+        // TODO: How to not iterate through twice?
         PsiStatement[] bodyStatements = body.getStatements();
 
         int numCases = 0;
@@ -43,6 +40,55 @@ public final class CodeCloneUtils {
         }
 
         return caseBlocks;
+    }
+
+    public static PsiStatement[][] getMethodBodies(PsiMethod[] methods) {
+        //TODO:
+        //1. Get number of methods and max number of statements (excluding whitespace / comments)
+        //2. Then create array
+        //3. Put statements into the array
+
+        int numMethods = methods.length;
+        int numStats = 0;
+        List<Integer> statements = new ArrayList<>();
+        for (PsiMethod m : methods) {
+            if (m.getBody() == null) {
+                statements.add(numStats);
+                continue;
+            }
+
+            PsiStatement[] bodyStats = m.getBody().getStatements();
+
+            for (PsiStatement s : bodyStats) {
+                if (!(s instanceof PsiWhiteSpace) && !(s instanceof PsiComment)) {
+                    numStats++;
+                }
+            }
+            statements.add(numStats);
+            numStats = 0;
+        }
+
+
+        PsiStatement[][] methodBlocks = new PsiStatement[numMethods][Collections.max(statements)];
+        int statIndex = 0;
+        for (int methodIndex = 0; methodIndex < methods.length; methodIndex++) {
+            PsiMethod m = methods[methodIndex];
+            if (m.getBody() == null) {
+                continue;
+            }
+
+            PsiStatement[] bodyStats = m.getBody().getStatements();
+
+            for (PsiStatement s : bodyStats) {
+                if (!(s instanceof PsiWhiteSpace) && !(s instanceof PsiComment)) {
+                    methodBlocks[methodIndex][statIndex] = s;
+                    statIndex++;
+                }
+            }
+            statIndex = 0;
+        }
+
+        return methodBlocks;
     }
 
     public static String[] getStmtAsStringArray(PsiStatement stmt) {

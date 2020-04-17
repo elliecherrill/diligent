@@ -18,20 +18,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTool {
+public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
     @NotNull
     public String getDisplayName() {
-        return "Similar code in switch cases";
+        return "Similar code";
     }
 
-    public CaseCloneInspection() {
+    public CloneInspection() {
     }
 
     @Override
     @NotNull
     public String getShortName() {
-        return "CaseClone";
+        return "Clone";
     }
 
     @Override
@@ -62,43 +62,9 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
         private final ProblemsHolder holder;
         private final FeedbackHolder feedbackHolder;
 
-        // String representation
-        private Map<PsiDeclarationStatement, String[]> declarationMap;
-        private Map<PsiAssignmentExpression, String[]> assignmentMap;
-        private Map<PsiIfStatement, String[]> ifStmtMap;
-        private Map<PsiMethodCallExpression, String[]> methodCallMap;
-
-        // Location
-        private Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap;
-        private Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap;
-        private Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap;
-        private Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap;
-
-        // Location of clones
-        private Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap;
-        private Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap;
-        private Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap;
-        private Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap;
-
         CloneVisitor(ProblemsHolder holder) {
             this.holder = holder;
             feedbackHolder = FeedbackHolder.getInstance();
-
-            declarationMap = new HashMap<>();
-            assignmentMap = new HashMap<>();
-            ifStmtMap = new HashMap<>();
-            methodCallMap = new HashMap<>();
-
-            declarationLocationMap = new HashMap<>();
-            assignmentLocationMap = new HashMap<>();
-            ifStmtLocationMap = new HashMap<>();
-            methodCallLocationMap = new HashMap<>();
-
-
-            declarationCloneMap = new HashMap<>();
-            assignmentCloneMap = new HashMap<>();
-            ifStmtCloneMap = new HashMap<>();
-            methodCallCloneMap = new HashMap<>();
         }
 
         @Override
@@ -111,6 +77,119 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
 
             feedbackHolder.writeToFile();
         }
+
+//        @Override
+//        public void visitClass(PsiClass aClass) {
+//            super.visitClass(aClass);
+//
+//            if (Utils.hasErrorsInFile(aClass)) {
+//                return;
+//            }
+//
+//            PsiMethod[] methods = aClass.getMethods();
+//
+//            if (methods.length == 0) {
+//                return;
+//            }
+//
+//            PsiStatement[][] methodBodies = CodeCloneUtils.getMethodBodies(methods);
+//
+//            // String representation
+//            Map<PsiDeclarationStatement, String[]> declarationMap = new HashMap<>();
+//            Map<PsiAssignmentExpression, String[]> assignmentMap = new HashMap<>();
+//            Map<PsiIfStatement, String[]> ifStmtMap = new HashMap<>();
+//            Map<PsiMethodCallExpression, String[]> methodCallMap = new HashMap<>();
+//
+//            // Location
+//            Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap = new HashMap<>();
+//            Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap = new HashMap<>();
+//            Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap = new HashMap<>();
+//            Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap = new HashMap<>();
+//
+//            // Location of clones
+//            Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap = new HashMap<>();
+//            Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap = new HashMap<>();
+//            Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap = new HashMap<>();
+//            Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap = new HashMap<>();
+//
+//            // Iterate through all statements and add to corresponding LOCATION and STRING REP maps
+//            for (int i = 0; i < methodBodies.length; i++) {
+//                for (int j = 0; j < methodBodies[0].length; j++) {
+//                    PsiStatement stat = methodBodies[i][j];
+//                    if (stat == null) {
+//                        continue;
+//                    }
+//
+//                    // Calculate string representation and add to map
+//                    StatType type = addStatToMap(stat, declarationMap, assignmentMap, ifStmtMap, methodCallMap);
+//
+//                    // Add to location map
+//                    Pair<Integer, Integer> location = new Pair<>(i, j);
+//
+//                    if (type == StatType.ASSIGNMENT) {
+//                        PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
+//                        assignmentLocationMap.put((PsiAssignmentExpression) expr, location);
+//                    } else if (type == StatType.DECLARATION) {
+//                        declarationLocationMap.put((PsiDeclarationStatement) stat, location);
+//                    } else if (type == StatType.METHOD_CALL) {
+//                        PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
+//                        methodCallLocationMap.put((PsiMethodCallExpression) expr, location);
+//                    } else if (type == StatType.IF) {
+//                        ifStmtLocationMap.put((PsiIfStatement) stat, location);
+//                    }
+//                }
+//            }
+//
+//            compareAssignments(assignmentMap, assignmentCloneMap, assignmentLocationMap);
+//            compareIfStatements(ifStmtMap, ifStmtCloneMap, ifStmtLocationMap);
+//            compareDeclarations(declarationMap, declarationCloneMap, declarationLocationMap);
+//            compareMethodCalls(methodCallMap, methodCallCloneMap, methodCallLocationMap);
+//
+//            List<Integer> rangeOfMethods = IntStream.range(0, methodBodies.length - 1).boxed().collect(Collectors.toList());
+//            String filename = aClass.getContainingFile().getName();
+//
+//            // If we have an entire method where duplicate / similar has been detected for every line in another method
+//            for (int i = 0; i < methodBodies.length; i++) {
+//                // Empty method
+//                if (methodBodies[i][0] == null) {
+//                    continue;
+//                }
+//
+//                Set<Integer> firstClones = getClones(methodBodies[i][0], assignmentCloneMap, declarationCloneMap, ifStmtCloneMap, methodCallCloneMap);
+//
+//                if (firstClones.size() == 0) {
+//                    continue;
+//                }
+//
+//                Set<Integer> intersection = new HashSet<>(firstClones);
+//
+//                for (int j = 1; j < methodBodies[0].length; j++) {
+//                    if (methodBodies[i][j] == null) {
+//                        break;
+//                    }
+//                    Set<Integer> currClones = getClones(methodBodies[i][j], assignmentCloneMap, declarationCloneMap, ifStmtCloneMap, methodCallCloneMap);
+//                    if (currClones == null) {
+//                        intersection.clear();
+//                        break;
+//                    } else {
+//                        intersection.retainAll(currClones);
+//                    }
+//                }
+//
+//                //If it has at least one clone
+//                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(methods[i]), "clone", PsiStmtType.SWITCH);
+//
+//                for (Integer methodIndex : rangeOfMethods) {
+//                    if (intersection.contains(methodIndex)) {
+//                        int line = Utils.getLineNumber(methods[i]);
+//                        Feedback feedback = new Feedback(line, "Method \'" + methods[i].getName() + "\' is clone of method \'" + methods[methodIndex].getName() + "\'.", filename, line + "-clone");
+//                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+//                    } else {
+//                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+//                    }
+//                }
+//            }
+//        }
 
         @Override
         public void visitSwitchStatement(PsiSwitchStatement statement) {
@@ -129,13 +208,31 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             //TODO: I think can merge getCaseBlocks and iteration below to reduce complexity
             PsiStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
 
+            // String representation
+            Map<PsiDeclarationStatement, String[]> declarationMap = new HashMap<>();
+            Map<PsiAssignmentExpression, String[]> assignmentMap = new HashMap<>();
+            Map<PsiIfStatement, String[]> ifStmtMap = new HashMap<>();
+            Map<PsiMethodCallExpression, String[]> methodCallMap = new HashMap<>();
+
+            // Location
+            Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap = new HashMap<>();
+            Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap = new HashMap<>();
+            Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap = new HashMap<>();
+            Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap = new HashMap<>();
+
+            // Location of clones
+            Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap = new HashMap<>();
+            Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap = new HashMap<>();
+            Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap = new HashMap<>();
+            Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap = new HashMap<>();
+
             // Iterate through all statements and add to corresponding LOCATION and STRING REP maps
             for (int i = 0; i < cases.length; i++) {
                 for (int j = 0; j < cases[0].length; j++) {
                     PsiStatement stat = cases[i][j];
                     if (stat != null) {
                         // Calculate string representation and add to map
-                        StatType type = addStatToMap(stat);
+                        StatType type = addStatToMap(stat, declarationMap, assignmentMap, ifStmtMap, methodCallMap);
 
                         // Add to location map
                         Pair<Integer, Integer> location = new Pair<>(i, j);
@@ -155,10 +252,10 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                 }
             }
 
-            compareAssignments();
-            compareIfStatements();
-            compareDeclarations();
-            compareMethodCalls();
+            compareAssignments(assignmentMap, assignmentCloneMap, assignmentLocationMap);
+            compareIfStatements(ifStmtMap, ifStmtCloneMap, ifStmtLocationMap);
+            compareDeclarations(declarationMap, declarationCloneMap, declarationLocationMap);
+            compareMethodCalls(methodCallMap, methodCallCloneMap, methodCallLocationMap);
 
             List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).boxed().collect(Collectors.toList());
             List<Set<Integer>> clones = new ArrayList<>(cases.length);
@@ -171,7 +268,7 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     continue;
                 }
 
-                Set<Integer> firstClones = getClones(cases[i][0]);
+                Set<Integer> firstClones = getClones(cases[i][0], assignmentCloneMap, declarationCloneMap, ifStmtCloneMap, methodCallCloneMap);
 
                 if (firstClones.size() == 0) {
                     continue;
@@ -183,7 +280,7 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     if (cases[i][j] == null) {
                         break;
                     }
-                    Set<Integer> currClones = getClones(cases[i][j]);
+                    Set<Integer> currClones = getClones(cases[i][j], assignmentCloneMap, declarationCloneMap, ifStmtCloneMap, methodCallCloneMap);
                     if (currClones == null) {
                         intersection.clear();
                         break;
@@ -210,7 +307,9 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             }
         }
 
-        private void compareMethodCalls() {
+        private void compareMethodCalls(Map<PsiMethodCallExpression, String[]> methodCallMap,
+                                        Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap,
+                                        Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap) {
             for (Map.Entry<PsiMethodCallExpression, String[]> methodCall : methodCallMap.entrySet()) {
                 for (Map.Entry<PsiMethodCallExpression, String[]> otherMethodCall : methodCallMap.entrySet()) {
                     PsiMethodCallExpression entryKey = methodCall.getKey();
@@ -224,8 +323,8 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     }
 
                     if (Arrays.equals(entryValue, otherEntryValue)) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
+                        updateCloneSet(entryKey, otherEntryKey, methodCallCloneMap, methodCallLocationMap);
+                        updateCloneSet(otherEntryKey, entryKey, methodCallCloneMap, methodCallLocationMap);
 
                         continue;
                     }
@@ -233,7 +332,9 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             }
         }
 
-        private void compareDeclarations() {
+        private void compareDeclarations(Map<PsiDeclarationStatement, String[]> declarationMap,
+                                         Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap,
+                                         Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap) {
             for (Map.Entry<PsiDeclarationStatement, String[]> declStmt : declarationMap.entrySet()) {
                 for (Map.Entry<PsiDeclarationStatement, String[]> otherDeclStmt : declarationMap.entrySet()) {
                     PsiDeclarationStatement entryKey = declStmt.getKey();
@@ -249,8 +350,8 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     }
 
                     if (Arrays.equals(entryValue, otherEntryValue)) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
+                        updateCloneSet(entryKey, otherEntryKey, declarationCloneMap, declarationLocationMap);
+                        updateCloneSet(otherEntryKey, entryKey, declarationCloneMap, declarationLocationMap);
                         continue;
                     }
 
@@ -259,14 +360,16 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     }
 
                     if (update) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
+                        updateCloneSet(entryKey, otherEntryKey, declarationCloneMap, declarationLocationMap);
+                        updateCloneSet(otherEntryKey, entryKey, declarationCloneMap, declarationLocationMap);
                     }
                 }
             }
         }
 
-        private void compareIfStatements() {
+        private void compareIfStatements(Map<PsiIfStatement, String[]> ifStmtMap,
+                                         Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap,
+                                         Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap) {
             for (Map.Entry<PsiIfStatement, String[]> ifStmt : ifStmtMap.entrySet()) {
                 for (Map.Entry<PsiIfStatement, String[]> otherIfStmt : ifStmtMap.entrySet()) {
                     PsiIfStatement entryKey = ifStmt.getKey();
@@ -289,8 +392,8 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     //TODO: what about else cases?
 
                     if (Arrays.equals(entryValue, otherEntryValue)) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
+                        updateCloneSet(entryKey, otherEntryKey, ifStmtCloneMap, ifStmtLocationMap);
+                        updateCloneSet(otherEntryKey, entryKey, ifStmtCloneMap, ifStmtLocationMap);
 
                         continue;
                     }
@@ -309,8 +412,8 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     }
 
                     if (update) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
+                        updateCloneSet(entryKey, otherEntryKey, ifStmtCloneMap, ifStmtLocationMap);
+                        updateCloneSet(otherEntryKey, entryKey, ifStmtCloneMap, ifStmtLocationMap);
                     }
                 }
             }
@@ -351,7 +454,9 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             return false;
         }
 
-        private void compareAssignments() {
+        private void compareAssignments(Map<PsiAssignmentExpression, String[]> assignmentMap,
+                                        Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap,
+                                        Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap) {
             for (Map.Entry<PsiAssignmentExpression, String[]> assExpr : assignmentMap.entrySet()) {
                 for (Map.Entry<PsiAssignmentExpression, String[]> otherAssExpr : assignmentMap.entrySet()) {
                     PsiAssignmentExpression entryKey = assExpr.getKey();
@@ -367,8 +472,8 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     }
 
                     if (Arrays.equals(entryValue, otherEntryValue)) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
+                        updateCloneSet(entryKey, otherEntryKey, assignmentCloneMap, assignmentLocationMap);
+                        updateCloneSet(otherEntryKey, entryKey, assignmentCloneMap, assignmentLocationMap);
 
                         continue;
                     }
@@ -382,8 +487,8 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
                     }
 
                     if (update) {
-                        updateCloneSet(entryKey, otherEntryKey);
-                        updateCloneSet(otherEntryKey, entryKey);
+                        updateCloneSet(entryKey, otherEntryKey, assignmentCloneMap, assignmentLocationMap);
+                        updateCloneSet(otherEntryKey, entryKey, assignmentCloneMap, assignmentLocationMap);
                     }
                 }
             }
@@ -411,7 +516,9 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             return false;
         }
 
-        private void updateCloneSet(PsiAssignmentExpression entryKey, PsiAssignmentExpression otherEntryKey) {
+        private void updateCloneSet(PsiAssignmentExpression entryKey, PsiAssignmentExpression otherEntryKey,
+                                    Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap,
+                                    Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap) {
             Set<Integer> existingClones = assignmentCloneMap.get(entryKey);
             int caseIndex = assignmentLocationMap.get(otherEntryKey).getFirst();
             if (existingClones == null) {
@@ -421,7 +528,9 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             assignmentCloneMap.put(entryKey, existingClones);
         }
 
-        private void updateCloneSet(PsiMethodCallExpression entryKey, PsiMethodCallExpression otherEntryKey) {
+        private void updateCloneSet(PsiMethodCallExpression entryKey, PsiMethodCallExpression otherEntryKey,
+                                    Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap,
+                                    Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap) {
             Set<Integer> existingClones = methodCallCloneMap.get(entryKey);
             int caseIndex = methodCallLocationMap.get(otherEntryKey).getFirst();
             if (existingClones == null) {
@@ -431,7 +540,9 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             methodCallCloneMap.put(entryKey, existingClones);
         }
 
-        private void updateCloneSet(PsiDeclarationStatement entryKey, PsiDeclarationStatement otherEntryKey) {
+        private void updateCloneSet(PsiDeclarationStatement entryKey, PsiDeclarationStatement otherEntryKey,
+                                    Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap,
+                                    Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap) {
             Set<Integer> existingClones = declarationCloneMap.get(entryKey);
             int caseIndex = declarationLocationMap.get(otherEntryKey).getFirst();
             if (existingClones == null) {
@@ -441,7 +552,9 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             declarationCloneMap.put(entryKey, existingClones);
         }
 
-        private void updateCloneSet(PsiIfStatement entryKey, PsiIfStatement otherEntryKey) {
+        private void updateCloneSet(PsiIfStatement entryKey, PsiIfStatement otherEntryKey,
+                                    Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap,
+                                    Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap) {
             Set<Integer> existingClones = ifStmtCloneMap.get(entryKey);
             int caseIndex = ifStmtLocationMap.get(otherEntryKey).getFirst();
             if (existingClones == null) {
@@ -451,7 +564,11 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             ifStmtCloneMap.put(entryKey, existingClones);
         }
 
-        private StatType addStatToMap(PsiStatement stat) {
+        private StatType addStatToMap(PsiStatement stat, Map<PsiDeclarationStatement,
+                String[]> declarationMap, Map<PsiAssignmentExpression,
+                String[]> assignmentMap, Map<PsiIfStatement,
+                String[]> ifStmtMap, Map<PsiMethodCallExpression,
+                String[]> methodCallMap) {
             //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
             String[] stringRep = CodeCloneUtils.getStmtAsStringArray(stat);
 
@@ -486,7 +603,11 @@ public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTo
             return null;
         }
 
-        private Set<Integer> getClones(PsiStatement stat) {
+        private Set<Integer> getClones(PsiStatement stat,
+                                       Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap,
+                                       Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap,
+                                       Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap,
+                                       Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap) {
             if (stat instanceof PsiExpressionStatement) {
                 PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
                 if (expr instanceof PsiAssignmentExpression) {

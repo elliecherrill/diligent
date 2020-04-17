@@ -116,7 +116,25 @@ public final class CodeCloneUtils {
             return getDeclStmtAsString((PsiDeclarationStatement) stmt);
         }
 
+        if (stmt instanceof PsiReturnStatement) {
+            return getReturnStmtAsString((PsiReturnStatement) stmt);
+        }
+
         return null;
+    }
+
+    private static List<String> getReturnStmtAsString(PsiReturnStatement stmt) {
+        List<String> returnStmtAsString = new ArrayList<>();
+
+        returnStmtAsString.add("RETURN");
+
+        PsiExpression returnExpr = stmt.getReturnValue();
+
+        if (returnExpr != null) {
+            returnStmtAsString.addAll(getExprAsString(returnExpr));
+        }
+
+        return returnStmtAsString;
     }
 
     private static List<String> getDeclStmtAsString(PsiDeclarationStatement stmt) {

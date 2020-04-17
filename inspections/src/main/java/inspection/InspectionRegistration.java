@@ -22,7 +22,7 @@ public final class InspectionRegistration implements ApplicationComponent, Inspe
     public Class<? extends LocalInspectionTool>[] getInspectionClasses() {
         return new Class[]{
                 CamelCaseInspection.class,
-                CaseCloneInspection.class,
+                CloneInspection.class,
                 FieldsFirstInspection.class,
                 IfReturnElseInspection.class,
                 MethodCloneInspection.class,

@@ -179,7 +179,62 @@ public final class CodeCloneUtils {
             return getForStmtAsString((PsiForStatement) stmt);
         }
 
+        if (stmt instanceof PsiSwitchStatement) {
+            return getSwitchStmtAsString((PsiSwitchStatement) stmt);
+        }
+
+        if (stmt instanceof PsiSwitchLabelStatement) {
+            return getSwitchLabelStmtAsString((PsiSwitchLabelStatement) stmt);
+        }
+
         return null;
+    }
+
+    private static List<String> getSwitchLabelStmtAsString(PsiSwitchLabelStatement stmt) {
+        List<String> switchLabelStmtAsString = new ArrayList<>();
+
+        switchLabelStmtAsString.add("CASE");
+
+        PsiElement[] children = stmt.getChildren();
+
+        for (PsiElement child : children) {
+            if (child instanceof PsiExpressionList) {
+                PsiExpressionList exprList = (PsiExpressionList) child;
+                PsiExpression[] exprs = exprList.getExpressions();
+                for (PsiExpression expr : exprs) {
+                    switchLabelStmtAsString.addAll(getExprAsString(expr));
+                }
+                break;
+            }
+        }
+
+        return switchLabelStmtAsString;
+    }
+
+    private static List<String> getSwitchStmtAsString(PsiSwitchStatement stmt) {
+        List<String> switchStmtAsString = new ArrayList<>();
+
+        switchStmtAsString.add("SWITCH");
+
+        PsiElement[] children = stmt.getChildren();
+        for (PsiElement child : children) {
+            if (child instanceof PsiReferenceExpression) {
+                switchStmtAsString.add(getRefAsString((PsiReferenceExpression) child));
+                break;
+            }
+        }
+
+        PsiCodeBlock switchBody = stmt.getBody();
+
+        if (switchBody != null) {
+            PsiStatement[] stats = switchBody.getStatements();
+
+            for (PsiStatement s : stats) {
+                switchStmtAsString.addAll(getStmtAsString(s));
+            }
+        }
+
+        return switchStmtAsString;
     }
 
     private static List<String> getForStmtAsString(PsiForStatement stmt) {

@@ -2,7 +2,10 @@ package util;
 
 import com.intellij.psi.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public final class CodeCloneUtils {
 
@@ -19,7 +22,7 @@ public final class CodeCloneUtils {
                 statements.add(numStats);
                 numStats = 0;
             }
-            if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof  PsiBreakStatement)) {
+            if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof PsiBreakStatement)) {
                 numStats++;
             }
         }
@@ -33,7 +36,7 @@ public final class CodeCloneUtils {
                 statIndex = 0;
             }
 
-            if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof  PsiBreakStatement)) {
+            if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof PsiBreakStatement)) {
                 caseBlocks[caseIndex][statIndex] = stat;
                 statIndex++;
             }
@@ -89,6 +92,61 @@ public final class CodeCloneUtils {
         }
 
         return methodBlocks;
+    }
+
+    public static PsiStatement[][] getThenBodies(PsiIfStatement ifStmt, PsiIfStatement otherIfStmt) {
+        List<Integer> statements = new ArrayList<>();
+
+        statements.add(getNumStats(ifStmt.getThenBranch()));
+        statements.add(getNumStats(otherIfStmt.getThenBranch()));
+
+        // Entry one = then branch of ifStmt
+        // Entry two = then branch of otherIfStmt
+        PsiStatement[][] thenBlocks = new PsiStatement[2][Collections.max(statements)];
+
+        if (ifStmt.getThenBranch() != null) {
+            addStats(thenBlocks, 0, ifStmt.getThenBranch());
+        }
+
+        if (otherIfStmt.getThenBranch() != null) {
+            addStats(thenBlocks, 1, otherIfStmt.getThenBranch());
+        }
+
+        return thenBlocks;
+    }
+
+    private static int getNumStats(PsiStatement branch) {
+        if (branch == null) {
+            return 0;
+        }
+
+        int numStats = 0;
+        if (branch instanceof PsiBlockStatement) {
+            PsiBlockStatement branchBlock = (PsiBlockStatement) branch;
+            PsiCodeBlock branchCodeBlock = branchBlock.getCodeBlock();
+            PsiStatement[] branchStats = branchCodeBlock.getStatements();
+            for (PsiStatement s : branchStats) {
+                if (!(s instanceof PsiWhiteSpace) && !(s instanceof PsiComment)) {
+                    numStats++;
+                }
+            }
+        }
+        return numStats;
+    }
+
+    private static void addStats(PsiStatement[][] ifBlocks, int index, PsiStatement branch) {
+        int statIndex = 0;
+        if (branch instanceof PsiBlockStatement) {
+            PsiBlockStatement branchBlock = (PsiBlockStatement) branch;
+            PsiCodeBlock branchCodeBlock = branchBlock.getCodeBlock();
+            PsiStatement[] branchStats = branchCodeBlock.getStatements();
+            for (PsiStatement s : branchStats) {
+                if (!(s instanceof PsiWhiteSpace) && !(s instanceof PsiComment)) {
+                    ifBlocks[index][statIndex] = s;
+                    statIndex++;
+                }
+            }
+        }
     }
 
     public static String[] getStmtAsStringArray(PsiStatement stmt) {
@@ -374,7 +432,7 @@ public final class CodeCloneUtils {
 
     public static boolean sameIfCondition(String[] first, String[] second) {
         int firstCondIndex = getStartIndex("COND", first) + 1;
-        int firstCondEndIndex = getStartIndex("THEN",first);
+        int firstCondEndIndex = getStartIndex("THEN", first);
         int secondCondIndex = getStartIndex("COND", second) + 1;
         int secondCondEndIndex = getStartIndex("THEN", second);
 
@@ -392,7 +450,7 @@ public final class CodeCloneUtils {
         int firstRhsIndex = getStartIndex("BINEXPRRHS", first);
         int secondRhsIndex = getStartIndex("BINEXPRRHS", second);
 
-        return Arrays.equals(first,0, firstRhsIndex, second, 0, secondRhsIndex);
+        return Arrays.equals(first, 0, firstRhsIndex, second, 0, secondRhsIndex);
     }
 
     public static boolean conditionChangeInLhs(String[] first, String[] second) {
@@ -401,7 +459,7 @@ public final class CodeCloneUtils {
         int firstOpIndex = getStartIndex("BINEXPROP", first);
         int secondOpIndex = getStartIndex("BINEXPROP", second);
 
-        return Arrays.equals(first,firstOpIndex, first.length, second, secondOpIndex, second.length);
+        return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
     }
 
     // TODO
@@ -423,9 +481,9 @@ public final class CodeCloneUtils {
         // Same type and initialiser (if they have one)
         // Different variable name
         int firstNameIndex = getStartIndex("NAME", first);
-        int firstEndNameIndex = getStartIndex("INIT",first);
+        int firstEndNameIndex = getStartIndex("INIT", first);
         int secondNameIndex = getStartIndex("NAME", second);
-        int secondEndNameIndex = getStartIndex("INIT",second);
+        int secondEndNameIndex = getStartIndex("INIT", second);
 
         boolean sameType = Arrays.equals(first, 0, firstNameIndex, second, 0, secondNameIndex);
 
@@ -438,7 +496,7 @@ public final class CodeCloneUtils {
         }
 
         if (firstEndNameIndex != -1 && secondEndNameIndex != -1) {
-            return Arrays.equals(first,firstEndNameIndex, first.length, second, secondEndNameIndex, second.length);
+            return Arrays.equals(first, firstEndNameIndex, first.length, second, secondEndNameIndex, second.length);
         }
 
         return false;

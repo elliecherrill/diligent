@@ -64,6 +64,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
         private Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap;
         private Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap;
         private Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap;
+        private Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap;
+
 
         CloneVisitor(ProblemsHolder holder) {
             this.holder = holder;
@@ -74,6 +76,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             ifStmtMap = new HashMap<>();
             methodCallMap = new HashMap<>();
             returnMap = new HashMap<>();
+            forLoopMap = new HashMap<>();
         }
 
         @Override
@@ -102,24 +105,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             }
 
             PsiStatement[][] methodBodies = CodeCloneUtils.getMethodBodies(methods);
-
-            // Iterate through all statements and add to corresponding LOCATION and STRING REP maps
-            for (int i = 0; i < methodBodies.length; i++) {
-                for (int j = 0; j < methodBodies[0].length; j++) {
-                    PsiStatement stat = methodBodies[i][j];
-                    if (stat != null) {
-                        // Add string representation and location to map with corresponding expression
-                        Pair<Integer, Integer> location = new Pair<>(i, j);
-                        addStatToMap(stat, location, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap);
-                    }
-                }
-            }
-
-            compareStatements(assignmentMap);
-            compareStatements(ifStmtMap);
-            compareStatements(declarationMap);
-            compareStatements(methodCallMap);
-            compareStatements(returnMap);
+            cloneInit(methodBodies, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap, forLoopMap);
 
             List<Integer> rangeOfMethods = IntStream.range(0, methodBodies.length - 1).boxed().collect(Collectors.toList());
             String filename = aClass.getContainingFile().getName();
@@ -131,7 +117,10 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                     continue;
                 }
 
-                Set<Integer> firstClones = getClones(methodBodies[i][0], declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap);
+                Set<Integer> firstClones = getClones(methodBodies[i][0],
+                                                    declarationMap, assignmentMap,
+                                                    ifStmtMap, methodCallMap,
+                                                    returnMap, forLoopMap);
 
                 if (firstClones == null || firstClones.size() == 0) {
                     continue;
@@ -143,7 +132,10 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                     if (methodBodies[i][j] == null) {
                         break;
                     }
-                    Set<Integer> currClones = getClones(methodBodies[i][j], declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap);
+                    Set<Integer> currClones = getClones(methodBodies[i][j],
+                                                        declarationMap, assignmentMap,
+                                                        ifStmtMap, methodCallMap,
+                                                        returnMap, forLoopMap);
                     if (currClones == null) {
                         intersection.clear();
                         break;
@@ -165,6 +157,33 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                     }
                 }
             }
+        }
+
+        private void cloneInit(PsiStatement[][] bodies,
+                               Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap,
+                               Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap,
+                               Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap,
+                               Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap,
+                               Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
+                               Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap) {
+            // Iterate through all statements and add to corresponding LOCATION and STRING REP maps
+            for (int i = 0; i < bodies.length; i++) {
+                for (int j = 0; j < bodies[0].length; j++) {
+                    PsiStatement stat = bodies[i][j];
+                    if (stat != null) {
+                        // Add string representation and location to map with corresponding expression
+                        Pair<Integer, Integer> location = new Pair<>(i, j);
+                        addStatToMap(stat, location, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap, forLoopMap);
+                    }
+                }
+            }
+
+            compareStatements(assignmentMap);
+            compareStatements(ifStmtMap);
+            compareStatements(declarationMap);
+            compareStatements(methodCallMap);
+            compareStatements(returnMap);
+            compareStatements(forLoopMap);
         }
 
         private <T extends PsiElement> void compareStatements(Map<T, CloneExpression<T>> map) {
@@ -205,7 +224,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             PsiIfStatement ifStmt = (PsiIfStatement) entryKey;
                             PsiIfStatement otherIfStmt = (PsiIfStatement) otherEntryKey;
 
-                            if (haveSimilarBodies(ifStmt, otherIfStmt)) {
+                            if (haveSimilarIfBodies(ifStmt, otherIfStmt)) {
                                 update = true;
                             }
                         } else if (CodeCloneUtils.sameIfBody(entryStringRep, otherEntryStringRep)) {
@@ -223,6 +242,17 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         if (CodeCloneUtils.changeInOp(entryStringRep, otherEntryStringRep)) {
                             update = true;
                         }
+                    } else if (entryKey instanceof PsiForStatement) {
+                        if (CodeCloneUtils.sameForSetup(entryStringRep, otherEntryStringRep)) {
+                            PsiForStatement forStmt = (PsiForStatement) entryKey;
+                            PsiForStatement otherForStmt = (PsiForStatement) otherEntryKey;
+
+                            if (haveSimilarForBodies(forStmt, otherForStmt)) {
+                                update = true;
+                            }
+                        }
+
+                        //TODO: to ask about vice versa (same body, similar condition)
                     }
 
                     if (update) {
@@ -244,49 +274,63 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             return sb.toString();
         }
 
-        //TODO: finish this - use clone detection
-        private boolean haveSimilarBodies(PsiIfStatement ifStmt, PsiIfStatement otherIfStmt) {
+        private boolean haveSimilarIfBodies(PsiIfStatement ifStmt, PsiIfStatement otherIfStmt) {
             Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap = new HashMap<>();
             Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap = new HashMap<>();
             Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap = new HashMap<>();
             Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap = new HashMap<>();
             Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
+            Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
 
-            //TODO: consider else cases
-            PsiStatement[][] thenBodies = CodeCloneUtils.getThenBodies(ifStmt, otherIfStmt);
+            //TODO: consider else cases (else vs else-if)
+            return areSimilarBlocks(ifStmt.getThenBranch(), otherIfStmt.getThenBranch(),
+                    declarationMap, assignmentMap,
+                    ifStmtMap, methodCallMap,
+                    returnMap, forLoopMap);
+        }
 
-            // Iterate through all statements and add to corresponding LOCATION and STRING REP maps
-            for (int i = 0; i < thenBodies.length; i++) {
-                for (int j = 0; j < thenBodies[0].length; j++) {
-                    PsiStatement stat = thenBodies[i][j];
-                    if (stat != null) {
-                        // Add string representation and location to map with corresponding expression
-                        Pair<Integer, Integer> location = new Pair<>(i, j);
-                        addStatToMap(stat, location, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap);
-                    }
-                }
-            }
+        private boolean haveSimilarForBodies(PsiForStatement forStmt, PsiForStatement otherForStmt) {
+            Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap = new HashMap<>();
+            Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap = new HashMap<>();
+            Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap = new HashMap<>();
+            Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap = new HashMap<>();
+            Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
+            Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
 
-            compareStatements(assignmentMap);
-            compareStatements(ifStmtMap);
-            compareStatements(declarationMap);
-            compareStatements(methodCallMap);
-            compareStatements(returnMap);
+            return areSimilarBlocks(forStmt.getBody(), otherForStmt.getBody(),
+                    declarationMap, assignmentMap,
+                    ifStmtMap, methodCallMap,
+                    returnMap, forLoopMap);
+        }
 
-            // Are the 'then' bodies the same?
-            if ((thenBodies[0][0] == null) && (thenBodies[1][0] != null)) {
+        private boolean areSimilarBlocks(PsiStatement stat, PsiStatement otherStat,
+                                         Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap,
+                                         Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap,
+                                         Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap,
+                                         Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap,
+                                         Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
+                                         Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap) {
+            PsiStatement[][] blocks = CodeCloneUtils.getBlocks(stat, otherStat);
+            cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap, forLoopMap);
+
+            if ((blocks[0][0] == null) && (blocks[1][0] != null)) {
                 return false;
             }
 
-            if ((thenBodies[0][0] != null) && (thenBodies[1][0] == null)) {
+            if ((blocks[0][0] != null) && (blocks[1][0] == null)) {
                 return false;
             }
 
-            if (thenBodies[0][0] != null) {
+            if (blocks[0][0] != null) {
                 //Both not empty - need to check they are the same
 
-                for (int i = 0; i < thenBodies.length; i++) {
-                    Set<Integer> firstClones = getClones(thenBodies[i][0], declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap);
+                //TODO: do we need to loop here? or just compare first to the second?
+                //TODO: does similar mean we allow for extra / fewer statements?
+                for (int i = 0; i < blocks.length; i++) {
+                    Set<Integer> firstClones = getClones(blocks[i][0],
+                                                        declarationMap, assignmentMap,
+                                                        ifStmtMap, methodCallMap,
+                                                        returnMap, forLoopMap);
 
                     if (firstClones == null || firstClones.size() == 0) {
                         return false;
@@ -294,11 +338,14 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
 
                     Set<Integer> intersection = new HashSet<>(firstClones);
 
-                    for (int j = 1; j < thenBodies[0].length; j++) {
-                        if (thenBodies[i][j] == null) {
+                    for (int j = 1; j < blocks[0].length; j++) {
+                        if (blocks[i][j] == null) {
                             break;
                         }
-                        Set<Integer> currClones = getClones(thenBodies[i][j], declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap);
+                        Set<Integer> currClones = getClones(blocks[i][j],
+                                                            declarationMap, assignmentMap,
+                                                            ifStmtMap, methodCallMap,
+                                                            returnMap, forLoopMap);
                         if (currClones == null) {
                             intersection.clear();
                             break;
@@ -315,7 +362,6 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                 }
             }
 
-            //TODO: this returns true if then bodies are similar - consider else cases
             return true;
         }
 
@@ -335,7 +381,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                   Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap,
                                   Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap,
                                   Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap,
-                                  Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap) {
+                                  Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
+                                  Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap) {
             //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
             String[] stringRep = CodeCloneUtils.getStmtAsStringArray(stat);
 
@@ -344,30 +391,41 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                 if (expr instanceof PsiAssignmentExpression) {
                     PsiAssignmentExpression assExpr = (PsiAssignmentExpression) expr;
                     assignmentMap.put(assExpr, new CloneExpression<>(assExpr, stringRep, location));
+                    return;
                 }
 
                 if (expr instanceof PsiMethodCallExpression) {
                     PsiMethodCallExpression callExpr = (PsiMethodCallExpression) expr;
                     methodCallMap.put(callExpr, new CloneExpression<>(callExpr, stringRep, location));
+                    return;
                 }
             }
 
             if (stat instanceof PsiIfStatement) {
                 PsiIfStatement ifStmt = (PsiIfStatement) stat;
                 ifStmtMap.put(ifStmt, new CloneExpression<>(ifStmt, stringRep, location));
+                return;
             }
 
             if (stat instanceof PsiDeclarationStatement) {
                 PsiDeclarationStatement declStmt = (PsiDeclarationStatement) stat;
                 declarationMap.put(declStmt, new CloneExpression<>(declStmt, stringRep, location));
+                return;
             }
 
             if (stat instanceof PsiReturnStatement) {
                 PsiReturnStatement returnStat = (PsiReturnStatement) stat;
                 returnMap.put(returnStat, new CloneExpression<>(returnStat, stringRep, location));
+                return;
             }
 
-            assert true : "Unknown statement type";
+            if (stat instanceof PsiForStatement) {
+                PsiForStatement forStat = (PsiForStatement) stat;
+                forLoopMap.put(forStat, new CloneExpression<>(forStat, stringRep, location));
+                return;
+            }
+
+            assert false : "Unknown statement type " + stat.toString();
         }
 
         private Set<Integer> getClones(PsiStatement stat,
@@ -375,7 +433,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                        Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap,
                                        Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap,
                                        Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap,
-                                       Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap) {
+                                       Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
+                                       Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap) {
             if (stat instanceof PsiExpressionStatement) {
                 PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
                 if (expr instanceof PsiAssignmentExpression) {
@@ -409,7 +468,13 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                 return cloneExpr.getClones();
             }
 
-            assert true : "Unknown statement type";
+            if (stat instanceof PsiForStatement) {
+                PsiForStatement forStat = (PsiForStatement) stat;
+                CloneExpression<PsiForStatement> cloneExpr = forLoopMap.get(forStat);
+                return cloneExpr.getClones();
+            }
+
+            assert false : "Unknown statement type " + stat.toString();
             return null;
         }
     }

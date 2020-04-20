@@ -46,7 +46,6 @@ public final class CodeCloneUtils {
     }
 
     public static PsiStatement[][] getMethodBodies(PsiMethod[] methods) {
-        //TODO:
         //1. Get number of methods and max number of statements (excluding whitespace / comments)
         //2. Then create array
         //3. Put statements into the array
@@ -94,25 +93,23 @@ public final class CodeCloneUtils {
         return methodBlocks;
     }
 
-    public static PsiStatement[][] getThenBodies(PsiIfStatement ifStmt, PsiIfStatement otherIfStmt) {
+    public static PsiStatement[][] getBlocks(PsiStatement blockBody, PsiStatement otherBlockBody) {
         List<Integer> statements = new ArrayList<>();
 
-        statements.add(getNumStats(ifStmt.getThenBranch()));
-        statements.add(getNumStats(otherIfStmt.getThenBranch()));
+        statements.add(getNumStats(blockBody));
+        statements.add(getNumStats(otherBlockBody));
 
-        // Entry one = then branch of ifStmt
-        // Entry two = then branch of otherIfStmt
-        PsiStatement[][] thenBlocks = new PsiStatement[2][Collections.max(statements)];
+        PsiStatement[][] blocks = new PsiStatement[2][Collections.max(statements)];
 
-        if (ifStmt.getThenBranch() != null) {
-            addStats(thenBlocks, 0, ifStmt.getThenBranch());
+        if (blockBody != null) {
+            addStats(blocks, 0, blockBody);
         }
 
-        if (otherIfStmt.getThenBranch() != null) {
-            addStats(thenBlocks, 1, otherIfStmt.getThenBranch());
+        if (otherBlockBody != null) {
+            addStats(blocks, 1, otherBlockBody);
         }
 
-        return thenBlocks;
+        return blocks;
     }
 
     private static int getNumStats(PsiStatement branch) {
@@ -178,7 +175,51 @@ public final class CodeCloneUtils {
             return getReturnStmtAsString((PsiReturnStatement) stmt);
         }
 
+        if (stmt instanceof PsiForStatement) {
+            return getForStmtAsString((PsiForStatement) stmt);
+        }
+
         return null;
+    }
+
+    private static List<String> getForStmtAsString(PsiForStatement stmt) {
+        List<String> forStmtAsString = new ArrayList<>();
+
+        forStmtAsString.add("FOR");
+        PsiStatement initStmt = stmt.getInitialization();
+        PsiExpression limitExpr = stmt.getCondition();
+        PsiStatement updateStmt = stmt.getUpdate();
+
+        String indexVar = "";
+        if (initStmt instanceof PsiDeclarationStatement) {
+            List<String> initAsString = getDeclStmtAsString((PsiDeclarationStatement) initStmt);
+
+            indexVar = initAsString.get(initAsString.indexOf("NAME") + 1);
+
+            forStmtAsString.add("FOR-INIT");
+            forStmtAsString.addAll(initAsString);
+        }
+
+        forStmtAsString.add("FOR-COND");
+        forStmtAsString.addAll(getExprAsString(limitExpr));
+
+        forStmtAsString.add("FOR-UPDATE");
+        getStmtAsString(updateStmt);
+
+        forStmtAsString.add("FOR-BODY");
+        PsiStatement forBody = stmt.getBody();
+        forStmtAsString.addAll(getStmtAsString(forBody));
+
+        findAndReplaceIndexVar(forStmtAsString, indexVar, "FOR-INDEX");
+        return forStmtAsString;
+    }
+
+    private static void findAndReplaceIndexVar(List<String> list, String toFind, String replacement) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).equals(toFind)) {
+                list.set(i, replacement);
+            }
+        }
     }
 
     private static List<String> getReturnStmtAsString(PsiReturnStatement stmt) {
@@ -364,6 +405,16 @@ public final class CodeCloneUtils {
 
         } else if (expr instanceof PsiLiteralExpression) {
             exprAsString.add(getLiteralAsString((PsiLiteralExpression) expr));
+        } else if (expr instanceof PsiPostfixExpression) {
+            PsiPostfixExpression postfixExpr = (PsiPostfixExpression) expr;
+            exprAsString.addAll(getExprAsString(postfixExpr.getOperand()));
+            exprAsString.add(getOpAsString(postfixExpr.getOperationSign()));
+        } else if (expr instanceof PsiPrefixExpression) {
+            PsiPrefixExpression prefixExpr = (PsiPrefixExpression) expr;
+            exprAsString.addAll(getExprAsString(prefixExpr.getOperand()));
+            exprAsString.add(getOpAsString(prefixExpr.getOperationSign()));
+        } else if (expr instanceof PsiBinaryExpression) {
+            exprAsString.addAll(getBinExprAsString((PsiBinaryExpression) expr));
         }
 
         return exprAsString;
@@ -474,6 +525,13 @@ public final class CodeCloneUtils {
         int secondThenIndex = getStartIndex("THEN", second);
 
         return Arrays.equals(first, firstThenIndex, first.length, second, secondThenIndex, second.length);
+    }
+
+    public static boolean sameForSetup(String[] first, String[] second) {
+        int firstBodyIndex = getStartIndex("FOR-BODY", first);
+        int secondBodyIndex = getStartIndex("FOR-BODY", second);
+
+        return Arrays.equals(first, 0, firstBodyIndex, second, 0, secondBodyIndex);
     }
 
     public static boolean declChangeInVarName(String[] first, String[] second) {

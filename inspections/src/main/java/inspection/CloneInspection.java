@@ -599,7 +599,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 return StatType.DECLARATION;
             }
 
-            assert true : "Unknown statement type";
+            assert false : "Unknown statement type";
             return null;
         }
 
@@ -631,7 +631,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 return declarationCloneMap.getOrDefault(declStmt, Collections.emptySet());
             }
 
-            assert true : "Unknown statement type";
+            assert false : "Unknown statement type";
             return null;
         }
 

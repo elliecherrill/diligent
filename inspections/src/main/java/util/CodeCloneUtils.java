@@ -2,6 +2,7 @@ package util;
 
 import com.intellij.psi.*;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,7 +10,7 @@ import java.util.List;
 
 public final class CodeCloneUtils {
 
-    public static PsiStatement[][] getCaseBlocks(PsiCodeBlock body) {
+    public static PsiStatement[][] getCaseBlocks(@Nonnull PsiCodeBlock body) {
         // TODO: How to not iterate through twice?
         PsiStatement[] bodyStatements = body.getStatements();
 
@@ -21,11 +22,11 @@ public final class CodeCloneUtils {
                 numCases++;
                 statements.add(numStats);
                 numStats = 0;
-            }
-            if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof PsiBreakStatement)) {
+            } else if (!(stat instanceof PsiBreakStatement)) {
                 numStats++;
             }
         }
+        statements.add(numStats);
 
         PsiStatement[][] caseBlocks = new PsiStatement[numCases][Collections.max(statements)];
         int caseIndex = -1;
@@ -37,6 +38,133 @@ public final class CodeCloneUtils {
             }
 
             if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof PsiBreakStatement)) {
+                caseBlocks[caseIndex][statIndex] = stat;
+                statIndex++;
+            }
+        }
+
+        return caseBlocks;
+    }
+
+    public static PsiStatement[][] getSameCaseBlocks(@Nonnull PsiCodeBlock body, @Nonnull PsiCodeBlock otherBody) {
+        //TODO: consider default case??
+        // TODO: How to not iterate through twice?
+
+        int sameCases = 0;
+        // Returns a pair of case labels and number of statements in cases
+        Pair<List<String>, List<Integer>> otherLabels = getCaseLabels(otherBody);
+
+        PsiStatement[] bodyStatements = body.getStatements();
+        List<Integer> statements = new ArrayList<>();
+
+        List<Integer> bodyIndices = new ArrayList<>();
+        List<Integer> otherBodyIndices = new ArrayList<>();
+
+        int caseIndex = -1;
+        int numStats = 0;
+        for (PsiStatement stat : bodyStatements) {
+            if (stat instanceof PsiSwitchLabelStatement) {
+                caseIndex++;
+                String caseLabel = getCaseLabel((PsiSwitchLabelStatement) stat);
+                int index = otherLabels.getFirst().indexOf(caseLabel);
+                if (index > -1) {
+                    sameCases++;
+                    statements.add(numStats);
+                    otherBodyIndices.add(index);
+                    bodyIndices.add(caseIndex);
+                }
+                numStats = 0;
+            } else if (!(stat instanceof PsiBreakStatement)) {
+                numStats++;
+            }
+        }
+        statements.add(numStats);
+
+        int maxStatements = Math.max(Collections.max(statements), Collections.max(otherLabels.getSecond()));
+
+        PsiStatement[][] otherCaseBlocks = getCaseStatements(otherBody, otherLabels.getFirst().size(), maxStatements);
+
+        PsiStatement[][] caseBlocks = new PsiStatement[sameCases * 2][maxStatements];
+        caseIndex = -1;
+        int insertCaseIndex = -2;
+        int statIndex = 0;
+        for (PsiStatement stat : bodyStatements) {
+            if (stat instanceof PsiSwitchLabelStatement) {
+                caseIndex++;
+                statIndex = 0;
+
+                if (bodyIndices.contains(caseIndex)) {
+                    insertCaseIndex += 2;
+                }
+
+            } else if (!(stat instanceof PsiBreakStatement)) {
+                if (bodyIndices.contains(caseIndex)) {
+                    caseBlocks[insertCaseIndex][statIndex] = stat;
+                    statIndex++;
+                }
+            }
+        }
+
+        insertCaseIndex = 1;
+        for (int i : otherBodyIndices) {
+            caseBlocks[insertCaseIndex] = otherCaseBlocks[i];
+            insertCaseIndex +=2;
+        }
+
+        return caseBlocks;
+    }
+
+    private static String getCaseLabel(PsiSwitchLabelStatement switchLabel) {
+        StringBuffer sb = new StringBuffer();
+
+        PsiElement[] children = switchLabel.getChildren();
+
+        for (PsiElement child : children) {
+            if (child instanceof PsiExpressionList) {
+                PsiExpressionList exprList = (PsiExpressionList) child;
+                PsiExpression[] exprs = exprList.getExpressions();
+                for (PsiExpression expr : exprs) {
+                    sb.append(getExprAsString(expr));
+                }
+                break;
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private static Pair<List<String>, List<Integer>> getCaseLabels(PsiCodeBlock body) {
+        List<String> labels = new ArrayList<>();
+        List<Integer> statements = new ArrayList<>();
+        PsiStatement[] bodyStatements = body.getStatements();
+
+        String currCase = null;
+        int currStats = 0;
+        for (PsiStatement stat : bodyStatements) {
+            if (stat instanceof PsiSwitchLabelStatement) {
+                currCase = getCaseLabel((PsiSwitchLabelStatement) stat);
+                labels.add(currCase);
+
+                statements.add(currStats);
+                currStats = 0;
+            } else if (!(stat instanceof PsiBreakStatement)) {
+                currStats++;
+            }
+        }
+
+        return new Pair<>(labels, statements);
+    }
+
+    private static PsiStatement[][] getCaseStatements(PsiCodeBlock body, int numCases, int maxStats) {
+        PsiStatement[][] caseBlocks = new PsiStatement[numCases][maxStats];
+
+        int caseIndex = -1;
+        int statIndex = 0;
+        for (PsiStatement stat : body.getStatements()) {
+            if (stat instanceof PsiSwitchLabelStatement) {
+                caseIndex++;
+                statIndex = 0;
+            } else if (!(stat instanceof PsiBreakStatement)) {
                 caseBlocks[caseIndex][statIndex] = stat;
                 statIndex++;
             }
@@ -613,6 +741,13 @@ public final class CodeCloneUtils {
         }
 
         return false;
+    }
+
+    public static boolean sameSwitchVar(String[] first, String[] second) {
+        int firstVarIndex = getStartIndex("SWITCH", first) + 1;
+        int secondVarIndex = getStartIndex("SWITCH", second) + 1;
+
+        return first[firstVarIndex].equals(second[secondVarIndex]);
     }
 
     private static int getStartIndex(String toFind, String[] arr) {

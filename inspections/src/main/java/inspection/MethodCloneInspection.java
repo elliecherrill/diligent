@@ -119,10 +119,10 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                 }
 
                 Set<Integer> firstClones = getClones(methodBodies[i][0],
-                                                    declarationMap, assignmentMap,
-                                                    ifStmtMap, methodCallMap,
-                                                    returnMap, forLoopMap,
-                                                    switchMap);
+                        declarationMap, assignmentMap,
+                        ifStmtMap, methodCallMap,
+                        returnMap, forLoopMap,
+                        switchMap);
 
                 if (firstClones == null || firstClones.size() == 0) {
                     continue;
@@ -135,10 +135,10 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         break;
                     }
                     Set<Integer> currClones = getClones(methodBodies[i][j],
-                                                        declarationMap, assignmentMap,
-                                                        ifStmtMap, methodCallMap,
-                                                        returnMap, forLoopMap,
-                                                        switchMap);
+                            declarationMap, assignmentMap,
+                            ifStmtMap, methodCallMap,
+                            returnMap, forLoopMap,
+                            switchMap);
                     if (currClones == null) {
                         intersection.clear();
                         break;
@@ -178,10 +178,10 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         // Add string representation and location to map with corresponding expression
                         Pair<Integer, Integer> location = new Pair<>(i, j);
                         addStatToMap(stat, location,
-                                    declarationMap, assignmentMap,
-                                    ifStmtMap, methodCallMap,
-                                    returnMap, forLoopMap,
-                                    switchMap);
+                                declarationMap, assignmentMap,
+                                ifStmtMap, methodCallMap,
+                                returnMap, forLoopMap,
+                                switchMap);
                     }
                 }
             }
@@ -262,8 +262,16 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         }
 
                         //TODO: to ask about vice versa (same body, similar condition)
+                    } else if (entryKey instanceof PsiSwitchStatement) {
+                        if (CodeCloneUtils.sameSwitchVar(entryStringRep, otherEntryStringRep)) {
+                            PsiSwitchStatement switchStmt = (PsiSwitchStatement) entryKey;
+                            PsiSwitchStatement otherSwitchStmt = (PsiSwitchStatement) otherEntryKey;
+
+                            if (haveSimilarSwitchBodies(switchStmt, otherSwitchStmt)) {
+                                update = true;
+                            }
+                        }
                     }
-                    //TODO: *similar* switch statements
 
                     if (update) {
                         updateCloneSet(entryValue, otherEntryValue);
@@ -317,6 +325,75 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                     switchMap);
         }
 
+        private boolean haveSimilarSwitchBodies(PsiSwitchStatement switchStmt, PsiSwitchStatement otherSwitchStmt) {
+            Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap = new HashMap<>();
+            Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap = new HashMap<>();
+            Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap = new HashMap<>();
+            Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap = new HashMap<>();
+            Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
+            Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
+            Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap = new HashMap<>();
+
+            PsiCodeBlock body = switchStmt.getBody();
+            PsiCodeBlock otherBody = otherSwitchStmt.getBody();
+
+            if ((body == null) && (otherBody == null)) {
+                return true;
+            }
+
+            if ((body == null) || (otherBody == null)) {
+                return false;
+            }
+
+            PsiStatement[][] blocks = CodeCloneUtils.getSameCaseBlocks(body, otherBody);
+            cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap, forLoopMap, switchMap);
+
+            // For every array of statements need to find clones for every statement in the *following* array
+            for (int i = 0; i < blocks.length; i+=2) {
+                Set<Integer> firstClones = getClones(blocks[i][0],
+                        declarationMap, assignmentMap,
+                        ifStmtMap, methodCallMap,
+                        returnMap, forLoopMap,
+                        switchMap);
+
+                if (firstClones == null || firstClones.size() == 0) {
+                    return false;
+                }
+
+                Set<Integer> intersection = new HashSet<>(firstClones);
+
+                for (int j = 1; j < blocks[0].length; j++) {
+                    if (blocks[i][j] == null) {
+                        break;
+                    }
+                    Set<Integer> currClones = getClones(blocks[i][j],
+                            declarationMap, assignmentMap,
+                            ifStmtMap, methodCallMap,
+                            returnMap, forLoopMap,
+                            switchMap);
+                    if (currClones == null) {
+                        intersection.clear();
+                        break;
+                    } else {
+                        intersection.retainAll(currClones);
+                    }
+                }
+                //TODO: remove this when we stop comparing to ourselves in compareStatements
+                intersection.remove(i);
+
+                if (intersection.isEmpty()) {
+                    return false;
+                }
+
+                //Must be a clone of the following
+                if (!(intersection.contains(i + 1))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private boolean areSimilarBlocks(PsiStatement stat, PsiStatement otherStat,
                                          Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap,
                                          Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap,
@@ -343,10 +420,10 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                 //TODO: does similar mean we allow for extra / fewer statements?
                 for (int i = 0; i < blocks.length; i++) {
                     Set<Integer> firstClones = getClones(blocks[i][0],
-                                                        declarationMap, assignmentMap,
-                                                        ifStmtMap, methodCallMap,
-                                                        returnMap, forLoopMap,
-                                                        switchMap);
+                            declarationMap, assignmentMap,
+                            ifStmtMap, methodCallMap,
+                            returnMap, forLoopMap,
+                            switchMap);
 
                     if (firstClones == null || firstClones.size() == 0) {
                         return false;
@@ -359,10 +436,10 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             break;
                         }
                         Set<Integer> currClones = getClones(blocks[i][j],
-                                                            declarationMap, assignmentMap,
-                                                            ifStmtMap, methodCallMap,
-                                                            returnMap, forLoopMap,
-                                                            switchMap);
+                                declarationMap, assignmentMap,
+                                ifStmtMap, methodCallMap,
+                                returnMap, forLoopMap,
+                                switchMap);
                         if (currClones == null) {
                             intersection.clear();
                             break;

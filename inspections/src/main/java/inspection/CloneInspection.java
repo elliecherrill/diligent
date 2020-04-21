@@ -205,7 +205,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 return;
             }
 
-            //TODO: I think can merge getCaseBlocks and iteration below to reduce complexity
             PsiStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
 
             // String representation

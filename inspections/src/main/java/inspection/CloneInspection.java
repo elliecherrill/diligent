@@ -9,10 +9,7 @@ import feedback.FeedbackHolder;
 import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import util.CodeCloneUtils;
-import util.Pair;
-import util.PsiStmtType;
-import util.Utils;
+import util.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -569,7 +566,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 String[]> ifStmtMap, Map<PsiMethodCallExpression,
                 String[]> methodCallMap) {
             //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
-            String[] stringRep = CodeCloneUtils.getStmtAsStringArray(stat);
+            String[] stringRep = TokeniseUtils.getStmtAsStringArray(stat);
 
             if (stat instanceof PsiExpressionStatement) {
                 PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();

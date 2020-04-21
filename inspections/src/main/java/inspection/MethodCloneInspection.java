@@ -540,7 +540,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                   Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap,
                                   Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap) {
             //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
-            String[] stringRep = CodeCloneUtils.getStmtAsStringArray(stat);
+            String[] stringRep = TokeniseUtils.getStmtAsStringArray(stat);
 
             if (stat instanceof PsiExpressionStatement) {
                 PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();

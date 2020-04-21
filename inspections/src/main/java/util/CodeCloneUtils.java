@@ -309,6 +309,10 @@ public final class CodeCloneUtils {
             return getForStmtAsString((PsiForStatement) stmt);
         }
 
+        if (stmt instanceof PsiForeachStatement) {
+            return getForEachStmtAsString((PsiForeachStatement) stmt);
+        }
+
         if (stmt instanceof PsiSwitchStatement) {
             return getSwitchStmtAsString((PsiSwitchStatement) stmt);
         }
@@ -460,6 +464,31 @@ public final class CodeCloneUtils {
         forStmtAsString.add("END-FOR");
 
         return forStmtAsString;
+    }
+
+    private static List<String> getForEachStmtAsString(PsiForeachStatement stmt) {
+        List<String> forEachStmtAsString = new ArrayList<>();
+
+        forEachStmtAsString.add("FOREACH");
+        PsiParameter param = stmt.getIterationParameter();
+        forEachStmtAsString.add(getTypeAsString(param.getType()));
+        String paramName = param.getName();
+        forEachStmtAsString.add("FOREACH-PARAM");
+
+        forEachStmtAsString.add("IN");
+        forEachStmtAsString.addAll(getExprAsString(stmt.getIteratedValue()));
+
+        if (stmt.getBody() != null) {
+            forEachStmtAsString.add("FOREACH-BODY");
+            List<String> body = getStmtAsString(stmt.getBody());
+            findAndReplaceVar(body, paramName, "FOREACH-PARAM");
+            forEachStmtAsString.addAll(body);
+            forEachStmtAsString.add("END-FOREACH-BODY");
+        }
+
+        forEachStmtAsString.add("END-FOREACH");
+
+        return forEachStmtAsString;
     }
 
     private static void findAndReplaceVar(List<String> list, String toFind, String replacement) {

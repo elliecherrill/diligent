@@ -313,6 +313,14 @@ public final class CodeCloneUtils {
             return getForEachStmtAsString((PsiForeachStatement) stmt);
         }
 
+        if (stmt instanceof PsiWhileStatement) {
+            return getWhileStmtAsString((PsiWhileStatement) stmt);
+        }
+
+        if (stmt instanceof PsiDoWhileStatement) {
+            return getDoWhileStmtAsString((PsiDoWhileStatement) stmt);
+        }
+
         if (stmt instanceof PsiSwitchStatement) {
             return getSwitchStmtAsString((PsiSwitchStatement) stmt);
         }
@@ -489,6 +497,50 @@ public final class CodeCloneUtils {
         forEachStmtAsString.add("END-FOREACH");
 
         return forEachStmtAsString;
+    }
+
+    private static List<String> getWhileStmtAsString(PsiWhileStatement stmt) {
+        List<String> whileStmtAsString = new ArrayList<>();
+
+        whileStmtAsString.add("WHILE");
+
+        if (stmt.getCondition() != null) {
+            whileStmtAsString.add("WHILE-COND");
+            whileStmtAsString.addAll(getExprAsString(stmt.getCondition()));
+            whileStmtAsString.add("END-WHILE-COND");
+        }
+
+        if (stmt.getBody() != null) {
+            whileStmtAsString.add("WHILE-BODY");
+            whileStmtAsString.addAll(getStmtAsString(stmt.getBody()));
+            whileStmtAsString.add("END-WHILE-BODY");
+        }
+
+        whileStmtAsString.add("END-WHILE");
+
+        return whileStmtAsString;
+    }
+
+    private static List<String> getDoWhileStmtAsString(PsiDoWhileStatement stmt) {
+        List<String> doWhileStmtAsString = new ArrayList<>();
+
+        doWhileStmtAsString.add("DOWHILE");
+
+        if (stmt.getBody() != null) {
+            doWhileStmtAsString.add("DOWHILE-BODY");
+            doWhileStmtAsString.addAll(getStmtAsString(stmt.getBody()));
+            doWhileStmtAsString.add("END-DOWHILE-BODY");
+        }
+
+        if (stmt.getCondition() != null) {
+            doWhileStmtAsString.add("DOWHILE-COND");
+            doWhileStmtAsString.addAll(getExprAsString(stmt.getCondition()));
+            doWhileStmtAsString.add("END-DOWHILE-COND");
+        }
+
+        doWhileStmtAsString.add("END-DOWHILE");
+
+        return doWhileStmtAsString;
     }
 
     private static void findAndReplaceVar(List<String> list, String toFind, String replacement) {

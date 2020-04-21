@@ -66,6 +66,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
         private Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap;
         private Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap;
         private Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap;
+        private Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap;
+        private Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap;
         private Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap;
         private Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap;
         private Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap;
@@ -81,6 +83,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             returnMap = new HashMap<>();
             forLoopMap = new HashMap<>();
             forEachLoopMap = new HashMap<>();
+            whileLoopMap = new HashMap<>();
+            doWhileLoopMap = new HashMap<>();
             switchMap = new HashMap<>();
             assertMap = new HashMap<>();
             tryMap = new HashMap<>();
@@ -114,6 +118,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             PsiStatement[][] methodBodies = CodeCloneUtils.getMethodBodies(methods);
             cloneInit(methodBodies, declarationMap, assignmentMap, ifStmtMap,
                         methodCallMap, returnMap, forLoopMap, forEachLoopMap,
+                        whileLoopMap, doWhileLoopMap,
                         switchMap, assertMap, tryMap);
 
             List<Integer> rangeOfMethods = IntStream.range(0, methodBodies.length - 1).boxed().collect(Collectors.toList());
@@ -130,7 +135,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         declarationMap, assignmentMap,
                         ifStmtMap, methodCallMap,
                         returnMap, forLoopMap,
-                        forEachLoopMap,
+                        forEachLoopMap, whileLoopMap,
+                        doWhileLoopMap,
                         switchMap, assertMap,
                         tryMap);
 
@@ -148,7 +154,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             declarationMap, assignmentMap,
                             ifStmtMap, methodCallMap,
                             returnMap, forLoopMap,
-                            forEachLoopMap,
+                            forEachLoopMap, whileLoopMap,
+                            doWhileLoopMap,
                             switchMap, assertMap,
                             tryMap);
                     if (currClones == null) {
@@ -182,6 +189,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
                                Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap,
                                Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap,
+                               Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap,
+                               Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap,
                                Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap,
                                Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap,
                                Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap) {
@@ -196,7 +205,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                 declarationMap, assignmentMap,
                                 ifStmtMap, methodCallMap,
                                 returnMap, forLoopMap,
-                                forEachLoopMap,
+                                forEachLoopMap, whileLoopMap,
+                                doWhileLoopMap,
                                 switchMap, assertMap,
                                 tryMap);
                     }
@@ -209,10 +219,12 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             compareStatements(methodCallMap);
             compareStatements(returnMap);
             compareStatements(forLoopMap);
+            compareStatements(forEachLoopMap);
+            compareStatements(whileLoopMap);
+            compareStatements(doWhileLoopMap);
             compareStatements(switchMap);
             compareStatements(assertMap);
             compareStatements(tryMap);
-            compareStatements(forEachLoopMap);
         }
 
         private <T extends PsiElement> void compareStatements(Map<T, CloneExpression<T>> map) {
@@ -320,6 +332,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
             Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
             Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap = new HashMap<>();
+            Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap = new HashMap<>();
+            Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap = new HashMap<>();
             Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap = new HashMap<>();
             Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap = new HashMap<>();
             Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap = new HashMap<>();
@@ -329,7 +343,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                     declarationMap, assignmentMap,
                     ifStmtMap, methodCallMap,
                     returnMap, forLoopMap,
-                    forEachLoopMap,
+                    forEachLoopMap, whileLoopMap,
+                    doWhileLoopMap,
                     switchMap, assertMap,
                     tryMap);
         }
@@ -342,6 +357,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
             Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
             Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap = new HashMap<>();
+            Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap = new HashMap<>();
+            Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap = new HashMap<>();
             Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap = new HashMap<>();
             Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap = new HashMap<>();
             Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap = new HashMap<>();
@@ -350,7 +367,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                     declarationMap, assignmentMap,
                     ifStmtMap, methodCallMap,
                     returnMap, forLoopMap,
-                    forEachLoopMap,
+                    forEachLoopMap, whileLoopMap,
+                    doWhileLoopMap,
                     switchMap, assertMap,
                     tryMap);
         }
@@ -363,6 +381,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
             Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
             Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap = new HashMap<>();
+            Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap = new HashMap<>();
+            Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap = new HashMap<>();
             Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap = new HashMap<>();
             Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap = new HashMap<>();
             Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap = new HashMap<>();
@@ -379,8 +399,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             }
 
             PsiStatement[][] blocks = CodeCloneUtils.getSameCaseBlocks(body, otherBody);
-            cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap, forLoopMap, forEachLoopMap,
-                    switchMap, assertMap, tryMap);
+            cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap,
+                    forLoopMap, forEachLoopMap, whileLoopMap, doWhileLoopMap, switchMap, assertMap, tryMap);
 
             // For every array of statements need to find clones for every statement in the *following* array
             for (int i = 0; i < blocks.length; i+=2) {
@@ -388,7 +408,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         declarationMap, assignmentMap,
                         ifStmtMap, methodCallMap,
                         returnMap, forLoopMap,
-                        forEachLoopMap,
+                        forEachLoopMap, whileLoopMap,
+                        doWhileLoopMap,
                         switchMap, assertMap,
                         tryMap);
 
@@ -406,7 +427,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             declarationMap, assignmentMap,
                             ifStmtMap, methodCallMap,
                             returnMap, forLoopMap,
-                            forEachLoopMap,
+                            forEachLoopMap, whileLoopMap,
+                            doWhileLoopMap,
                             switchMap, assertMap,
                             tryMap);
                     if (currClones == null) {
@@ -440,11 +462,14 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                          Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
                                          Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap,
                                          Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap,
+                                         Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap,
+                                         Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap,
                                          Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap,
                                          Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap,
                                          Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap) {
             PsiStatement[][] blocks = CodeCloneUtils.getBlocks(stat, otherStat);
-            cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap, forLoopMap, forEachLoopMap,
+            cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap,
+                    forLoopMap, forEachLoopMap, whileLoopMap, doWhileLoopMap,
                     switchMap, assertMap, tryMap);
 
             if ((blocks[0][0] == null) && (blocks[1][0] != null)) {
@@ -465,7 +490,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             declarationMap, assignmentMap,
                             ifStmtMap, methodCallMap,
                             returnMap, forLoopMap,
-                            forEachLoopMap,
+                            forEachLoopMap, whileLoopMap,
+                            doWhileLoopMap,
                             switchMap, assertMap,
                             tryMap);
 
@@ -483,7 +509,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                 declarationMap, assignmentMap,
                                 ifStmtMap, methodCallMap,
                                 returnMap, forLoopMap,
-                                forEachLoopMap,
+                                forEachLoopMap, whileLoopMap,
+                                doWhileLoopMap,
                                 switchMap, assertMap,
                                 tryMap);
                         if (currClones == null) {
@@ -524,6 +551,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                   Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
                                   Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap,
                                   Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap,
+                                  Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap,
+                                  Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap,
                                   Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap,
                                   Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap,
                                   Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap) {
@@ -575,6 +604,18 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                 return;
             }
 
+            if (stat instanceof PsiWhileStatement) {
+                PsiWhileStatement whileStat = (PsiWhileStatement) stat;
+                whileLoopMap.put(whileStat, new CloneExpression<>(whileStat, stringRep, location));
+                return;
+            }
+
+            if (stat instanceof PsiDoWhileStatement) {
+                PsiDoWhileStatement doWhileStat = (PsiDoWhileStatement) stat;
+                doWhileLoopMap.put(doWhileStat, new CloneExpression<>(doWhileStat, stringRep, location));
+                return;
+            }
+
             if (stat instanceof PsiSwitchStatement) {
                 PsiSwitchStatement switchStat = (PsiSwitchStatement) stat;
                 switchMap.put(switchStat, new CloneExpression<>(switchStat, stringRep, location));
@@ -604,6 +645,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                        Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
                                        Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap,
                                        Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap,
+                                       Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap,
+                                       Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap,
                                        Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap,
                                        Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap,
                                        Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap) {
@@ -649,6 +692,18 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             if (stat instanceof PsiForeachStatement) {
                 PsiForeachStatement forEachStat = (PsiForeachStatement) stat;
                 CloneExpression<PsiForeachStatement> cloneExpr = forEachLoopMap.get(forEachStat);
+                return cloneExpr.getClones();
+            }
+
+            if (stat instanceof PsiWhileStatement) {
+                PsiWhileStatement whileStat = (PsiWhileStatement) stat;
+                CloneExpression<PsiWhileStatement> cloneExpr = whileLoopMap.get(whileStat);
+                return cloneExpr.getClones();
+            }
+
+            if (stat instanceof PsiDoWhileStatement) {
+                PsiDoWhileStatement doWhileStat = (PsiDoWhileStatement) stat;
+                CloneExpression<PsiDoWhileStatement> cloneExpr = doWhileLoopMap.get(doWhileStat);
                 return cloneExpr.getClones();
             }
 

@@ -479,11 +479,12 @@ public final class CodeCloneUtils {
 
         forEachStmtAsString.add("FOREACH");
         PsiParameter param = stmt.getIterationParameter();
+        forEachStmtAsString.add("FOREACH-TYPE");
         forEachStmtAsString.add(getTypeAsString(param.getType()));
         String paramName = param.getName();
         forEachStmtAsString.add("FOREACH-PARAM");
 
-        forEachStmtAsString.add("IN");
+        forEachStmtAsString.add("FOREACH-IN");
         forEachStmtAsString.addAll(getExprAsString(stmt.getIteratedValue()));
 
         if (stmt.getBody() != null) {
@@ -880,6 +881,20 @@ public final class CodeCloneUtils {
         int secondBodyIndex = getStartIndex("FOR-BODY", second);
 
         return Arrays.equals(first, 0, firstBodyIndex, second, 0, secondBodyIndex);
+    }
+
+    public static boolean sameForEachSetup(String[] first, String[] second) {
+        int firstTypeIndex = getStartIndex("FOREACH-TYPE", first) + 1;
+        int secondTypeIndex = getStartIndex("FOREACH-TYPE", second) + 1;
+
+        if (!(first[firstTypeIndex].equals(second[secondTypeIndex]))) {
+            return false;
+        }
+
+        int firstIteratedIndex = getStartIndex("FOREACH-IN", first) + 1;
+        int secondIteratedIndex = getStartIndex("FOREACH-IN", second) + 1;
+
+        return first[firstIteratedIndex].equals(second[secondIteratedIndex]);
     }
 
     public static boolean declChangeInVarName(String[] first, String[] second) {

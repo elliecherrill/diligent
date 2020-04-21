@@ -284,16 +284,24 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             update = true;
                         }
                     } else if (entryKey instanceof PsiForStatement) {
+                        //TODO: to ask about vice versa (same body, similar condition)
                         if (CodeCloneUtils.sameForSetup(entryStringRep, otherEntryStringRep)) {
                             PsiForStatement forStmt = (PsiForStatement) entryKey;
                             PsiForStatement otherForStmt = (PsiForStatement) otherEntryKey;
 
-                            if (haveSimilarForBodies(forStmt, otherForStmt)) {
+                            if (areSimilarBlocks(forStmt.getBody(), otherForStmt.getBody())) {
                                 update = true;
                             }
                         }
+                    } else if (entryKey instanceof PsiForeachStatement) {
+                        if (CodeCloneUtils.sameForEachSetup(entryStringRep, otherEntryStringRep)) {
+                            PsiForeachStatement forEachStmt = (PsiForeachStatement) entryKey;
+                            PsiForeachStatement otherForEachStmt = (PsiForeachStatement) otherEntryKey;
 
-                        //TODO: to ask about vice versa (same body, similar condition)
+                            if (areSimilarBlocks(forEachStmt.getBody(), otherForEachStmt.getBody())) {
+                                update = true;
+                            }
+                        }
                     } else if (entryKey instanceof PsiSwitchStatement) {
                         if (CodeCloneUtils.sameSwitchVar(entryStringRep, otherEntryStringRep)) {
                             PsiSwitchStatement switchStmt = (PsiSwitchStatement) entryKey;
@@ -325,52 +333,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
         }
 
         private boolean haveSimilarIfBodies(PsiIfStatement ifStmt, PsiIfStatement otherIfStmt) {
-            Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap = new HashMap<>();
-            Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap = new HashMap<>();
-            Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap = new HashMap<>();
-            Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap = new HashMap<>();
-            Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
-            Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
-            Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap = new HashMap<>();
-            Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap = new HashMap<>();
-            Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap = new HashMap<>();
-            Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap = new HashMap<>();
-            Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap = new HashMap<>();
-            Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap = new HashMap<>();
-
             //TODO: consider else cases (else vs else-if)
-            return areSimilarBlocks(ifStmt.getThenBranch(), otherIfStmt.getThenBranch(),
-                    declarationMap, assignmentMap,
-                    ifStmtMap, methodCallMap,
-                    returnMap, forLoopMap,
-                    forEachLoopMap, whileLoopMap,
-                    doWhileLoopMap,
-                    switchMap, assertMap,
-                    tryMap);
-        }
-
-        private boolean haveSimilarForBodies(PsiForStatement forStmt, PsiForStatement otherForStmt) {
-            Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap = new HashMap<>();
-            Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap = new HashMap<>();
-            Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap = new HashMap<>();
-            Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap = new HashMap<>();
-            Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
-            Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
-            Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap = new HashMap<>();
-            Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap = new HashMap<>();
-            Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap = new HashMap<>();
-            Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap = new HashMap<>();
-            Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap = new HashMap<>();
-            Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap = new HashMap<>();
-
-            return areSimilarBlocks(forStmt.getBody(), otherForStmt.getBody(),
-                    declarationMap, assignmentMap,
-                    ifStmtMap, methodCallMap,
-                    returnMap, forLoopMap,
-                    forEachLoopMap, whileLoopMap,
-                    doWhileLoopMap,
-                    switchMap, assertMap,
-                    tryMap);
+            return areSimilarBlocks(ifStmt.getThenBranch(), otherIfStmt.getThenBranch());
         }
 
         private boolean haveSimilarSwitchBodies(PsiSwitchStatement switchStmt, PsiSwitchStatement otherSwitchStmt) {
@@ -454,19 +418,20 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             return true;
         }
 
-        private boolean areSimilarBlocks(PsiStatement stat, PsiStatement otherStat,
-                                         Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap,
-                                         Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap,
-                                         Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap,
-                                         Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap,
-                                         Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap,
-                                         Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap,
-                                         Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap,
-                                         Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap,
-                                         Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap,
-                                         Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap,
-                                         Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap,
-                                         Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap) {
+        private boolean areSimilarBlocks(PsiStatement stat, PsiStatement otherStat) {
+            Map<PsiDeclarationStatement, CloneExpression<PsiDeclarationStatement>> declarationMap = new HashMap<>();
+            Map<PsiAssignmentExpression, CloneExpression<PsiAssignmentExpression>> assignmentMap = new HashMap<>();
+            Map<PsiIfStatement, CloneExpression<PsiIfStatement>> ifStmtMap = new HashMap<>();
+            Map<PsiMethodCallExpression, CloneExpression<PsiMethodCallExpression>> methodCallMap = new HashMap<>();
+            Map<PsiReturnStatement, CloneExpression<PsiReturnStatement>> returnMap = new HashMap<>();
+            Map<PsiForStatement, CloneExpression<PsiForStatement>> forLoopMap = new HashMap<>();
+            Map<PsiForeachStatement, CloneExpression<PsiForeachStatement>> forEachLoopMap = new HashMap<>();
+            Map<PsiWhileStatement, CloneExpression<PsiWhileStatement>> whileLoopMap = new HashMap<>();
+            Map<PsiDoWhileStatement, CloneExpression<PsiDoWhileStatement>> doWhileLoopMap = new HashMap<>();
+            Map<PsiSwitchStatement, CloneExpression<PsiSwitchStatement>> switchMap = new HashMap<>();
+            Map<PsiAssertStatement, CloneExpression<PsiAssertStatement>> assertMap = new HashMap<>();
+            Map<PsiTryStatement, CloneExpression<PsiTryStatement>> tryMap = new HashMap<>();
+
             PsiStatement[][] blocks = CodeCloneUtils.getBlocks(stat, otherStat);
             cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap,
                     forLoopMap, forEachLoopMap, whileLoopMap, doWhileLoopMap,

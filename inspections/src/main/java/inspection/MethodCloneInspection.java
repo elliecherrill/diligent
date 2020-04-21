@@ -302,6 +302,24 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                 update = true;
                             }
                         }
+                    } else if (entryKey instanceof PsiWhileStatement) {
+                        if (CodeCloneUtils.sameWhileCondition(entryStringRep, otherEntryStringRep)) {
+                            PsiWhileStatement whileStmt = (PsiWhileStatement) entryKey;
+                            PsiWhileStatement otherWhileStmt = (PsiWhileStatement) otherEntryKey;
+
+                            if (areSimilarBlocks(whileStmt.getBody(), otherWhileStmt.getBody())) {
+                                update = true;
+                            }
+                        }
+                    } else if (entryKey instanceof PsiDoWhileStatement) {
+                        if (CodeCloneUtils.sameDoWhileCondition(entryStringRep, otherEntryStringRep)) {
+                            PsiDoWhileStatement doWhileStmt = (PsiDoWhileStatement) entryKey;
+                            PsiDoWhileStatement otherDoWhileStmt = (PsiDoWhileStatement) otherEntryKey;
+
+                            if (areSimilarBlocks(doWhileStmt.getBody(), otherDoWhileStmt.getBody())) {
+                                update = true;
+                            }
+                        }
                     } else if (entryKey instanceof PsiSwitchStatement) {
                         if (CodeCloneUtils.sameSwitchVar(entryStringRep, otherEntryStringRep)) {
                             PsiSwitchStatement switchStmt = (PsiSwitchStatement) entryKey;

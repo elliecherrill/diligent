@@ -633,19 +633,19 @@ public final class CodeCloneUtils {
         PsiExpression condExpr = stmt.getCondition();
 
         if (condExpr != null) {
-            ifStmtAsString.add("COND");
+            ifStmtAsString.add("IF-COND");
             ifStmtAsString.addAll(getBinExprAsString((PsiBinaryExpression) condExpr));
         }
 
         PsiStatement thenStmt = stmt.getThenBranch();
         if (thenStmt != null) {
-            ifStmtAsString.add("THEN");
+            ifStmtAsString.add("IF-THEN");
             ifStmtAsString.addAll(getStmtAsString(thenStmt));
         }
 
         PsiStatement elseStmt = stmt.getElseBranch();
         if (elseStmt != null) {
-            ifStmtAsString.add("ELSE");
+            ifStmtAsString.add("IF-ELSE");
             ifStmtAsString.addAll(getStmtAsString(elseStmt));
         }
 
@@ -838,15 +838,28 @@ public final class CodeCloneUtils {
     }
 
     public static boolean sameIfCondition(String[] first, String[] second) {
-        int firstCondIndex = getStartIndex("COND", first) + 1;
-        int firstCondEndIndex = getStartIndex("THEN", first);
-        int secondCondIndex = getStartIndex("COND", second) + 1;
-        int secondCondEndIndex = getStartIndex("THEN", second);
+        int firstCondIndex = getStartIndex("IF-COND", first) + 1;
+        int firstCondEndIndex = getStartIndex("IF-THEN", first);
+        int secondCondIndex = getStartIndex("IF-COND", second) + 1;
+        int secondCondEndIndex = getStartIndex("IF-THEN", second);
 
-        // if no condition
-        if (firstCondIndex == firstCondEndIndex || secondCondIndex == secondCondEndIndex) {
-            return false;
-        }
+        return Arrays.equals(first, firstCondIndex, firstCondEndIndex, second, secondCondIndex, secondCondEndIndex);
+    }
+
+    public static boolean sameWhileCondition(String[] first, String[] second) {
+        int firstCondIndex = getStartIndex("WHILE-COND", first) + 1;
+        int firstCondEndIndex = getStartIndex("END-WHILE-COND", first);
+        int secondCondIndex = getStartIndex("WHILE-COND", second) + 1;
+        int secondCondEndIndex = getStartIndex("END-WHILE-COND", second);
+
+        return Arrays.equals(first, firstCondIndex, firstCondEndIndex, second, secondCondIndex, secondCondEndIndex);
+    }
+
+    public static boolean sameDoWhileCondition(String[] first, String[] second) {
+        int firstCondIndex = getStartIndex("DOWHILE-COND", first) + 1;
+        int firstCondEndIndex = getStartIndex("END-DOWHILE-COND", first);
+        int secondCondIndex = getStartIndex("DOWHILE-COND", second) + 1;
+        int secondCondEndIndex = getStartIndex("END-DOWHILE-COND", second);
 
         return Arrays.equals(first, firstCondIndex, firstCondEndIndex, second, secondCondIndex, secondCondEndIndex);
     }
@@ -870,8 +883,8 @@ public final class CodeCloneUtils {
     }
 
     public static boolean sameIfBody(String[] first, String[] second) {
-        int firstThenIndex = getStartIndex("THEN", first);
-        int secondThenIndex = getStartIndex("THEN", second);
+        int firstThenIndex = getStartIndex("IF-THEN", first);
+        int secondThenIndex = getStartIndex("IF-THEN", second);
 
         return Arrays.equals(first, firstThenIndex, first.length, second, secondThenIndex, second.length);
     }

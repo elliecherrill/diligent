@@ -108,7 +108,7 @@ public final class CodeCloneUtils {
         insertCaseIndex = 1;
         for (int i : otherBodyIndices) {
             caseBlocks[insertCaseIndex] = otherCaseBlocks[i];
-            insertCaseIndex +=2;
+            insertCaseIndex += 2;
         }
 
         return caseBlocks;
@@ -274,6 +274,8 @@ public final class CodeCloneUtils {
         }
     }
 
+    //TODO: move tokenisation into different file
+    //TODO: standardise tokenisation (e.g. start and end flags)
     public static String[] getStmtAsStringArray(PsiStatement stmt) {
         return getStmtAsString(stmt).toArray(new String[0]);
     }
@@ -319,7 +321,48 @@ public final class CodeCloneUtils {
             return getAssertStmtAsString((PsiAssertStatement) stmt);
         }
 
+        if (stmt instanceof PsiTryStatement) {
+            return getTryStmtAsString((PsiTryStatement) stmt);
+        }
+
         return null;
+    }
+
+    private static List<String> getTryStmtAsString(PsiTryStatement stmt) {
+        List<String> tryStmtAsString = new ArrayList<>();
+
+        if (stmt.getTryBlock() != null) {
+            tryStmtAsString.add("TRY");
+            tryStmtAsString.addAll(getCodeBlockAsString(stmt.getTryBlock()));
+            tryStmtAsString.add("END-TRY");
+        }
+
+        if (stmt.getCatchBlocks().length > 0) {
+            for (PsiCatchSection c : stmt.getCatchSections()) {
+                if ((c.getCatchType() != null) && (c.getParameter() != null) && (c.getCatchBlock() != null)) {
+                    tryStmtAsString.add("CATCH");
+
+                    tryStmtAsString.add("PARAM");
+                    tryStmtAsString.add(getTypeAsString(c.getCatchType()));
+                    String exceptionName = c.getParameter().getName();
+                    tryStmtAsString.add("EXCEPTION");
+
+                    List<String> catchBlock = getCodeBlockAsString(c.getCatchBlock());
+                    findAndReplaceVar(catchBlock, exceptionName, "EXCEPTION");
+                    tryStmtAsString.addAll(catchBlock);
+
+                    tryStmtAsString.add("END-CATCH");
+                }
+            }
+        }
+
+        if (stmt.getFinallyBlock() != null) {
+            tryStmtAsString.add("FINALLY");
+            tryStmtAsString.addAll(getCodeBlockAsString(stmt.getFinallyBlock()));
+            tryStmtAsString.add("END-FINALLY");
+        }
+
+        return tryStmtAsString;
     }
 
     private static List<String> getAssertStmtAsString(PsiAssertStatement stmt) {
@@ -328,6 +371,7 @@ public final class CodeCloneUtils {
 
         assertStmtAsString.add("ASSERT");
         assertStmtAsString.addAll(getExprAsString(stmt.getAssertCondition()));
+        assertStmtAsString.add("END-ASSERT");
 
         return assertStmtAsString;
     }
@@ -335,7 +379,7 @@ public final class CodeCloneUtils {
     private static List<String> getSwitchLabelStmtAsString(PsiSwitchLabelStatement stmt) {
         List<String> switchLabelStmtAsString = new ArrayList<>();
 
-        switchLabelStmtAsString.add("CASE");
+        switchLabelStmtAsString.add("CASELABEL");
 
         PsiElement[] children = stmt.getChildren();
 
@@ -349,6 +393,8 @@ public final class CodeCloneUtils {
                 break;
             }
         }
+
+        switchLabelStmtAsString.add("END-CASELABEL");
 
         return switchLabelStmtAsString;
     }
@@ -375,6 +421,8 @@ public final class CodeCloneUtils {
                 switchStmtAsString.addAll(getStmtAsString(s));
             }
         }
+
+        switchStmtAsString.add("END-SWITCH");
 
         return switchStmtAsString;
     }
@@ -407,11 +455,14 @@ public final class CodeCloneUtils {
         PsiStatement forBody = stmt.getBody();
         forStmtAsString.addAll(getStmtAsString(forBody));
 
-        findAndReplaceIndexVar(forStmtAsString, indexVar, "FOR-INDEX");
+        findAndReplaceVar(forStmtAsString, indexVar, "FOR-INDEX");
+
+        forStmtAsString.add("END-FOR");
+
         return forStmtAsString;
     }
 
-    private static void findAndReplaceIndexVar(List<String> list, String toFind, String replacement) {
+    private static void findAndReplaceVar(List<String> list, String toFind, String replacement) {
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).equals(toFind)) {
                 list.set(i, replacement);
@@ -430,11 +481,15 @@ public final class CodeCloneUtils {
             returnStmtAsString.addAll(getExprAsString(returnExpr));
         }
 
+        returnStmtAsString.add("END-RETURN");
+
         return returnStmtAsString;
     }
 
     private static List<String> getDeclStmtAsString(PsiDeclarationStatement stmt) {
         List<String> declStmtAsString = new ArrayList<>();
+
+        declStmtAsString.add("DECLARATION");
 
         //TODO: try with multiple elements
         PsiElement[] elements = stmt.getDeclaredElements();
@@ -446,6 +501,8 @@ public final class CodeCloneUtils {
             }
         }
 
+        declStmtAsString.add("END-DECLARATION");
+
         return declStmtAsString;
     }
 
@@ -454,7 +511,7 @@ public final class CodeCloneUtils {
 
         localVarAsString.add("TYPE");
         PsiTypeElement type = var.getTypeElement();
-        localVarAsString.add(type.getType().getCanonicalText());
+        localVarAsString.add(getTypeAsString(type.getType()));
 
         localVarAsString.add("NAME");
         localVarAsString.add(var.getName());
@@ -469,21 +526,27 @@ public final class CodeCloneUtils {
     }
 
     private static List<String> getBlockStmtAsString(PsiBlockStatement stmt) {
-        List<String> blockStmtAsString = new ArrayList<>();
+        return getCodeBlockAsString(stmt.getCodeBlock());
+    }
 
-        PsiStatement[] blockStmts = stmt.getCodeBlock().getStatements();
+    private static List<String> getCodeBlockAsString(PsiCodeBlock stmt) {
+        List<String> codeBlockAsString = new ArrayList<>();
+
+        PsiStatement[] blockStmts = stmt.getStatements();
 
         for (PsiStatement blockStmt : blockStmts) {
-            blockStmtAsString.add("STMT");
-            blockStmtAsString.addAll(getStmtAsString(blockStmt));
+            codeBlockAsString.add("STMT");
+            codeBlockAsString.addAll(getStmtAsString(blockStmt));
+            codeBlockAsString.add("END-STMT");
         }
 
-        return blockStmtAsString;
-
+        return codeBlockAsString;
     }
 
     private static List<String> getIfStmtAsString(PsiIfStatement stmt) {
         List<String> ifStmtAsString = new ArrayList<>();
+
+        ifStmtAsString.add("IF");
 
         PsiExpression condExpr = stmt.getCondition();
 
@@ -503,6 +566,8 @@ public final class CodeCloneUtils {
             ifStmtAsString.add("ELSE");
             ifStmtAsString.addAll(getStmtAsString(elseStmt));
         }
+
+        ifStmtAsString.add("END-IF");
 
         return ifStmtAsString;
     }
@@ -525,6 +590,8 @@ public final class CodeCloneUtils {
             binExprAsString.addAll(getBinExprAsString((PsiBinaryExpression) leftExpr));
         }
 
+        binExprAsString.add("END-BINEXPRLHS");
+
         binExprAsString.add("BINEXPROP");
         binExprAsString.add(getOpAsString(binExpr.getOperationSign()));
 
@@ -543,6 +610,8 @@ public final class CodeCloneUtils {
             binExprAsString.addAll(getBinExprAsString((PsiBinaryExpression) rightExpr));
         }
 
+        binExprAsString.add("END-BINEXPRRHS");
+
         return binExprAsString;
     }
 
@@ -554,6 +623,8 @@ public final class CodeCloneUtils {
 
     private static List<String> getExprAsString(PsiExpression expr) {
         List<String> exprAsString = new ArrayList<>();
+
+        exprAsString.add("EXPR");
 
         if (expr instanceof PsiAssignmentExpression) {
             exprAsString.add("LHS");
@@ -614,6 +685,8 @@ public final class CodeCloneUtils {
             exprAsString.addAll(getBinExprAsString((PsiBinaryExpression) expr));
         }
 
+        exprAsString.add("END-EXPR");
+
         return exprAsString;
     }
 
@@ -643,6 +716,10 @@ public final class CodeCloneUtils {
         }
 
         return "";
+    }
+
+    private static String getTypeAsString(PsiType type) {
+        return type.getCanonicalText();
     }
 
     private static String getIdentifierString(PsiReferenceExpression refExpr) {
@@ -710,13 +787,6 @@ public final class CodeCloneUtils {
         return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
     }
 
-    // TODO
-//    public static boolean orSameCondition(String[] first, String[] second) {
-//        // If first is a condition in the form A OR B
-//        int firstLhsIndex = getStartIndex("BINEXPRLHS", first);
-//        int firstRhsIndex = getStartIndex("BINEXPRRHS", first);
-//    }
-
     public static boolean sameIfBody(String[] first, String[] second) {
         int firstThenIndex = getStartIndex("THEN", first);
         int secondThenIndex = getStartIndex("THEN", second);
@@ -773,28 +843,4 @@ public final class CodeCloneUtils {
 
         return -1;
     }
-
-    private static boolean isNumeric(String str) {
-        return str.matches("(\\d)+");
-    }
-
-    public static String output(String[] str) {
-        StringBuffer sb = new StringBuffer();
-
-        for (String s : str) {
-            sb.append(s);
-        }
-
-        return sb.toString();
-    }
-
-//    public static boolean isAllTrue (boolean[] bs) {
-//        for (boolean b : bs) {
-//            if (!b) {
-//                return false;
-//            }
-//        }
-//
-//        return true;
-//    }
 }

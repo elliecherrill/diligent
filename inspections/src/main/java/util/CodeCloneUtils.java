@@ -315,7 +315,21 @@ public final class CodeCloneUtils {
             return getSwitchLabelStmtAsString((PsiSwitchLabelStatement) stmt);
         }
 
+        if (stmt instanceof PsiAssertStatement) {
+            return getAssertStmtAsString((PsiAssertStatement) stmt);
+        }
+
         return null;
+    }
+
+    private static List<String> getAssertStmtAsString(PsiAssertStatement stmt) {
+        //Only consider assertion condition (not description)
+        List<String> assertStmtAsString = new ArrayList<>();
+
+        assertStmtAsString.add("ASSERT");
+        assertStmtAsString.addAll(getExprAsString(stmt.getAssertCondition()));
+
+        return assertStmtAsString;
     }
 
     private static List<String> getSwitchLabelStmtAsString(PsiSwitchLabelStatement stmt) {

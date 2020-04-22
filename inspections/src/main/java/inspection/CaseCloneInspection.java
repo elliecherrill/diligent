@@ -15,20 +15,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
+public final class CaseCloneInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
     @NotNull
     public String getDisplayName() {
-        return "Similar code";
+        return "Similar code in all cases.";
     }
 
-    public CloneInspection() {
+    public CaseCloneInspection() {
     }
 
     @Override
     @NotNull
     public String getShortName() {
-        return "Clone";
+        return "CaseClone";
     }
 
     @Override
@@ -48,18 +48,18 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
 
         if (Utils.isInspectionOn(holder, "clone")) {
-            return new CloneVisitor(holder);
+            return new CaseCloneVisitor(holder);
         }
 
         return new JavaElementVisitor() {
         };
     }
 
-    private static class CloneVisitor extends JavaElementVisitor {
+    private static class CaseCloneVisitor extends JavaElementVisitor {
         private final ProblemsHolder holder;
         private final FeedbackHolder feedbackHolder;
 
-        CloneVisitor(ProblemsHolder holder) {
+        CaseCloneVisitor(ProblemsHolder holder) {
             this.holder = holder;
             feedbackHolder = FeedbackHolder.getInstance();
         }
@@ -74,119 +74,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
             feedbackHolder.writeToFile();
         }
-
-//        @Override
-//        public void visitClass(PsiClass aClass) {
-//            super.visitClass(aClass);
-//
-//            if (Utils.hasErrorsInFile(aClass)) {
-//                return;
-//            }
-//
-//            PsiMethod[] methods = aClass.getMethods();
-//
-//            if (methods.length == 0) {
-//                return;
-//            }
-//
-//            PsiStatement[][] methodBodies = CodeCloneUtils.getMethodBodies(methods);
-//
-//            // String representation
-//            Map<PsiDeclarationStatement, String[]> declarationMap = new HashMap<>();
-//            Map<PsiAssignmentExpression, String[]> assignmentMap = new HashMap<>();
-//            Map<PsiIfStatement, String[]> ifStmtMap = new HashMap<>();
-//            Map<PsiMethodCallExpression, String[]> methodCallMap = new HashMap<>();
-//
-//            // Location
-//            Map<PsiDeclarationStatement, Pair<Integer, Integer>> declarationLocationMap = new HashMap<>();
-//            Map<PsiAssignmentExpression, Pair<Integer, Integer>> assignmentLocationMap = new HashMap<>();
-//            Map<PsiIfStatement, Pair<Integer, Integer>> ifStmtLocationMap = new HashMap<>();
-//            Map<PsiMethodCallExpression, Pair<Integer, Integer>> methodCallLocationMap = new HashMap<>();
-//
-//            // Location of clones
-//            Map<PsiDeclarationStatement, Set<Integer>> declarationCloneMap = new HashMap<>();
-//            Map<PsiAssignmentExpression, Set<Integer>> assignmentCloneMap = new HashMap<>();
-//            Map<PsiIfStatement, Set<Integer>> ifStmtCloneMap = new HashMap<>();
-//            Map<PsiMethodCallExpression, Set<Integer>> methodCallCloneMap = new HashMap<>();
-//
-//            // Iterate through all statements and add to corresponding LOCATION and STRING REP maps
-//            for (int i = 0; i < methodBodies.length; i++) {
-//                for (int j = 0; j < methodBodies[0].length; j++) {
-//                    PsiStatement stat = methodBodies[i][j];
-//                    if (stat == null) {
-//                        continue;
-//                    }
-//
-//                    // Calculate string representation and add to map
-//                    StatType type = addStatToMap(stat, declarationMap, assignmentMap, ifStmtMap, methodCallMap);
-//
-//                    // Add to location map
-//                    Pair<Integer, Integer> location = new Pair<>(i, j);
-//
-//                    if (type == StatType.ASSIGNMENT) {
-//                        PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
-//                        assignmentLocationMap.put((PsiAssignmentExpression) expr, location);
-//                    } else if (type == StatType.DECLARATION) {
-//                        declarationLocationMap.put((PsiDeclarationStatement) stat, location);
-//                    } else if (type == StatType.METHOD_CALL) {
-//                        PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
-//                        methodCallLocationMap.put((PsiMethodCallExpression) expr, location);
-//                    } else if (type == StatType.IF) {
-//                        ifStmtLocationMap.put((PsiIfStatement) stat, location);
-//                    }
-//                }
-//            }
-//
-//            compareAssignments(assignmentMap, assignmentCloneMap, assignmentLocationMap);
-//            compareIfStatements(ifStmtMap, ifStmtCloneMap, ifStmtLocationMap);
-//            compareDeclarations(declarationMap, declarationCloneMap, declarationLocationMap);
-//            compareMethodCalls(methodCallMap, methodCallCloneMap, methodCallLocationMap);
-//
-//            List<Integer> rangeOfMethods = IntStream.range(0, methodBodies.length - 1).boxed().collect(Collectors.toList());
-//            String filename = aClass.getContainingFile().getName();
-//
-//            // If we have an entire method where duplicate / similar has been detected for every line in another method
-//            for (int i = 0; i < methodBodies.length; i++) {
-//                // Empty method
-//                if (methodBodies[i][0] == null) {
-//                    continue;
-//                }
-//
-//                Set<Integer> firstClones = getClones(methodBodies[i][0], assignmentCloneMap, declarationCloneMap, ifStmtCloneMap, methodCallCloneMap);
-//
-//                if (firstClones.size() == 0) {
-//                    continue;
-//                }
-//
-//                Set<Integer> intersection = new HashSet<>(firstClones);
-//
-//                for (int j = 1; j < methodBodies[0].length; j++) {
-//                    if (methodBodies[i][j] == null) {
-//                        break;
-//                    }
-//                    Set<Integer> currClones = getClones(methodBodies[i][j], assignmentCloneMap, declarationCloneMap, ifStmtCloneMap, methodCallCloneMap);
-//                    if (currClones == null) {
-//                        intersection.clear();
-//                        break;
-//                    } else {
-//                        intersection.retainAll(currClones);
-//                    }
-//                }
-//
-//                //If it has at least one clone
-//                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(methods[i]), "clone", PsiStmtType.SWITCH);
-//
-//                for (Integer methodIndex : rangeOfMethods) {
-//                    if (intersection.contains(methodIndex)) {
-//                        int line = Utils.getLineNumber(methods[i]);
-//                        Feedback feedback = new Feedback(line, "Method \'" + methods[i].getName() + "\' is clone of method \'" + methods[methodIndex].getName() + "\'.", filename, line + "-clone");
-//                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-//                    } else {
-//                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
-//                    }
-//                }
-//            }
-//        }
 
         @Override
         public void visitSwitchStatement(PsiSwitchStatement statement) {

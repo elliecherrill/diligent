@@ -69,7 +69,23 @@ public class TokeniseUtils {
             return getTryStmtAsString((PsiTryStatement) stmt);
         }
 
+        if (stmt instanceof PsiThrowStatement) {
+            return getThrowStmtAsString((PsiThrowStatement) stmt);
+        }
+
         return null;
+    }
+
+    private static List<String> getThrowStmtAsString(PsiThrowStatement stmt) {
+        List<String> throwStmtAsString = new ArrayList<>();
+
+        throwStmtAsString.add("THROW");
+
+        throwStmtAsString.addAll(getExprAsString(stmt.getException()));
+
+        throwStmtAsString.add("END-THROW");
+
+        return throwStmtAsString;
     }
 
     private static List<String> getTryStmtAsString(PsiTryStatement stmt) {

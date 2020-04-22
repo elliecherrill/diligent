@@ -71,6 +71,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
         private Map<PsiSwitchStatement, CloneExpression> switchMap;
         private Map<PsiAssertStatement, CloneExpression> assertMap;
         private Map<PsiTryStatement, CloneExpression> tryMap;
+        private Map<PsiThrowStatement, CloneExpression> throwMap;
 
         CloneVisitor(ProblemsHolder holder) {
             this.holder = holder;
@@ -88,6 +89,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             switchMap = new HashMap<>();
             assertMap = new HashMap<>();
             tryMap = new HashMap<>();
+            throwMap = new HashMap<>();
         }
 
         @Override
@@ -118,8 +120,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             PsiStatement[][] methodBodies = CodeCloneUtils.getMethodBodies(methods);
             cloneInit(methodBodies, declarationMap, assignmentMap, ifStmtMap,
                         methodCallMap, returnMap, forLoopMap, forEachLoopMap,
-                        whileLoopMap, doWhileLoopMap,
-                        switchMap, assertMap, tryMap);
+                        whileLoopMap, doWhileLoopMap, switchMap, assertMap,
+                        tryMap, throwMap);
 
             List<Integer> rangeOfMethods = IntStream.range(0, methodBodies.length - 1).boxed().collect(Collectors.toList());
             String filename = aClass.getContainingFile().getName();
@@ -138,7 +140,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         forEachLoopMap, whileLoopMap,
                         doWhileLoopMap,
                         switchMap, assertMap,
-                        tryMap);
+                        tryMap, throwMap);
 
                 if (firstClones == null || firstClones.size() == 0) {
                     continue;
@@ -157,7 +159,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             forEachLoopMap, whileLoopMap,
                             doWhileLoopMap,
                             switchMap, assertMap,
-                            tryMap);
+                            tryMap, throwMap);
                     if (currClones == null) {
                         intersection.clear();
                         break;
@@ -193,7 +195,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                Map<PsiDoWhileStatement, CloneExpression> doWhileLoopMap,
                                Map<PsiSwitchStatement, CloneExpression> switchMap,
                                Map<PsiAssertStatement, CloneExpression> assertMap,
-                               Map<PsiTryStatement, CloneExpression> tryMap) {
+                               Map<PsiTryStatement, CloneExpression> tryMap,
+                               Map<PsiThrowStatement, CloneExpression> throwMap) {
             // Iterate through all statements and add to corresponding LOCATION and STRING REP maps
             for (int i = 0; i < bodies.length; i++) {
                 for (int j = 0; j < bodies[0].length; j++) {
@@ -208,7 +211,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                 forEachLoopMap, whileLoopMap,
                                 doWhileLoopMap,
                                 switchMap, assertMap,
-                                tryMap);
+                                tryMap, throwMap);
                     }
                 }
             }
@@ -225,6 +228,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             compareStatements(switchMap);
             compareStatements(assertMap);
             compareStatements(tryMap);
+            compareStatements(throwMap);
         }
 
         private <T extends PsiElement> void compareStatements(Map<T, CloneExpression> map) {
@@ -368,6 +372,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             Map<PsiSwitchStatement, CloneExpression> switchMap = new HashMap<>();
             Map<PsiAssertStatement, CloneExpression> assertMap = new HashMap<>();
             Map<PsiTryStatement, CloneExpression> tryMap = new HashMap<>();
+            Map<PsiThrowStatement, CloneExpression> throwMap = new HashMap<>();
 
             PsiCodeBlock body = switchStmt.getBody();
             PsiCodeBlock otherBody = otherSwitchStmt.getBody();
@@ -382,7 +387,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
 
             PsiStatement[][] blocks = CodeCloneUtils.getSameCaseBlocks(body, otherBody);
             cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap,
-                    forLoopMap, forEachLoopMap, whileLoopMap, doWhileLoopMap, switchMap, assertMap, tryMap);
+                    forLoopMap, forEachLoopMap, whileLoopMap, doWhileLoopMap, switchMap, assertMap,
+                    tryMap, throwMap);
 
             // For every array of statements need to find clones for every statement in the *following* array
             for (int i = 0; i < blocks.length; i+=2) {
@@ -393,7 +399,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         forEachLoopMap, whileLoopMap,
                         doWhileLoopMap,
                         switchMap, assertMap,
-                        tryMap);
+                        tryMap, throwMap);
 
                 if (firstClones == null || firstClones.size() == 0) {
                     return false;
@@ -412,7 +418,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             forEachLoopMap, whileLoopMap,
                             doWhileLoopMap,
                             switchMap, assertMap,
-                            tryMap);
+                            tryMap, throwMap);
                     if (currClones == null) {
                         intersection.clear();
                         break;
@@ -449,11 +455,12 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             Map<PsiSwitchStatement, CloneExpression> switchMap = new HashMap<>();
             Map<PsiAssertStatement, CloneExpression> assertMap = new HashMap<>();
             Map<PsiTryStatement, CloneExpression> tryMap = new HashMap<>();
+            Map<PsiThrowStatement, CloneExpression> throwMap = new HashMap<>();
 
             PsiStatement[][] blocks = CodeCloneUtils.getBlocks(stat, otherStat);
             cloneInit(blocks, declarationMap, assignmentMap, ifStmtMap, methodCallMap, returnMap,
-                    forLoopMap, forEachLoopMap, whileLoopMap, doWhileLoopMap,
-                    switchMap, assertMap, tryMap);
+                    forLoopMap, forEachLoopMap, whileLoopMap, doWhileLoopMap, switchMap, assertMap,
+                    tryMap, throwMap);
 
             if ((blocks[0][0] == null) && (blocks[1][0] != null)) {
                 return false;
@@ -476,7 +483,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                             forEachLoopMap, whileLoopMap,
                             doWhileLoopMap,
                             switchMap, assertMap,
-                            tryMap);
+                            tryMap, throwMap);
 
                     if (firstClones == null || firstClones.size() == 0) {
                         return false;
@@ -495,7 +502,7 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                 forEachLoopMap, whileLoopMap,
                                 doWhileLoopMap,
                                 switchMap, assertMap,
-                                tryMap);
+                                tryMap, throwMap);
                         if (currClones == null) {
                             intersection.clear();
                             break;
@@ -537,7 +544,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                   Map<PsiDoWhileStatement, CloneExpression> doWhileLoopMap,
                                   Map<PsiSwitchStatement, CloneExpression> switchMap,
                                   Map<PsiAssertStatement, CloneExpression> assertMap,
-                                  Map<PsiTryStatement, CloneExpression> tryMap) {
+                                  Map<PsiTryStatement, CloneExpression> tryMap,
+                                  Map<PsiThrowStatement, CloneExpression> throwMap) {
             //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
             String[] stringRep = TokeniseUtils.getStmtAsStringArray(stat);
 
@@ -616,6 +624,12 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                 return;
             }
 
+            if (stat instanceof PsiThrowStatement) {
+                PsiThrowStatement throwStat = (PsiThrowStatement) stat;
+                throwMap.put(throwStat, new CloneExpression(stringRep, location));
+                return;
+            }
+
             assert false : "Unknown statement type " + stat.toString();
         }
 
@@ -631,7 +645,8 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                                        Map<PsiDoWhileStatement, CloneExpression> doWhileLoopMap,
                                        Map<PsiSwitchStatement, CloneExpression> switchMap,
                                        Map<PsiAssertStatement, CloneExpression> assertMap,
-                                       Map<PsiTryStatement, CloneExpression> tryMap) {
+                                       Map<PsiTryStatement, CloneExpression> tryMap,
+                                       Map<PsiThrowStatement, CloneExpression> throwMap) {
             if (stat instanceof PsiExpressionStatement) {
                 PsiExpression expr = ((PsiExpressionStatement) stat).getExpression();
                 if (expr instanceof PsiAssignmentExpression) {
@@ -704,6 +719,12 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
             if (stat instanceof PsiTryStatement) {
                 PsiTryStatement tryStat = (PsiTryStatement) stat;
                 CloneExpression cloneExpr = tryMap.get(tryStat);
+                return cloneExpr.getClones();
+            }
+
+            if (stat instanceof PsiThrowStatement) {
+                PsiThrowStatement throwStat = (PsiThrowStatement) stat;
+                CloneExpression cloneExpr = throwMap.get(throwStat);
                 return cloneExpr.getClones();
             }
 

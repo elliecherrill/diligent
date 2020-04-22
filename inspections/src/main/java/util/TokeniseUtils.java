@@ -151,7 +151,7 @@ public class TokeniseUtils {
         PsiElement[] children = stmt.getChildren();
         for (PsiElement child : children) {
             if (child instanceof PsiReferenceExpression) {
-                switchStmtAsString.add(getRefAsString((PsiReferenceExpression) child));
+                switchStmtAsString.addAll(getRefAsString((PsiReferenceExpression) child));
                 break;
             }
         }
@@ -309,9 +309,10 @@ public class TokeniseUtils {
         PsiElement[] elements = stmt.getDeclaredElements();
 
         for (PsiElement elem : elements) {
-            // TODO: what else could it be?
             if (elem instanceof PsiLocalVariable) {
                 declStmtAsString.addAll(getLocalVarAsString((PsiLocalVariable) elem));
+            } else {
+                assert false: "Unknown element in declaration " + elem.toString();
             }
         }
 
@@ -390,40 +391,16 @@ public class TokeniseUtils {
         List<String> binExprAsString = new ArrayList<>();
 
         binExprAsString.add("BINEXPRLHS");
-
         PsiExpression leftExpr = binExpr.getLOperand();
-        if (leftExpr instanceof PsiReferenceExpression) {
-            binExprAsString.add(getRefAsString((PsiReferenceExpression) leftExpr));
-        }
-
-        if (leftExpr instanceof PsiLiteralExpression) {
-            binExprAsString.add(getLiteralAsString((PsiLiteralExpression) leftExpr));
-        }
-
-        if (leftExpr instanceof PsiBinaryExpression) {
-            binExprAsString.addAll(getBinExprAsString((PsiBinaryExpression) leftExpr));
-        }
-
+        binExprAsString.addAll(getExprAsString(leftExpr));
         binExprAsString.add("END-BINEXPRLHS");
 
         binExprAsString.add("BINEXPROP");
         binExprAsString.add(getOpAsString(binExpr.getOperationSign()));
 
         binExprAsString.add("BINEXPRRHS");
-
         PsiExpression rightExpr = binExpr.getROperand();
-        if (rightExpr instanceof PsiReferenceExpression) {
-            binExprAsString.add(getRefAsString((PsiReferenceExpression) rightExpr));
-        }
-
-        if (rightExpr instanceof PsiLiteralExpression) {
-            binExprAsString.add(getLiteralAsString((PsiLiteralExpression) rightExpr));
-        }
-
-        if (rightExpr instanceof PsiBinaryExpression) {
-            binExprAsString.addAll(getBinExprAsString((PsiBinaryExpression) rightExpr));
-        }
-
+        binExprAsString.addAll(getExprAsString(rightExpr));
         binExprAsString.add("END-BINEXPRRHS");
 
         return binExprAsString;
@@ -441,50 +418,11 @@ public class TokeniseUtils {
         exprAsString.add("EXPR");
 
         if (expr instanceof PsiAssignmentExpression) {
-            exprAsString.add("LHS");
-            PsiAssignmentExpression assignmentExpr = (PsiAssignmentExpression) expr;
-            PsiExpression leftExpr = assignmentExpr.getLExpression();
-
-            if (leftExpr instanceof PsiReferenceExpression) {
-                exprAsString.add(getRefAsString((PsiReferenceExpression) leftExpr));
-            }
-
-            exprAsString.add("OP");
-            PsiJavaToken opToken = assignmentExpr.getOperationSign();
-            exprAsString.add(getOpAsString(opToken));
-
-            exprAsString.add("RHS");
-            PsiExpression rightExpr = assignmentExpr.getRExpression();
-
-            if (rightExpr instanceof PsiReferenceExpression) {
-                exprAsString.add(getRefAsString((PsiReferenceExpression) rightExpr));
-            }
-
-            if (rightExpr instanceof PsiLiteralExpression) {
-                exprAsString.add(getLiteralAsString((PsiLiteralExpression) rightExpr));
-            }
-
+            exprAsString.addAll(getAssExprAsString((PsiAssignmentExpression) expr));
         } else if (expr instanceof PsiMethodCallExpression) {
-            PsiMethodCallExpression methodCallExpr = (PsiMethodCallExpression) expr;
-            PsiReferenceExpression refExpr = methodCallExpr.getMethodExpression();
-
-            exprAsString.add("CALL");
-            exprAsString.add(getRefAsString(refExpr));
-
-            PsiExpressionList paramList = methodCallExpr.getArgumentList();
-            PsiExpression[] params = paramList.getExpressions();
-
-            if (params.length > 0) {
-                exprAsString.add("PARAMS");
-            }
-
-            for (PsiExpression param : params) {
-                exprAsString.addAll(getExprAsString(param));
-            }
-
+            exprAsString.addAll(getMethodCallExprAsString((PsiMethodCallExpression) expr));
         } else if (expr instanceof PsiReferenceExpression) {
-            exprAsString.add(getRefAsString((PsiReferenceExpression) expr));
-
+            exprAsString.addAll(getRefAsString((PsiReferenceExpression) expr));
         } else if (expr instanceof PsiLiteralExpression) {
             exprAsString.add(getLiteralAsString((PsiLiteralExpression) expr));
         } else if (expr instanceof PsiPostfixExpression) {
@@ -497,11 +435,102 @@ public class TokeniseUtils {
             exprAsString.add(getOpAsString(prefixExpr.getOperationSign()));
         } else if (expr instanceof PsiBinaryExpression) {
             exprAsString.addAll(getBinExprAsString((PsiBinaryExpression) expr));
+        } else if (expr instanceof PsiNewExpression){
+            exprAsString.addAll(getNewExprAsString((PsiNewExpression) expr));
         }
 
         exprAsString.add("END-EXPR");
 
         return exprAsString;
+    }
+
+    private static List<String> getAssExprAsString(PsiAssignmentExpression expr) {
+        List<String> assExprAsString = new ArrayList<>();
+
+        assExprAsString.add("LHS");
+        PsiExpression leftExpr = expr.getLExpression();
+        assExprAsString.addAll(getExprAsString(leftExpr));
+
+        assExprAsString.add("OP");
+        PsiJavaToken opToken = expr.getOperationSign();
+        assExprAsString.add(getOpAsString(opToken));
+
+        assExprAsString.add("RHS");
+        PsiExpression rightExpr = expr.getRExpression();
+        assExprAsString.addAll(getExprAsString(rightExpr));
+
+        return assExprAsString;
+    }
+
+    private static List<String> getMethodCallExprAsString(PsiMethodCallExpression expr) {
+        List<String> methodCallExprAsString = new ArrayList<>();
+
+        PsiReferenceExpression refExpr = expr.getMethodExpression();
+
+        methodCallExprAsString.add("METHOD-CALL");
+        methodCallExprAsString.addAll(getRefAsString(refExpr));
+
+        PsiExpressionList paramList = expr.getArgumentList();
+        PsiExpression[] params = paramList.getExpressions();
+
+        if (params.length > 0) {
+            methodCallExprAsString.add("PARAMS");
+        }
+
+        for (PsiExpression param : params) {
+            methodCallExprAsString.addAll(getExprAsString(param));
+        }
+
+        methodCallExprAsString.add("END-METHOD-CALL");
+
+        return methodCallExprAsString;
+    }
+
+    private static List<String> getNewExprAsString(PsiNewExpression expr) {
+        List<String> newExprAsString = new ArrayList<>();
+
+        if (expr.isArrayCreation()) {
+            newExprAsString.add("NEW-ARRAY");
+            PsiArrayInitializerExpression arrInitExpr = expr.getArrayInitializer();
+            if (arrInitExpr != null){
+                newExprAsString.add("TYPE");
+                PsiExpression[] initExprs = arrInitExpr.getInitializers();
+                for (PsiExpression e : initExprs) {
+                    newExprAsString.addAll(getExprAsString(e));
+                }
+            }
+            PsiExpression[] dimensions = expr.getArrayDimensions();
+            newExprAsString.add("DIM");
+            for (PsiExpression e : dimensions) {
+                newExprAsString.addAll(getExprAsString(e));
+            }
+            newExprAsString.add("END-NEW-ARRAY");
+        } else {
+            newExprAsString.add("NEW-OBJECT");
+            PsiJavaCodeReferenceElement refElem = expr.getClassReference();
+            if (refElem != null) {
+                newExprAsString.add(refElem.getQualifiedName());
+                PsiType[] typeParams = refElem.getTypeParameters();
+                if (typeParams.length > 0) {
+                    newExprAsString.add("TYPE-PARAMS");
+                }
+                for (PsiType t : typeParams) {
+                    newExprAsString.add(getTypeAsString(t));
+                }
+            }
+
+            PsiExpressionList params = expr.getArgumentList();
+            if (params != null) {
+                newExprAsString.add("PARAMS");
+                PsiExpression[] exprs = params.getExpressions();
+                for (PsiExpression e : exprs) {
+                    newExprAsString.addAll(getExprAsString(e));
+                }
+            }
+            newExprAsString.add("END-NEW-OBJECT");
+        }
+
+        return newExprAsString;
     }
 
     private static String getOpAsString(PsiJavaToken opToken) {
@@ -522,14 +551,22 @@ public class TokeniseUtils {
         return "";
     }
 
-    private static String getRefAsString(PsiReferenceExpression refExpr) {
-        String id = getIdentifierString(refExpr);
+    private static List<String> getRefAsString(PsiReferenceExpression refExpr) {
+        List<String> refAsString = new ArrayList<>();
 
-        if (id != null) {
-            return id;
+        refAsString.add("REF");
+        if (refExpr.getQualifierExpression() != null) {
+            refAsString.addAll(getExprAsString(refExpr.getQualifierExpression()));
         }
 
-        return "";
+        String id = getIdentifierString(refExpr);
+        if (id != null) {
+            refAsString.add(id);
+        }
+
+        refAsString.add("END-REF");
+
+        return refAsString;
     }
 
     private static String getTypeAsString(PsiType type) {

@@ -10,5 +10,6 @@ public enum PsiStmtType {
     FILE,
     LEFT_THIS_EXPR,
     RIGHT_THIS_EXPR,
-    SWITCH
+    SWITCH,
+    BIN_EXPR
 }

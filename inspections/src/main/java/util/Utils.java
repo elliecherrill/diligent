@@ -141,7 +141,7 @@ public final class Utils {
         return SmartPointerManager.createPointer(element);
     }
 
-    private static boolean isString(PsiType type) {
+    public static boolean isString(PsiType type) {
         return type.getCanonicalText().equals("java.lang.String");
     }
 

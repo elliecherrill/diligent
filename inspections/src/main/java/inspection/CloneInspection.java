@@ -15,20 +15,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class MethodCloneInspection extends AbstractBaseJavaLocalInspectionTool {
+public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
     @NotNull
     public String getDisplayName() {
-        return "Similar code in methods";
+        return "Similar code in methods and switch cases.";
     }
 
-    public MethodCloneInspection() {
+    public CloneInspection() {
     }
 
     @Override
     @NotNull
     public String getShortName() {
-        return "MethodClone";
+        return "Clone";
     }
 
     @Override
@@ -59,37 +59,9 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
         private final ProblemsHolder holder;
         private final FeedbackHolder feedbackHolder;
 
-        private Map<PsiDeclarationStatement, CloneExpression> declarationMap;
-        private Map<PsiAssignmentExpression, CloneExpression> assignmentMap;
-        private Map<PsiIfStatement, CloneExpression> ifStmtMap;
-        private Map<PsiMethodCallExpression, CloneExpression> methodCallMap;
-        private Map<PsiReturnStatement, CloneExpression> returnMap;
-        private Map<PsiForStatement, CloneExpression> forLoopMap;
-        private Map<PsiForeachStatement, CloneExpression> forEachLoopMap;
-        private Map<PsiWhileStatement, CloneExpression> whileLoopMap;
-        private Map<PsiDoWhileStatement, CloneExpression> doWhileLoopMap;
-        private Map<PsiSwitchStatement, CloneExpression> switchMap;
-        private Map<PsiAssertStatement, CloneExpression> assertMap;
-        private Map<PsiTryStatement, CloneExpression> tryMap;
-        private Map<PsiThrowStatement, CloneExpression> throwMap;
-
         CloneVisitor(ProblemsHolder holder) {
             this.holder = holder;
             feedbackHolder = FeedbackHolder.getInstance();
-
-            declarationMap = new HashMap<>();
-            assignmentMap = new HashMap<>();
-            ifStmtMap = new HashMap<>();
-            methodCallMap = new HashMap<>();
-            returnMap = new HashMap<>();
-            forLoopMap = new HashMap<>();
-            forEachLoopMap = new HashMap<>();
-            whileLoopMap = new HashMap<>();
-            doWhileLoopMap = new HashMap<>();
-            switchMap = new HashMap<>();
-            assertMap = new HashMap<>();
-            tryMap = new HashMap<>();
-            throwMap = new HashMap<>();
         }
 
         @Override
@@ -104,6 +76,130 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
         }
 
         @Override
+        public void visitSwitchStatement(PsiSwitchStatement statement) {
+            super.visitSwitchStatement(statement);
+
+            if (Utils.hasErrorsInFile(statement)) {
+                return;
+            }
+
+            PsiCodeBlock switchBody = statement.getBody();
+
+            if (switchBody == null) {
+                return;
+            }
+
+            Map<PsiDeclarationStatement, CloneExpression> declarationMap = new HashMap<>();
+            Map<PsiAssignmentExpression, CloneExpression> assignmentMap = new HashMap<>();
+            Map<PsiIfStatement, CloneExpression> ifStmtMap = new HashMap<>();
+            Map<PsiMethodCallExpression, CloneExpression> methodCallMap = new HashMap<>();
+            Map<PsiReturnStatement, CloneExpression> returnMap = new HashMap<>();
+            Map<PsiForStatement, CloneExpression> forLoopMap = new HashMap<>();
+            Map<PsiForeachStatement, CloneExpression> forEachLoopMap = new HashMap<>();
+            Map<PsiWhileStatement, CloneExpression> whileLoopMap = new HashMap<>();
+            Map<PsiDoWhileStatement, CloneExpression> doWhileLoopMap = new HashMap<>();
+            Map<PsiSwitchStatement, CloneExpression> switchMap = new HashMap<>();
+            Map<PsiAssertStatement, CloneExpression> assertMap = new HashMap<>();
+            Map<PsiTryStatement, CloneExpression> tryMap = new HashMap<>();
+            Map<PsiThrowStatement, CloneExpression> throwMap = new HashMap<>();
+
+            PsiStatement[][] cases = CodeCloneUtils.getCaseBlocks(switchBody);
+            cloneInit(cases, declarationMap, assignmentMap, ifStmtMap,
+                    methodCallMap, returnMap, forLoopMap, forEachLoopMap,
+                    whileLoopMap, doWhileLoopMap, switchMap, assertMap,
+                    tryMap, throwMap);
+
+            List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).boxed().collect(Collectors.toList());
+            List<Set<Integer>> clones = new ArrayList<>(cases.length);
+
+            // If we have an entire case where duplicate / similar has been detected for every line in another case
+            for (int i = 0; i < cases.length; i++) {
+                // Empty case
+                //TODO: consider fallthrough
+                if (cases[i][0] == null) {
+                    continue;
+                }
+
+                Set<Integer> firstClones = getClones(cases[i][0],
+                        declarationMap, assignmentMap,
+                        ifStmtMap, methodCallMap,
+                        returnMap, forLoopMap,
+                        forEachLoopMap, whileLoopMap,
+                        doWhileLoopMap,
+                        switchMap, assertMap,
+                        tryMap, throwMap);
+
+                if (firstClones == null || firstClones.size() == 0) {
+                    continue;
+                }
+
+                Set<Integer> intersection = new HashSet<>(firstClones);
+
+                for (int j = 1; j < cases[0].length; j++) {
+                    if (cases[i][j] == null) {
+                        break;
+                    }
+                    Set<Integer> currClones = getClones(cases[i][j],
+                            declarationMap, assignmentMap,
+                            ifStmtMap, methodCallMap,
+                            returnMap, forLoopMap,
+                            forEachLoopMap, whileLoopMap,
+                            doWhileLoopMap,
+                            switchMap, assertMap,
+                            tryMap, throwMap);
+
+                    if (currClones == null) {
+                        intersection.clear();
+                        break;
+                    } else {
+                        intersection.retainAll(currClones);
+                    }
+                }
+
+                // Add itself to its clones
+                intersection.add(i);
+
+                clones.add(intersection);
+            }
+
+            String filename = statement.getContainingFile().getName();
+            FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "switch-clone", PsiStmtType.SWITCH);
+
+            if (transitiveClosureOfClones(clones, rangeOfCases)) {
+                int line = Utils.getLineNumber(statement);
+                Feedback feedback = new Feedback(line,
+                        "All cases in switch statement are clones of one another.", filename,
+                        line + "-switch-clone");
+                feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+            } else {
+                feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+            }
+
+        }
+
+        private boolean transitiveClosureOfClones(List<Set<Integer>> cases, List<Integer> aim) {
+            if (cases.isEmpty()) {
+                return false;
+            }
+
+            Set<Integer> currClones = new HashSet<>(cases.get(0));
+
+            for (int i = 1; i < cases.size(); i++) {
+                if (Collections.disjoint(currClones, cases.get(i))) {
+                    currClones = cases.get(i);
+                } else {
+                    currClones.addAll(cases.get(i));
+                }
+
+                if (currClones.containsAll(aim)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
         public void visitClass(PsiClass aClass) {
             super.visitClass(aClass);
 
@@ -113,15 +209,29 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
 
             PsiMethod[] methods = aClass.getMethods();
 
-            if (methods.length == 0) {
+            if (methods.length <= 1) {
                 return;
             }
 
+            Map<PsiDeclarationStatement, CloneExpression> declarationMap = new HashMap<>();
+            Map<PsiAssignmentExpression, CloneExpression> assignmentMap = new HashMap<>();
+            Map<PsiIfStatement, CloneExpression> ifStmtMap = new HashMap<>();
+            Map<PsiMethodCallExpression, CloneExpression> methodCallMap = new HashMap<>();
+            Map<PsiReturnStatement, CloneExpression> returnMap = new HashMap<>();
+            Map<PsiForStatement, CloneExpression> forLoopMap = new HashMap<>();
+            Map<PsiForeachStatement, CloneExpression> forEachLoopMap = new HashMap<>();
+            Map<PsiWhileStatement, CloneExpression> whileLoopMap = new HashMap<>();
+            Map<PsiDoWhileStatement, CloneExpression> doWhileLoopMap = new HashMap<>();
+            Map<PsiSwitchStatement, CloneExpression> switchMap = new HashMap<>();
+            Map<PsiAssertStatement, CloneExpression> assertMap = new HashMap<>();
+            Map<PsiTryStatement, CloneExpression> tryMap = new HashMap<>();
+            Map<PsiThrowStatement, CloneExpression> throwMap = new HashMap<>();
+
             PsiStatement[][] methodBodies = CodeCloneUtils.getMethodBodies(methods);
             cloneInit(methodBodies, declarationMap, assignmentMap, ifStmtMap,
-                        methodCallMap, returnMap, forLoopMap, forEachLoopMap,
-                        whileLoopMap, doWhileLoopMap, switchMap, assertMap,
-                        tryMap, throwMap);
+                    methodCallMap, returnMap, forLoopMap, forEachLoopMap,
+                    whileLoopMap, doWhileLoopMap, switchMap, assertMap,
+                    tryMap, throwMap);
 
             List<Integer> rangeOfMethods = IntStream.range(0, methodBodies.length - 1).boxed().collect(Collectors.toList());
             String filename = aClass.getContainingFile().getName();
@@ -142,39 +252,48 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                         switchMap, assertMap,
                         tryMap, throwMap);
 
+                Set<Integer> intersection;
                 if (firstClones == null || firstClones.size() == 0) {
-                    continue;
-                }
+                    intersection = new HashSet<>();
+                } else {
+                    intersection = new HashSet<>(firstClones);
 
-                Set<Integer> intersection = new HashSet<>(firstClones);
+                    for (int j = 1; j < methodBodies[0].length; j++) {
+                        if (methodBodies[i][j] == null) {
+                            break;
+                        }
+                        Set<Integer> currClones = getClones(methodBodies[i][j],
+                                declarationMap, assignmentMap,
+                                ifStmtMap, methodCallMap,
+                                returnMap, forLoopMap,
+                                forEachLoopMap, whileLoopMap,
+                                doWhileLoopMap,
+                                switchMap, assertMap,
+                                tryMap, throwMap);
 
-                for (int j = 1; j < methodBodies[0].length; j++) {
-                    if (methodBodies[i][j] == null) {
-                        break;
+                        if (currClones == null) {
+                            intersection.clear();
+                            break;
+                        } else {
+                            intersection.retainAll(currClones);
+                        }
                     }
-                    Set<Integer> currClones = getClones(methodBodies[i][j],
-                            declarationMap, assignmentMap,
-                            ifStmtMap, methodCallMap,
-                            returnMap, forLoopMap,
-                            forEachLoopMap, whileLoopMap,
-                            doWhileLoopMap,
-                            switchMap, assertMap,
-                            tryMap, throwMap);
-                    if (currClones == null) {
-                        intersection.clear();
-                        break;
-                    } else {
-                        intersection.retainAll(currClones);
-                    }
                 }
-
-                //If it has at least one clone
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(methods[i]), "clone", PsiStmtType.SWITCH);
 
                 for (Integer methodIndex : rangeOfMethods) {
+                    FeedbackIdentifier feedbackId;
+                    if (i > methodIndex) {
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(methods[i]), methodIndex + "-method-clone", PsiStmtType.SWITCH);
+                    } else {
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(methods[methodIndex]), i + "-method-clone", PsiStmtType.SWITCH);
+                    }
+
                     if (intersection.contains(methodIndex)) {
                         int line = Utils.getLineNumber(methods[i]);
-                        Feedback feedback = new Feedback(line, "Method \'" + methods[i].getName() + "\' is clone of method \'" + methods[methodIndex].getName() + "\'.", filename, line + "-clone");
+                        Feedback feedback = new Feedback(line,
+                                "Method \'" + methods[i].getName() + "\' is clone of method \'" + methods[methodIndex].getName() + "\'.",
+                                filename,
+                                line + "-method-clone");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -391,7 +510,11 @@ public final class MethodCloneInspection extends AbstractBaseJavaLocalInspection
                     tryMap, throwMap);
 
             // For every array of statements need to find clones for every statement in the *following* array
-            for (int i = 0; i < blocks.length; i+=2) {
+            for (int i = 0; i < blocks.length; i += 2) {
+                if (blocks[i][0] == null) {
+                    continue;
+                }
+
                 Set<Integer> firstClones = getClones(blocks[i][0],
                         declarationMap, assignmentMap,
                         ifStmtMap, methodCallMap,

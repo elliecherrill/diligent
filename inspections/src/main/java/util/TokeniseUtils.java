@@ -164,13 +164,22 @@ public class TokeniseUtils {
 
         switchStmtAsString.add("SWITCH");
 
+        switchStmtAsString.add("SWITCH-VAR");
+
         PsiElement[] children = stmt.getChildren();
         for (PsiElement child : children) {
             if (child instanceof PsiReferenceExpression) {
-                switchStmtAsString.addAll(getRefAsString((PsiReferenceExpression) child));
+                PsiReferenceExpression refExpr = (PsiReferenceExpression) child;
+                if (refExpr.getType() != null) {
+                    switchStmtAsString.add("SWITCH-VAR-TYPE");
+                    switchStmtAsString.add(getTypeAsString(refExpr.getType()));
+                }
+                switchStmtAsString.addAll(getRefAsString(refExpr));
                 break;
             }
         }
+
+        switchStmtAsString.add("END-SWITCH-VAR");
 
         PsiCodeBlock switchBody = stmt.getBody();
 
@@ -383,7 +392,7 @@ public class TokeniseUtils {
 
         if (condExpr != null) {
             ifStmtAsString.add("IF-COND");
-            ifStmtAsString.addAll(getBinExprAsString((PsiBinaryExpression) condExpr));
+            ifStmtAsString.addAll(getExprAsString(condExpr));
         }
 
         PsiStatement thenStmt = stmt.getThenBranch();

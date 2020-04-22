@@ -396,10 +396,12 @@ public class CodeCloneUtils {
     }
 
     public static boolean sameSwitchVar(String[] first, String[] second) {
-        int firstVarIndex = getStartIndex("SWITCH", first) + 1;
-        int secondVarIndex = getStartIndex("SWITCH", second) + 1;
+        int firstVarIndex = getStartIndex("SWITCH-VAR", first) + 1;
+        int firstEndVarIndex = getStartIndex("END-SWITCH-VAR", first);
+        int secondVarIndex = getStartIndex("SWITCH-VAR", second) + 1;
+        int secondEndVarIndex = getStartIndex("END-SWITCH-VAR", second);
 
-        return first[firstVarIndex].equals(second[secondVarIndex]);
+        return Arrays.equals(first, firstVarIndex, firstEndVarIndex, second, secondVarIndex, secondEndVarIndex);
     }
 
     private static int getStartIndex(String toFind, String[] arr) {

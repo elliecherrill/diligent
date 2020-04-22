@@ -1,6 +1,6 @@
 export const initialConfigs = {
     configs: {
-        // TODO: 'config-1': { id: 'config-1', content: 'No use of == for String comparison'},
+        'config-1': { id: 'config-1', content: 'No use of == (or !=) for String comparison'},
         'config-2': {id: 'config-2', content: 'Use of inheritance'},
         'config-3': {id: 'config-3', content: 'No use of inheritance'},
         'config-4': {id: 'config-4', content: 'Use of interfaces'},
@@ -27,11 +27,10 @@ export const initialConfigs = {
         'category-4': {
             id: 'category-4',
             title: 'Don\'t Check',
-            configIds: ['config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18', 'config-19']
-        }, //TODO: 'config-1',
+            configIds: ['config-1', 'config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18', 'config-19']
+        },
     },
     columnOrder: ['category-4', 'category-3', 'category-2', 'category-1']
 }
 
-export const allConfigs = ['config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18', 'config-19']
-//TODO: 'config-1',
+export const allConfigs = ['config-1', 'config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8', 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17', 'config-18', 'config-19']

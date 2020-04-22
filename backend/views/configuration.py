@@ -95,7 +95,7 @@ def get_checks_for_download(config_id):
     checks = {"high": list(), "medium": list(), "low": list()}
 
     forFile = {
-        # TODO 'config-1': '==-string',
+        'config-1': 'string-comparison',
         'config-2': 'inheritance',
         'config-3': 'no-inheritance',
         'config-4': 'interfaces',

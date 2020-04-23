@@ -173,52 +173,28 @@ public class CodeCloneUtils {
         return caseBlocks;
     }
 
-    public static PsiStatement[][] getMethodBodies(PsiMethod[] methods) {
-        //1. Get number of methods and max number of statements (excluding whitespace / comments)
-        //2. Then create array
-        //3. Put statements into the array
+    public static PsiStatement[][] getBlockBodies(PsiCodeBlock[] blocks) {
+        int numBlocks = blocks.length;
+        int maxStatementCount = Arrays.stream(blocks).map(PsiCodeBlock::getStatementCount).max(Integer::compare).get();
 
-        int numMethods = methods.length;
-        int numStats = 0;
-        List<Integer> statements = new ArrayList<>();
-        for (PsiMethod m : methods) {
-            if (m.getBody() == null) {
-                statements.add(numStats);
-                continue;
-            }
-
-            PsiStatement[] bodyStats = m.getBody().getStatements();
-
-            for (PsiStatement s : bodyStats) {
-                if (!(s instanceof PsiWhiteSpace) && !(s instanceof PsiComment)) {
-                    numStats++;
-                }
-            }
-            statements.add(numStats);
-            numStats = 0;
-        }
-
-
-        PsiStatement[][] methodBlocks = new PsiStatement[numMethods][Collections.max(statements)];
+        PsiStatement[][] blockBodies = new PsiStatement[numBlocks][maxStatementCount];
         int statIndex = 0;
-        for (int methodIndex = 0; methodIndex < methods.length; methodIndex++) {
-            PsiMethod m = methods[methodIndex];
-            if (m.getBody() == null) {
+        for (int blockIndex = 0; blockIndex < numBlocks; blockIndex++) {
+            PsiCodeBlock b = blocks[blockIndex];
+            if (b.isEmpty()) {
                 continue;
             }
 
-            PsiStatement[] bodyStats = m.getBody().getStatements();
+            PsiStatement[] bodyStats = b.getStatements();
 
             for (PsiStatement s : bodyStats) {
-                if (!(s instanceof PsiWhiteSpace) && !(s instanceof PsiComment)) {
-                    methodBlocks[methodIndex][statIndex] = s;
-                    statIndex++;
-                }
+                blockBodies[blockIndex][statIndex] = s;
+                statIndex++;
             }
             statIndex = 0;
         }
 
-        return methodBlocks;
+        return blockBodies;
     }
 
     public static PsiStatement[][] getBlocks(PsiStatement blockBody, PsiStatement otherBlockBody) {

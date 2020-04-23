@@ -207,9 +207,9 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 return;
             }
 
-            PsiMethod[] methods = aClass.getMethods();
+            PsiCodeBlock[] codeBlocks = getAllCodeBlocks(aClass);
 
-            if (methods.length <= 1) {
+            if (codeBlocks.length <= 1) {
                 return;
             }
 
@@ -227,23 +227,23 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             Map<PsiTryStatement, CloneExpression> tryMap = new HashMap<>();
             Map<PsiThrowStatement, CloneExpression> throwMap = new HashMap<>();
 
-            PsiStatement[][] methodBodies = CodeCloneUtils.getMethodBodies(methods);
-            cloneInit(methodBodies, declarationMap, assignmentMap, ifStmtMap,
+            PsiStatement[][] blockBodies = CodeCloneUtils.getBlockBodies(codeBlocks);
+            cloneInit(blockBodies, declarationMap, assignmentMap, ifStmtMap,
                     methodCallMap, returnMap, forLoopMap, forEachLoopMap,
                     whileLoopMap, doWhileLoopMap, switchMap, assertMap,
                     tryMap, throwMap);
 
-            List<Integer> rangeOfMethods = IntStream.range(0, methodBodies.length - 1).boxed().collect(Collectors.toList());
+            List<Integer> rangeOfBlocks = IntStream.range(0, blockBodies.length - 1).boxed().collect(Collectors.toList());
             String filename = aClass.getContainingFile().getName();
 
             // If we have an entire method where duplicate / similar has been detected for every line in another method
-            for (int i = 0; i < methodBodies.length; i++) {
-                // Empty method
-                if (methodBodies[i][0] == null) {
+            for (int i = 0; i < blockBodies.length; i++) {
+                // Empty block
+                if (blockBodies[i][0] == null) {
                     continue;
                 }
 
-                Set<Integer> firstClones = getClones(methodBodies[i][0],
+                Set<Integer> firstClones = getClones(blockBodies[i][0],
                         declarationMap, assignmentMap,
                         ifStmtMap, methodCallMap,
                         returnMap, forLoopMap,
@@ -258,11 +258,11 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 } else {
                     intersection = new HashSet<>(firstClones);
 
-                    for (int j = 1; j < methodBodies[0].length; j++) {
-                        if (methodBodies[i][j] == null) {
+                    for (int j = 1; j < blockBodies[0].length; j++) {
+                        if (blockBodies[i][j] == null) {
                             break;
                         }
-                        Set<Integer> currClones = getClones(methodBodies[i][j],
+                        Set<Integer> currClones = getClones(blockBodies[i][j],
                                 declarationMap, assignmentMap,
                                 ifStmtMap, methodCallMap,
                                 returnMap, forLoopMap,
@@ -280,26 +280,54 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     }
                 }
 
-                for (Integer methodIndex : rangeOfMethods) {
+                for (int blockIndex : rangeOfBlocks) {
                     FeedbackIdentifier feedbackId;
-                    if (i > methodIndex) {
-                        feedbackId = new FeedbackIdentifier(Utils.getPointer(methods[i]), methodIndex + "-method-clone", PsiStmtType.SWITCH);
+                    if (i > blockIndex) {
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[i]), blockIndex + "-block-clone", PsiStmtType.BLOCK);
                     } else {
-                        feedbackId = new FeedbackIdentifier(Utils.getPointer(methods[methodIndex]), i + "-method-clone", PsiStmtType.SWITCH);
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), i + "-block-clone", PsiStmtType.BLOCK);
                     }
 
-                    if (intersection.contains(methodIndex)) {
-                        int line = Utils.getLineNumber(methods[i]);
+                    if (intersection.contains(blockIndex)) {
+                        int line = Utils.getLineNumber(codeBlocks[i]);
                         Feedback feedback = new Feedback(line,
-                                "Method \'" + methods[i].getName() + "\' is clone of method \'" + methods[methodIndex].getName() + "\'.",
+                                "Block \'" + printCodeBlock(codeBlocks[i]) + "\' is clone of block \'" + printCodeBlock(codeBlocks[blockIndex]) + "\'.",
                                 filename,
-                                line + "-method-clone");
+                                line + "-block-clone");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
                 }
             }
+        }
+
+        private String printCodeBlock(PsiCodeBlock codeBlock) {
+            StringBuffer sb = new StringBuffer();
+
+            for (PsiStatement s : codeBlock.getStatements()) {
+                sb.append(s.getText());
+            }
+
+            return sb.toString();
+        }
+
+        private PsiCodeBlock[] getAllCodeBlocks(PsiClass aClass) {
+            return getCodeBlocks(aClass).toArray(new PsiCodeBlock[0]);
+        }
+
+        private List<PsiCodeBlock> getCodeBlocks(PsiElement elem) {
+            List<PsiCodeBlock> codeBlocks = new ArrayList<>();
+
+            for (PsiElement child : elem.getChildren()) {
+                if (child instanceof PsiCodeBlock) {
+                    codeBlocks.add((PsiCodeBlock) child);
+                }
+
+                codeBlocks.addAll(getCodeBlocks(child));
+            }
+
+            return codeBlocks;
         }
 
         private void cloneInit(PsiStatement[][] bodies,

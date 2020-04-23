@@ -110,17 +110,18 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     tryMap, throwMap);
 
             List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).boxed().collect(Collectors.toList());
-            List<Set<Integer>> clones = new ArrayList<>(cases.length);
+            List<Set<Location>> clones = new ArrayList<>(cases.length);
 
             // If we have an entire case where duplicate / similar has been detected for every line in another case
             for (int i = 0; i < cases.length; i++) {
                 // Empty case
                 //TODO: consider fallthrough
-                if (cases[i][0] == null) {
-                    continue;
+                if ((cases[i][0] == null) || (cases[i][1] == null)){
+                    return;
+                    //Only consider error when all cases are > 1 in length (excluding break;)
                 }
 
-                Set<Integer> firstClones = getClones(cases[i][0],
+                Set<Location> firstClones = getClones(cases[i][0],
                         declarationMap, assignmentMap,
                         ifStmtMap, methodCallMap,
                         returnMap, forLoopMap,
@@ -133,13 +134,13 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     continue;
                 }
 
-                Set<Integer> intersection = new HashSet<>(firstClones);
+                Set<Location> intersection = new LinkedHashSet<>(firstClones);
 
                 for (int j = 1; j < cases[0].length; j++) {
                     if (cases[i][j] == null) {
                         break;
                     }
-                    Set<Integer> currClones = getClones(cases[i][j],
+                    Set<Location> currClones = getClones(cases[i][j],
                             declarationMap, assignmentMap,
                             ifStmtMap, methodCallMap,
                             returnMap, forLoopMap,
@@ -152,21 +153,21 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         intersection.clear();
                         break;
                     } else {
-                        intersection.retainAll(currClones);
+                        intersection = CodeCloneUtils.getCombinedClones(intersection, currClones);
                     }
                 }
 
                 // Add itself to its clones
-                intersection.add(i);
+                intersection.add(new Location(i, 0));
 
                 clones.add(intersection);
             }
 
             String filename = statement.getContainingFile().getName();
-            FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "switch-clone", PsiStmtType.SWITCH);
+            int line = Utils.getLineNumber(statement);
+            FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), line + "switch-clone", PsiStmtType.SWITCH);
 
-            if (transitiveClosureOfClones(clones, rangeOfCases)) {
-                int line = Utils.getLineNumber(statement);
+            if (CodeCloneUtils.transitiveClosureOfClones(clones, rangeOfCases)) {
                 Feedback feedback = new Feedback(line,
                         "All cases in switch statement are clones of one another.", filename,
                         line + "-switch-clone");
@@ -177,28 +178,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
         }
 
-        private boolean transitiveClosureOfClones(List<Set<Integer>> cases, List<Integer> aim) {
-            if (cases.isEmpty()) {
-                return false;
-            }
-
-            Set<Integer> currClones = new HashSet<>(cases.get(0));
-
-            for (int i = 1; i < cases.size(); i++) {
-                if (Collections.disjoint(currClones, cases.get(i))) {
-                    currClones = cases.get(i);
-                } else {
-                    currClones.addAll(cases.get(i));
-                }
-
-                if (currClones.containsAll(aim)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         @Override
         public void visitClass(PsiClass aClass) {
             super.visitClass(aClass);
@@ -207,7 +186,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 return;
             }
 
-            PsiCodeBlock[] codeBlocks = getAllCodeBlocks(aClass);
+            PsiCodeBlock[] codeBlocks = CodeCloneUtils.getAllCodeBlocks(aClass);
 
             if (codeBlocks.length <= 1) {
                 return;
@@ -243,7 +222,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     continue;
                 }
 
-                Set<Integer> firstClones = getClones(blockBodies[i][0],
+                Set<Location> firstClones = getClones(blockBodies[i][0],
                         declarationMap, assignmentMap,
                         ifStmtMap, methodCallMap,
                         returnMap, forLoopMap,
@@ -252,17 +231,17 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         switchMap, assertMap,
                         tryMap, throwMap);
 
-                Set<Integer> intersection;
+                Set<Location> intersection;
                 if (firstClones == null || firstClones.size() == 0) {
-                    intersection = new HashSet<>();
+                    intersection = new LinkedHashSet<>();
                 } else {
-                    intersection = new HashSet<>(firstClones);
+                    intersection = new LinkedHashSet<>(firstClones);
 
                     for (int j = 1; j < blockBodies[0].length; j++) {
                         if (blockBodies[i][j] == null) {
                             break;
                         }
-                        Set<Integer> currClones = getClones(blockBodies[i][j],
+                        Set<Location> currClones = getClones(blockBodies[i][j],
                                 declarationMap, assignmentMap,
                                 ifStmtMap, methodCallMap,
                                 returnMap, forLoopMap,
@@ -275,7 +254,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                             intersection.clear();
                             break;
                         } else {
-                            intersection.retainAll(currClones);
+                            intersection = CodeCloneUtils.getCombinedClones(intersection, currClones);
                         }
                     }
                 }
@@ -288,10 +267,10 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), i + "-block-clone", PsiStmtType.BLOCK);
                     }
 
-                    if (intersection.contains(blockIndex)) {
+                    if (CodeCloneUtils.isBlockClone(intersection, blockIndex)) {
                         int line = Utils.getLineNumber(codeBlocks[i]);
                         Feedback feedback = new Feedback(line,
-                                "Block \'" + printCodeBlock(codeBlocks[i]) + "\' is clone of block \'" + printCodeBlock(codeBlocks[blockIndex]) + "\'.",
+                                "Block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[i]) + "\' is clone of block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[blockIndex]) + "\'.",
                                 filename,
                                 line + "-block-clone");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
@@ -300,34 +279,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     }
                 }
             }
-        }
-
-        private String printCodeBlock(PsiCodeBlock codeBlock) {
-            StringBuffer sb = new StringBuffer();
-
-            for (PsiStatement s : codeBlock.getStatements()) {
-                sb.append(s.getText());
-            }
-
-            return sb.toString();
-        }
-
-        private PsiCodeBlock[] getAllCodeBlocks(PsiClass aClass) {
-            return getCodeBlocks(aClass).toArray(new PsiCodeBlock[0]);
-        }
-
-        private List<PsiCodeBlock> getCodeBlocks(PsiElement elem) {
-            List<PsiCodeBlock> codeBlocks = new ArrayList<>();
-
-            for (PsiElement child : elem.getChildren()) {
-                if (child instanceof PsiCodeBlock) {
-                    codeBlocks.add((PsiCodeBlock) child);
-                }
-
-                codeBlocks.addAll(getCodeBlocks(child));
-            }
-
-            return codeBlocks;
         }
 
         private void cloneInit(PsiStatement[][] bodies,
@@ -350,7 +301,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     PsiStatement stat = bodies[i][j];
                     if (stat != null) {
                         // Add string representation and location to map with corresponding expression
-                        Pair<Integer, Integer> location = new Pair<>(i, j);
+                        Location location = new Location(i, j);
                         addStatToMap(stat, location,
                                 declarationMap, assignmentMap,
                                 ifStmtMap, methodCallMap,
@@ -490,17 +441,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             }
         }
 
-        private String print(String[] arr) {
-            StringBuffer sb = new StringBuffer();
-
-            for (String s : arr) {
-                sb.append(s);
-                sb.append(" ");
-            }
-
-            return sb.toString();
-        }
-
         private boolean haveSimilarIfBodies(PsiIfStatement ifStmt, PsiIfStatement otherIfStmt) {
             //TODO: consider else cases (else vs else-if)
             return areSimilarBlocks(ifStmt.getThenBranch(), otherIfStmt.getThenBranch());
@@ -543,7 +483,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     continue;
                 }
 
-                Set<Integer> firstClones = getClones(blocks[i][0],
+                Set<Location> firstClones = getClones(blocks[i][0],
                         declarationMap, assignmentMap,
                         ifStmtMap, methodCallMap,
                         returnMap, forLoopMap,
@@ -556,13 +496,13 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     return false;
                 }
 
-                Set<Integer> intersection = new HashSet<>(firstClones);
+                Set<Location> intersection = new LinkedHashSet<>(firstClones);
 
                 for (int j = 1; j < blocks[0].length; j++) {
                     if (blocks[i][j] == null) {
                         break;
                     }
-                    Set<Integer> currClones = getClones(blocks[i][j],
+                    Set<Location> currClones = getClones(blocks[i][j],
                             declarationMap, assignmentMap,
                             ifStmtMap, methodCallMap,
                             returnMap, forLoopMap,
@@ -574,18 +514,18 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         intersection.clear();
                         break;
                     } else {
-                        intersection.retainAll(currClones);
+                        intersection = CodeCloneUtils.getCombinedClones(intersection, currClones);
                     }
                 }
                 //TODO: remove this when we stop comparing to ourselves in compareStatements
-                intersection.remove(i);
+                intersection = CodeCloneUtils.removeCodeBlock(intersection, i);
 
                 if (intersection.isEmpty()) {
                     return false;
                 }
 
                 //Must be a clone of the following
-                if (!(intersection.contains(i + 1))) {
+                if (CodeCloneUtils.getClonesInCodeBlock(intersection, i + 1).isEmpty()) {
                     return false;
                 }
             }
@@ -627,7 +567,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 //TODO: do we need to loop here? or just compare first to the second?
                 //TODO: does similar mean we allow for extra / fewer statements?
                 for (int i = 0; i < blocks.length; i++) {
-                    Set<Integer> firstClones = getClones(blocks[i][0],
+                    Set<Location> firstClones = getClones(blocks[i][0],
                             declarationMap, assignmentMap,
                             ifStmtMap, methodCallMap,
                             returnMap, forLoopMap,
@@ -640,13 +580,13 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         return false;
                     }
 
-                    Set<Integer> intersection = new HashSet<>(firstClones);
+                    Set<Location> intersection = new LinkedHashSet<>(firstClones);
 
                     for (int j = 1; j < blocks[0].length; j++) {
                         if (blocks[i][j] == null) {
                             break;
                         }
-                        Set<Integer> currClones = getClones(blocks[i][j],
+                        Set<Location> currClones = getClones(blocks[i][j],
                                 declarationMap, assignmentMap,
                                 ifStmtMap, methodCallMap,
                                 returnMap, forLoopMap,
@@ -658,11 +598,11 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                             intersection.clear();
                             break;
                         } else {
-                            intersection.retainAll(currClones);
+                            intersection = CodeCloneUtils.getCombinedClones(intersection, currClones);
                         }
                     }
                     //TODO: remove this when we stop comparing to ourselves in compareStatements
-                    intersection.remove(i);
+                    intersection = CodeCloneUtils.removeCodeBlock(intersection, i);
 
                     if (intersection.isEmpty()) {
                         return false;
@@ -674,16 +614,16 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
         }
 
         private <T extends PsiElement> void updateCloneSet(CloneExpression cloneExpr, CloneExpression otherCloneExpr) {
-            Set<Integer> existingClones = cloneExpr.getClones();
-            int caseIndex = otherCloneExpr.getLocation().getFirst();
+            Set<Location> existingClones = cloneExpr.getClones();
+            Location location = otherCloneExpr.getLocation();
             if (existingClones == null) {
-                existingClones = new HashSet<>();
+                existingClones = new LinkedHashSet<>();
             }
-            existingClones.add(caseIndex);
+            existingClones.add(location);
             cloneExpr.setClones(existingClones);
         }
 
-        private void addStatToMap(PsiStatement stat, Pair<Integer, Integer> location,
+        private void addStatToMap(PsiStatement stat, Location location,
                                   Map<PsiDeclarationStatement, CloneExpression> declarationMap,
                                   Map<PsiAssignmentExpression, CloneExpression> assignmentMap,
                                   Map<PsiIfStatement, CloneExpression> ifStmtMap,
@@ -784,7 +724,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             assert false : "Unknown statement type " + stat.toString();
         }
 
-        private Set<Integer> getClones(PsiStatement stat,
+        private Set<Location> getClones(PsiStatement stat,
                                        Map<PsiDeclarationStatement, CloneExpression> declarationMap,
                                        Map<PsiAssignmentExpression, CloneExpression> assignmentMap,
                                        Map<PsiIfStatement, CloneExpression> ifStmtMap,

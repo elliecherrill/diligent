@@ -3,26 +3,30 @@ package util;
 import com.intellij.psi.*;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class CodeCloneUtils {
 
+    //TODO: do we want to ignore default case?
     public static PsiStatement[][] getCaseBlocks(@Nonnull PsiCodeBlock body) {
         // TODO: How to not iterate through twice?
         PsiStatement[] bodyStatements = body.getStatements();
 
         int numCases = 0;
         int numStats = 0;
+        boolean defaultCase = false;
         List<Integer> statements = new ArrayList<>();
         for (PsiStatement stat : bodyStatements) {
             if (stat instanceof PsiSwitchLabelStatement) {
+                if (((PsiSwitchLabelStatement) stat).isDefaultCase()) {
+                    defaultCase = true;
+                    continue;
+                }
+                defaultCase = false;
                 numCases++;
                 statements.add(numStats);
                 numStats = 0;
-            } else if (!(stat instanceof PsiBreakStatement)) {
+            } else if (!defaultCase && !(stat instanceof PsiBreakStatement)) {
                 numStats++;
             }
         }
@@ -31,15 +35,23 @@ public class CodeCloneUtils {
         PsiStatement[][] caseBlocks = new PsiStatement[numCases][Collections.max(statements)];
         int caseIndex = -1;
         int statIndex = 0;
+        defaultCase = false;
         for (PsiStatement stat : bodyStatements) {
             if (stat instanceof PsiSwitchLabelStatement) {
+                if (((PsiSwitchLabelStatement) stat).isDefaultCase()) {
+                    defaultCase = true;
+                    continue;
+                }
+                defaultCase = false;
                 caseIndex++;
                 statIndex = 0;
             }
 
-            if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof PsiBreakStatement)) {
-                caseBlocks[caseIndex][statIndex] = stat;
-                statIndex++;
+            if (!defaultCase) {
+                if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof PsiBreakStatement)) {
+                    caseBlocks[caseIndex][statIndex] = stat;
+                    statIndex++;
+                }
             }
         }
 
@@ -388,5 +400,154 @@ public class CodeCloneUtils {
         }
 
         return -1;
+    }
+
+    public static boolean transitiveClosureOfClones(List<Set<Location>> cases, List<Integer> aim) {
+        if (cases.isEmpty()) {
+            return false;
+        }
+
+        Set<Location> currClones = new LinkedHashSet<>(cases.get(0));
+
+        for (int i = 1; i < cases.size(); i++) {
+            if (Collections.disjoint(currClones, cases.get(i))) {
+                currClones = cases.get(i);
+            } else {
+                currClones.addAll(cases.get(i));
+            }
+
+            if (containsAll(currClones, aim)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean containsAll(Set<Location> clones, List<Integer> aim) {
+        for (int i : aim) {
+            if (getClonesInCodeBlock(clones, i).isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean isBlockClone(Set<Location> clones, int blockIndex) {
+        if (clones.isEmpty()) {
+            return false;
+        }
+
+        Set<Location> clonesInBlock = getClonesInCodeBlock(clones, blockIndex);
+
+        if (clonesInBlock.isEmpty()) {
+            return false;
+        }
+
+        int prev = -1;
+        for (Location l : clonesInBlock) {
+            if (l.getLine() < prev) {
+                return false;
+            } else {
+                prev = l.getLine();
+            }
+        }
+
+        return true;
+    }
+
+    public static Set<Location> getCombinedClones(Set<Location> firstClones, Set<Location> secondClones) {
+        Set<Location> combinedClones = new LinkedHashSet<>();
+        List<Integer> seenCodeBlocks = new ArrayList<>();
+
+        for (Location location : firstClones) {
+            int currCodeBlock = location.getCodeBlock();
+
+            if (!(seenCodeBlocks.contains(currCodeBlock))) {
+                seenCodeBlocks.add(currCodeBlock);
+
+                Set<Location> secondInBlock = getClonesInCodeBlock(secondClones, currCodeBlock);
+
+                if (!(secondInBlock.isEmpty())) {
+                    combinedClones.addAll(getClonesInCodeBlock(firstClones, currCodeBlock));
+                    combinedClones.addAll(secondInBlock);
+                }
+
+            }
+        }
+
+        return combinedClones;
+    }
+
+    public static Set<Location> getClonesInCodeBlock(Set<Location> clones, int codeBlock) {
+        Set<Location> clonesInCodeBlock = new LinkedHashSet<>();
+
+        for (Location l : clones) {
+            if (l.getCodeBlock() == codeBlock) {
+                clonesInCodeBlock.add(l);
+            }
+        }
+
+        return clonesInCodeBlock;
+    }
+
+    public static String printCodeBlock(PsiCodeBlock codeBlock) {
+        StringBuffer sb = new StringBuffer();
+
+        for (PsiStatement s : codeBlock.getStatements()) {
+            sb.append(s.getText());
+        }
+
+        return sb.toString();
+    }
+
+    public static PsiCodeBlock[] getAllCodeBlocks(PsiClass aClass) {
+        return getCodeBlocks(aClass).toArray(new PsiCodeBlock[0]);
+    }
+
+    private static List<PsiCodeBlock> getCodeBlocks(PsiElement elem) {
+        List<PsiCodeBlock> codeBlocks = new ArrayList<>();
+
+        for (PsiElement child : elem.getChildren()) {
+            if (child instanceof PsiCodeBlock) {
+                PsiCodeBlock block = (PsiCodeBlock) child;
+                // Only consider code blocks with more than one statement
+                if (block.getStatementCount() > 1) {
+                    codeBlocks.add((PsiCodeBlock) child);
+                }
+            }
+
+            if (child instanceof PsiSwitchStatement) {
+                //TODO
+            } else {
+                codeBlocks.addAll(getCodeBlocks(child));
+            }
+        }
+
+        return codeBlocks;
+    }
+
+    private static String print(String[] arr) {
+        StringBuffer sb = new StringBuffer();
+
+        for (String s : arr) {
+            sb.append(s);
+            sb.append(" ");
+        }
+
+        return sb.toString();
+    }
+
+    public static Set<Location> removeCodeBlock(Set<Location> clones, int toRemove) {
+        Set<Location> newClones = new LinkedHashSet<>();
+
+        for (Location l : clones) {
+            if (l.getCodeBlock() != toRemove) {
+                newClones.add(l);
+            }
+        }
+
+        return newClones;
     }
 }

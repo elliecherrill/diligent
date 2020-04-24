@@ -462,11 +462,27 @@ public class TokeniseUtils {
             exprAsString.addAll(getBinExprAsString((PsiBinaryExpression) expr));
         } else if (expr instanceof PsiNewExpression){
             exprAsString.addAll(getNewExprAsString((PsiNewExpression) expr));
+        } else if (expr instanceof PsiPolyadicExpression) {
+            exprAsString.addAll(getPolyExprAsString((PsiPolyadicExpression) expr));
         }
 
         exprAsString.add("END-EXPR");
 
         return exprAsString;
+    }
+
+    private static List<String> getPolyExprAsString(PsiPolyadicExpression expr) {
+        List<String> polyExprAsString = new ArrayList<>();
+
+        for (PsiExpression e : expr.getOperands()) {
+            PsiJavaToken op = expr.getTokenBeforeOperand(e);
+            if (op != null) {
+                polyExprAsString.add(getOpAsString(op));
+            }
+            polyExprAsString.addAll(getExprAsString(e));
+        }
+
+        return polyExprAsString;
     }
 
     private static List<String> getAssExprAsString(PsiAssignmentExpression expr) {

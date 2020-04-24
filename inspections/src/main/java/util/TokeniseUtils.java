@@ -474,6 +474,8 @@ public class TokeniseUtils {
     private static List<String> getPolyExprAsString(PsiPolyadicExpression expr) {
         List<String> polyExprAsString = new ArrayList<>();
 
+        polyExprAsString.add("POLYEXPR");
+
         for (PsiExpression e : expr.getOperands()) {
             PsiJavaToken op = expr.getTokenBeforeOperand(e);
             if (op != null) {
@@ -481,6 +483,8 @@ public class TokeniseUtils {
             }
             polyExprAsString.addAll(getExprAsString(e));
         }
+
+        polyExprAsString.add("END-POLYEXPR");
 
         return polyExprAsString;
     }

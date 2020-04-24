@@ -434,27 +434,72 @@ public class CodeCloneUtils {
         return true;
     }
 
-    public static boolean isBlockClone(Set<Location> clones, int blockIndex) {
+    public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> containsBlockClone(Set<Location> clones, int blockIndex) {
         if (clones.isEmpty()) {
-            return false;
+            return null;
         }
 
         Set<Location> clonesInBlock = getClonesInCodeBlock(clones, blockIndex);
 
         if (clonesInBlock.isEmpty()) {
-            return false;
+            return null;
         }
 
+        int longestSeq = 0;
+        int seqStart = -1;
+        int seqEnd = -1;
+        int otherStart = -1;
+        int otherEnd = -1;
+
         int prev = -1;
+        int currSeq = 0;
+        int currStart = 0;
+        int currOtherStart = 0;
+
+        int index = 0;
         for (Location l : clonesInBlock) {
+            if (index == 0) {
+                currOtherStart = l.getLine();
+            }
+
             if (l.getLine() < prev) {
-                return false;
+                if (currSeq > longestSeq) {
+                    longestSeq = currSeq;
+
+                    seqStart = currStart;
+                    seqEnd = index;
+
+                    otherStart = currOtherStart;
+                    otherEnd = prev + 1;
+                }
+
+                currStart = index;
+                currOtherStart = l.getLine();
+                prev = l.getLine();
+                currSeq = 0;
             } else {
                 prev = l.getLine();
             }
+
+            currSeq++;
+            index++;
         }
 
-        return true;
+        if (currSeq > longestSeq) {
+            longestSeq = currSeq;
+
+            seqStart = currStart;
+            seqEnd = index;
+
+            otherStart = currOtherStart;
+            otherEnd = prev + 1;
+        }
+
+        if (longestSeq > 2) {
+            return new Pair<>(new Pair<>(seqStart, seqEnd), new Pair<>(otherStart, otherEnd));
+        }
+
+        return null;
     }
 
     public static Set<Location> getCombinedClones(Set<Location> firstClones, Set<Location> secondClones) {
@@ -492,11 +537,14 @@ public class CodeCloneUtils {
         return clonesInCodeBlock;
     }
 
-    public static String printCodeBlock(PsiCodeBlock codeBlock) {
+    public static String printCodeBlock(PsiCodeBlock codeBlock, Pair<Integer, Integer> sequence) {
         StringBuffer sb = new StringBuffer();
 
-        for (PsiStatement s : codeBlock.getStatements()) {
-            sb.append(s.getText());
+        int endIndex = Math.min(codeBlock.getStatementCount(), sequence.getSecond());
+
+        for (int i = sequence.getFirst(); i < endIndex; i++) {
+            sb.append(codeBlock.getStatements()[i].getText());
+            sb.append(" ");
         }
 
         return sb.toString();

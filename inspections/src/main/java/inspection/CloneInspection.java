@@ -267,10 +267,11 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), i + "-block-clone", PsiStmtType.BLOCK);
                     }
 
-                    if (CodeCloneUtils.isBlockClone(intersection, blockIndex)) {
+                    Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> cloneSequence = CodeCloneUtils.containsBlockClone(intersection, blockIndex);
+                    if (cloneSequence != null) {
                         int line = Utils.getLineNumber(codeBlocks[i]);
                         Feedback feedback = new Feedback(line,
-                                "Block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[i]) + "\' is clone of block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[blockIndex]) + "\'.",
+                                "Block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[i], cloneSequence.getFirst()) + "\' is clone of block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[blockIndex], cloneSequence.getSecond()) + "\'.",
                                 filename,
                                 line + "-block-clone");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);

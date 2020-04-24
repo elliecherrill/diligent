@@ -2,8 +2,7 @@ package util;
 
 import com.intellij.psi.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class TokeniseUtils {
 
@@ -390,8 +389,10 @@ public class TokeniseUtils {
 
         PsiExpression condExpr = stmt.getCondition();
 
+        Map<String, String> replaceVars = null;
         if (condExpr != null) {
             ifStmtAsString.add("IF-COND");
+            replaceVars = getConditionVar(condExpr);
             ifStmtAsString.addAll(getExprAsString(condExpr));
         }
 
@@ -407,9 +408,33 @@ public class TokeniseUtils {
             ifStmtAsString.addAll(getStmtAsString(elseStmt));
         }
 
+        if (replaceVars != null) {
+            for (Map.Entry<String, String> entry : replaceVars.entrySet()) {
+                findAndReplaceVar(ifStmtAsString, entry.getKey(), entry.getValue());
+            }
+        }
+
         ifStmtAsString.add("END-IF");
 
         return ifStmtAsString;
+    }
+
+    private static Map<String, String> getConditionVar(PsiExpression expr) {
+        Map<String, String> replaceVars = new Hashtable<>();
+
+        getConditionVar(replaceVars, expr);
+
+        return replaceVars;
+    }
+
+    private static void getConditionVar(Map<String, String> replaceVars, PsiElement element) {
+        if (element instanceof PsiReferenceExpression) {
+            replaceVars.put(getIdentifierString((PsiReferenceExpression) element), "CONDVAR-" + replaceVars.size());
+        }
+
+        for (PsiElement child : element.getChildren()) {
+            getConditionVar(replaceVars, child);
+        }
     }
 
     private static List<String> getBinExprAsString(PsiBinaryExpression binExpr) {

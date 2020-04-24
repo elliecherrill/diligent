@@ -262,7 +262,16 @@ public class CodeCloneUtils {
         }
     }
 
-    public static boolean changeInLiteral(String[] first, String[] second) {
+    public static boolean changeInLHS(String[] first, String[] second) {
+        // RHS and operator the same
+        // LHS different
+        int firstOpIndex = getStartIndex("OP", first);
+        int secondOpIndex = getStartIndex("OP", second);
+
+        return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
+    }
+
+    public static boolean changeInRHS(String[] first, String[] second) {
         // LHS and operator the same
         // RHS different
         int firstRhsIndex = getStartIndex("RHS", first);
@@ -576,7 +585,7 @@ public class CodeCloneUtils {
         return codeBlocks;
     }
 
-    private static String print(String[] arr) {
+    public static String print(String[] arr) {
         StringBuffer sb = new StringBuffer();
 
         for (String s : arr) {

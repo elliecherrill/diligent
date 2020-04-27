@@ -112,6 +112,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).boxed().collect(Collectors.toList());
             List<Set<Location>> clones = new ArrayList<>(cases.length);
 
+            //TODO: update these checks from block clone detection
             // If we have an entire case where duplicate / similar has been detected for every line in another case
             for (int i = 0; i < cases.length; i++) {
                 // Empty case

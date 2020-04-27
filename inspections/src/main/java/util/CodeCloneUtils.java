@@ -490,7 +490,7 @@ public class CodeCloneUtils {
                 prev = l.getLine();
             }
 
-            currSeq++;
+            currSeq += l.getStatementCount();
             index++;
         }
 
@@ -619,8 +619,8 @@ public class CodeCloneUtils {
             if (child instanceof PsiCodeBlock) {
                 PsiCodeBlock block = (PsiCodeBlock) child;
                 // Only consider code blocks with more than one statement
-                if (block.getStatementCount() > 1) {
-                    codeBlocks.add((PsiCodeBlock) child);
+                if (getCodeBlockCount(block) > 1) {
+                    codeBlocks.add(block);
                 }
             }
 
@@ -655,5 +655,113 @@ public class CodeCloneUtils {
         }
 
         return newClones;
+    }
+
+    public static int getStatementCount(PsiStatement stat) {
+        int currCount = 0;
+
+        if (stat instanceof PsiIfStatement) {
+            PsiIfStatement ifStat = (PsiIfStatement) stat;
+
+            return getIfStatementCount(ifStat);
+        }
+
+        if (stat instanceof PsiLoopStatement) {
+            PsiLoopStatement loopStat = (PsiLoopStatement) stat;
+
+            currCount++;
+            if (loopStat.getBody() != null) {
+                currCount += getStatementCount(loopStat.getBody());
+            }
+
+            return currCount;
+        }
+
+        if (stat instanceof PsiSwitchStatement) {
+            PsiSwitchStatement switchStat = (PsiSwitchStatement) stat;
+
+            return getSwitchStatementCount(switchStat);
+        }
+
+        if (stat instanceof PsiTryStatement) {
+            PsiTryStatement tryStat = (PsiTryStatement) stat;
+
+            return getTryStatementCount(tryStat);
+        }
+
+        if (stat instanceof PsiBlockStatement) {
+            PsiBlockStatement blockStat = (PsiBlockStatement) stat;
+            PsiCodeBlock codeBlock = blockStat.getCodeBlock();
+            currCount += getCodeBlockCount(codeBlock);
+            return currCount;
+        }
+
+        return currCount + 1;
+    }
+
+    private static int getCodeBlockCount(PsiCodeBlock block) {
+        int currCount = 0;
+
+        for (PsiStatement stat : block.getStatements()) {
+            currCount += getStatementCount(stat);
+        }
+
+        return currCount;
+    }
+
+    private static int getIfStatementCount(PsiIfStatement ifStat) {
+        int currCount = 0;
+
+        if (ifStat.getCondition() != null) {
+            currCount++;
+        }
+
+        PsiStatement thenBranch = ifStat.getThenBranch();
+        if (thenBranch != null) {
+            currCount += getStatementCount(thenBranch) + 1;
+        }
+
+        PsiStatement elseBranch = ifStat.getElseBranch();
+        if (elseBranch != null) {
+            currCount += getStatementCount(elseBranch) + 1;
+        }
+
+        return currCount;
+    }
+
+    private static int getTryStatementCount(PsiTryStatement tryStat) {
+        int currCount = 0;
+
+        PsiCodeBlock tryBlock = tryStat.getTryBlock();
+        if (tryBlock != null) {
+            currCount += getCodeBlockCount(tryBlock) + 1;
+        }
+
+        PsiCodeBlock[] catchBlocks = tryStat.getCatchBlocks();
+        for (PsiCodeBlock block : catchBlocks) {
+            currCount += getCodeBlockCount(block) + 1;
+        }
+
+        PsiCodeBlock finallyBlock = tryStat.getFinallyBlock();
+        if (finallyBlock != null) {
+            currCount += getCodeBlockCount(finallyBlock) + 1;
+        }
+
+        return currCount;
+    }
+
+    private static int getSwitchStatementCount(PsiSwitchStatement switchStat) {
+        int currCount = 0;
+
+        if (switchStat.getExpression() != null) {
+            currCount++;
+        }
+
+        PsiCodeBlock switchBody = switchStat.getBody();
+        if (switchBody != null) {
+            currCount += getCodeBlockCount(switchBody);
+        }
+
+        return currCount;
     }
 }

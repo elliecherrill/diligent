@@ -1,12 +1,20 @@
 package util;
 
 public class Location {
+
     private final int codeBlock;
     private final int line;
 
-    public Location(int codeBlock, int line) {
+    private int statementCount;
+
+    private Location(int codeBlock, int line, int statementCount) {
         this.codeBlock = codeBlock;
         this.line = line;
+        this.statementCount = statementCount;
+    }
+
+    public Location(int codeBlock, int line) {
+        this(codeBlock, line, 1);
     }
 
     public int getCodeBlock() {
@@ -40,5 +48,13 @@ public class Location {
     @Override
     public String toString() {
         return "<" + codeBlock + ", " + line + ">";
+    }
+
+    public int getStatementCount() {
+        return statementCount;
+    }
+
+    public void setStatementCount(int statementCount) {
+        this.statementCount = statementCount;
     }
 }

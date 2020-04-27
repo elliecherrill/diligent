@@ -640,6 +640,9 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
             String[] stringRep = TokeniseUtils.getStmtAsStringArray(stat);
 
+            int statementCount = CodeCloneUtils.getStatementCount(stat);
+            location.setStatementCount(statementCount);
+
             if (stringRep == null) {
                 //TODO: remove assertion
                 assert false : "Unknown statement type " + stat.toString();
@@ -659,6 +662,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     methodCallMap.put(callExpr, new CloneExpression(stringRep, location));
                     return;
                 }
+                //TODO: handle prefix/postfix
             }
 
             if (stat instanceof PsiIfStatement) {

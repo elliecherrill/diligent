@@ -435,7 +435,7 @@ public class CodeCloneUtils {
 
     private static boolean containsAll(Set<Location> clones, List<Integer> aim) {
         for (int i : aim) {
-            if (getClonesInCodeBlock(clones, i).isEmpty()) {
+            if (getClonesInCodeBlock(clones, i, false).isEmpty()) {
                 return false;
             }
         }
@@ -444,11 +444,11 @@ public class CodeCloneUtils {
     }
 
     public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> containsBlockClone(Set<Location> clones, int blockIndex) {
-        if (clones.isEmpty()) {
+        if (clones == null || clones.isEmpty()) {
             return null;
         }
 
-        Set<Location> clonesInBlock = getClonesInCodeBlock(clones, blockIndex);
+        Set<Location> clonesInBlock = getClonesInCodeBlock(clones, blockIndex, true);
 
         if (clonesInBlock.isEmpty()) {
             return null;
@@ -471,7 +471,7 @@ public class CodeCloneUtils {
                 currOtherStart = l.getLine();
             }
 
-            if (l.getLine() < prev) {
+            if (l.getLine() != prev + 1) {
                 if (currSeq > longestSeq) {
                     longestSeq = currSeq;
 
@@ -504,7 +504,7 @@ public class CodeCloneUtils {
             otherEnd = prev + 1;
         }
 
-        if (longestSeq > 2) {
+        if (longestSeq > 1) {
             return new Pair<>(new Pair<>(seqStart, seqEnd), new Pair<>(otherStart, otherEnd));
         }
 
@@ -512,33 +512,82 @@ public class CodeCloneUtils {
     }
 
     public static Set<Location> getCombinedClones(Set<Location> firstClones, Set<Location> secondClones) {
+        if (firstClones == null) {
+            return null;
+        }
+
         Set<Location> combinedClones = new LinkedHashSet<>();
+        Set<Location> toAdd = new LinkedHashSet<>();
         List<Integer> seenCodeBlocks = new ArrayList<>();
+
+        // To allow additional lines at start of code block
+        boolean prevIsNull = true;
+        // To allow additional lines at end of code block
+        boolean followingIsNull = false;
+
+        if (!getClonesInCodeBlock(secondClones, -1, false).isEmpty()) {
+            combinedClones.addAll(firstClones);
+            combinedClones.add(new Location(-1, -1));
+            return combinedClones;
+        }
+
+        if (onlyContainsNullCase(firstClones)) {
+            combinedClones.addAll(firstClones);
+            combinedClones.addAll(secondClones);
+            return combinedClones;
+        }
 
         for (Location location : firstClones) {
             int currCodeBlock = location.getCodeBlock();
 
-            if (!(seenCodeBlocks.contains(currCodeBlock))) {
-                seenCodeBlocks.add(currCodeBlock);
+            if ((currCodeBlock == -1) && !prevIsNull) {
+                followingIsNull = true;
+            }
 
-                Set<Location> secondInBlock = getClonesInCodeBlock(secondClones, currCodeBlock);
+            if ((currCodeBlock != -1) && followingIsNull) {
+                return null;
+            }
 
-                if (!(secondInBlock.isEmpty())) {
-                    combinedClones.addAll(getClonesInCodeBlock(firstClones, currCodeBlock));
-                    combinedClones.addAll(secondInBlock);
+            if (currCodeBlock != -1) {
+                prevIsNull = false;
+
+                if (!(seenCodeBlocks.contains(currCodeBlock))) {
+                    seenCodeBlocks.add(currCodeBlock);
+
+                    Set<Location> secondInBlock = getClonesInCodeBlock(secondClones, currCodeBlock, false);
+
+                    if (!(secondInBlock.isEmpty())) {
+                        combinedClones.addAll(getClonesInCodeBlock(firstClones, currCodeBlock, false));
+                        toAdd.addAll(secondInBlock);
+                    }
+
                 }
-
+            } else {
+                combinedClones.add(location);
             }
         }
+
+        combinedClones.addAll(toAdd);
 
         return combinedClones;
     }
 
-    public static Set<Location> getClonesInCodeBlock(Set<Location> clones, int codeBlock) {
+    private static boolean onlyContainsNullCase(Set<Location> clones) {
+        if (clones == null) {
+            return false;
+        }
+
+        return clones.size() == getClonesInCodeBlock(clones, -1, false).size();
+    }
+
+    public static Set<Location> getClonesInCodeBlock(Set<Location> clones, int codeBlock, boolean showAdditional) {
         Set<Location> clonesInCodeBlock = new LinkedHashSet<>();
 
         for (Location l : clones) {
             if (l.getCodeBlock() == codeBlock) {
+                clonesInCodeBlock.add(l);
+            }
+            if (showAdditional && l.getCodeBlock() == -1) {
                 clonesInCodeBlock.add(l);
             }
         }

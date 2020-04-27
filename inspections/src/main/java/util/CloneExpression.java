@@ -5,7 +5,7 @@ import java.util.Set;
 public class CloneExpression {
 
     private final String[] stringRep;
-    private Location location;
+    private final Location location;
     private Set<Location> clones;
 
     private CloneExpression(String[] stringRep, Location location, Set<Location> clones) {

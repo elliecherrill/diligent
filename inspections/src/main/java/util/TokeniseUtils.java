@@ -8,7 +8,12 @@ public class TokeniseUtils {
 
     //TODO: standardise tokenisation (e.g. start and end flags)
     public static String[] getStmtAsStringArray(PsiStatement stmt) {
-        return getStmtAsString(stmt).toArray(new String[0]);
+        List<String> stmtAsString = getStmtAsString(stmt);
+        if (stmtAsString == null) {
+            return null;
+        }
+
+        return stmtAsString.toArray(new String[0]);
     }
 
     private static List<String> getStmtAsString(PsiStatement stmt) {

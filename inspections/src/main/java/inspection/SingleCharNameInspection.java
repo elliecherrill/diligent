@@ -10,7 +10,8 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.PsiStmtType;
+import util.Utils;
 
 public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspectionTool {
 
@@ -141,19 +142,21 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 PsiParameterList paramList = method.getParameterList();
                 PsiParameter[] params = paramList.getParameters();
 
-                int index = 0;
+                feedbackId = new FeedbackIdentifier(Utils.getPointer(paramList), "single-char-name", PsiStmtType.PARAMETER, method.getName());
+                boolean singleParam = false;
                 for (PsiParameter p : params) {
-                    feedbackId = new FeedbackIdentifier(Utils.getPointer(p), "single-char-name", PsiStmtType.PARAMETER);
-
                     if (p.getName().length() == 1) {
-                        int line = Utils.getLineNumber(p);
-                        Feedback feedback = new Feedback(line, "Parameter names should be more than one character in length.", filename, line + "-" + index + "-single-char-name");
-                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                    } else {
-                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+                        singleParam = true;
+                        break;
                     }
+                }
 
-                    index++;
+                if (singleParam) {
+                    int line = Utils.getLineNumber(paramList);
+                    Feedback feedback = new Feedback(line, "Parameter names should be more than one character in length.", filename, line + "-single-char-name");
+                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                } else {
+                    feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }
             }
         };

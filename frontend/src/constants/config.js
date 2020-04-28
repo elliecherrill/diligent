@@ -20,6 +20,7 @@ export const initialConfigs = {
         'config-18': {id: 'config-18', content: 'Field declarations at the top of a class'},
         'config-19': {id: 'config-19', content: 'No redundant \'this\' keywords'},
         'config-20': {id: 'config-20', content: 'Use of shorthand operation-and-assignment'},
+        'config-21': {id: 'config-21', content: 'No String concatenation in a loop'},
     },
     categories: {
         'category-1': {id: 'category-1', title: 'High Priority', configIds: []},
@@ -30,7 +31,7 @@ export const initialConfigs = {
             title: 'Don\'t Check',
             configIds: ['config-1', 'config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8',
                 'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16',
-                'config-17', 'config-18', 'config-19', 'config-20']
+                'config-17', 'config-18', 'config-19', 'config-20', 'config-21']
         },
     },
     columnOrder: ['category-4', 'category-3', 'category-2', 'category-1']
@@ -38,4 +39,4 @@ export const initialConfigs = {
 
 export const allConfigs = ['config-1', 'config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8',
     'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17',
-    'config-18', 'config-19', 'config-20']
+    'config-18', 'config-19', 'config-20', 'config-21']

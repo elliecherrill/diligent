@@ -4,6 +4,7 @@ import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
+import com.intellij.psi.tree.IElementType;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -307,6 +308,24 @@ public final class Utils {
                         return true;
                     }
                 }
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean containsLiteral(PsiElement element, IElementType literalKeyword) {
+        if (element instanceof PsiJavaToken) {
+            PsiJavaToken token = (PsiJavaToken) element;
+            if (token.getTokenType().equals(literalKeyword)) {
+                return true;
+            }
+        }
+
+        PsiElement[] children = element.getChildren();
+        for (PsiElement child : children) {
+            if (containsLiteral(child, literalKeyword)) {
+                return true;
             }
         }
 

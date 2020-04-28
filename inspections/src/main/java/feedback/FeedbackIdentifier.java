@@ -10,18 +10,13 @@ public class FeedbackIdentifier {
     private final String feedbackType;
     private final PsiElement initialElement;
     private final PsiStmtType type;
-    private final String initElementTextPrefix;
 
-    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType type, String initElementTextPrefix) {
+    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType type) {
         this.pointer = pointer;
         this.feedbackType = feedbackType;
         this.type = type;
-        this.initElementTextPrefix = initElementTextPrefix;
-        initialElement = pointer.getElement();
-    }
 
-    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType type) {
-        this(pointer, feedbackType, type, null);
+        initialElement = pointer.getElement();
     }
 
     public SmartPsiElementPointer<PsiElement> getPointer() {
@@ -36,14 +31,6 @@ public class FeedbackIdentifier {
         return initialElement;
     }
 
-    public String getInitElementText() {
-        if (initElementTextPrefix == null) {
-            return initialElement.getText();
-        }
-
-        return initElementTextPrefix + initialElement.getText();
-    }
-
     public PsiStmtType getType() {
         return type;
     }
@@ -54,7 +41,7 @@ public class FeedbackIdentifier {
 
     @Override
     public String toString() {
-        return pointer.getElement() + " : " + feedbackType + " : " + getInitElementText() + " : " + type;
+        return pointer.getElement() + " : " + feedbackType + " : " + initialElement.getText() + " : " + type;
     }
 
     @Override
@@ -63,13 +50,14 @@ public class FeedbackIdentifier {
             FeedbackIdentifier otherFeedbackId = (FeedbackIdentifier) other;
 
             PsiStmtType otherType = otherFeedbackId.getType();
+            PsiElement otherElement = otherFeedbackId.getInitialElement();
 
             if ((type == PsiStmtType.LEFT_THIS_EXPR || type == PsiStmtType.RIGHT_THIS_EXPR) && otherType == type) {
                 return otherFeedbackId.getFeedbackType().equals(feedbackType);
             }
 
             return otherType == type &&
-                    otherFeedbackId.getInitElementText().equals(getInitElementText()) &&
+                    otherElement.getText().equals(initialElement.getText()) &&
                     otherFeedbackId.getFeedbackType().equals(feedbackType);
         }
 

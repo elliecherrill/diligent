@@ -142,21 +142,19 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 PsiParameterList paramList = method.getParameterList();
                 PsiParameter[] params = paramList.getParameters();
 
-                feedbackId = new FeedbackIdentifier(Utils.getPointer(paramList), "single-char-name", PsiStmtType.PARAMETER, method.getName());
-                boolean singleParam = false;
+                int index = 0;
                 for (PsiParameter p : params) {
-                    if (p.getName().length() == 1) {
-                        singleParam = true;
-                        break;
-                    }
-                }
+                    feedbackId = new FeedbackIdentifier(Utils.getPointer(p), "single-char-name", PsiStmtType.PARAMETER);
 
-                if (singleParam) {
-                    int line = Utils.getLineNumber(paramList);
-                    Feedback feedback = new Feedback(line, "Parameter names should be more than one character in length.", filename, line + "-single-char-name");
-                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                } else {
-                    feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+                    if (p.getName().length() == 1) {
+                        int line = Utils.getLineNumber(p);
+                        Feedback feedback = new Feedback(line, "Parameter names should be more than one character in length.", filename, line + "-" + index + "-single-char-name");
+                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                    } else {
+                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+                    }
+
+                    index++;
                 }
             }
         };

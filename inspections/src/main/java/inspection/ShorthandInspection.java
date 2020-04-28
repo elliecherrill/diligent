@@ -73,9 +73,12 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
                     return;
                 }
 
+                String filename = expression.getContainingFile().getName();
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "shorthand-assignment", PsiStmtType.BIN_EXPR);
 
                 IElementType op = expression.getOperationTokenType();
                 if (!op.equals(JavaTokenType.EQ)) {
+                    feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     return;
                 }
 
@@ -112,10 +115,6 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
                         }
                     }
                 }
-
-                String filename = expression.getContainingFile().getName();
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "shorthand-assignment", PsiStmtType.BIN_EXPR);
-
 
                 if (registerProblem) {
                     int line = Utils.getLineNumber(expression);

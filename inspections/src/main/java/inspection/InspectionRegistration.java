@@ -30,6 +30,7 @@ public final class InspectionRegistration implements ApplicationComponent, Inspe
                 ShorthandInspection.class,
                 SingleCharNameInspection.class,
                 StringComparisonInspection.class,
+                StringConcatInspection.class,
                 ThisInspection.class,
                 UsingForLoopsInspection.class,
                 UsingInheritanceInspection.class,

@@ -142,6 +142,9 @@ public final class Utils {
     }
 
     public static boolean isString(PsiType type) {
+        if (type == null) {
+            return false;
+        }
         return type.getCanonicalText().equals("java.lang.String");
     }
 

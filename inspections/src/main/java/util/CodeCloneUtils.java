@@ -261,7 +261,8 @@ public class CodeCloneUtils {
             }
         }
     }
-
+    //TODO: for assignment / prefix / postfix - when comparing variable names, is this enough?
+    // do we also need to consider their types?
     public static boolean changeInLHS(String[] first, String[] second) {
         // RHS and operator the same
         // LHS different
@@ -291,6 +292,38 @@ public class CodeCloneUtils {
 
         return Arrays.equals(first, 0, firstOpIndex, second, 0, secondOpIndex) &&
                 Arrays.equals(first, firstEndOpIndex, first.length, second, secondEndOpIndex, second.length);
+    }
+
+    public static boolean prefixExprChangeInVar(String[] first, String[] second) {
+        // Same operator, Change in var
+        int firstOpIndex = getStartIndex("PREFIX-OP", first);
+        int secondOpIndex = getStartIndex("PREFIX-OP", second);
+
+        return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
+    }
+
+    public static boolean prefixExprChangeInOp(String[] first, String[] second) {
+        // Same var, Change in op
+        int firstEndVarIndex = getStartIndex("PREFIX-OP", first);
+        int secondEndVarIndex = getStartIndex("PREFIX-OP", second);
+
+        return Arrays.equals(first, 0, firstEndVarIndex, second, 0, secondEndVarIndex);
+    }
+
+    public static boolean postfixExprChangeInVar(String[] first, String[] second) {
+        // Same operator, Change in var
+        int firstOpIndex = getStartIndex("POSTFIX-OP", first);
+        int secondOpIndex = getStartIndex("POSTFIX-OP", second);
+
+        return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
+    }
+
+    public static boolean postfixExprChangeInOp(String[] first, String[] second) {
+        // Same var, Change in op
+        int firstEndVarIndex = getStartIndex("POSTFIX-OP", first);
+        int secondEndVarIndex = getStartIndex("POSTFIX-OP", second);
+
+        return Arrays.equals(first, 0, firstEndVarIndex, second, 0, secondEndVarIndex);
     }
 
     public static boolean sameIfCondition(String[] first, String[] second) {
@@ -470,7 +503,7 @@ public class CodeCloneUtils {
             if (index == 0) {
                 currOtherStart = l.getLine();
             }
-
+            // TODO: is this condition too strict?
             if (l.getLine() != prev + 1) {
                 if (currSeq > longestSeq) {
                     longestSeq = currSeq;

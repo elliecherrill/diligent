@@ -445,6 +445,18 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 update = true;
                             }
                         }
+                    } else if (entryKey instanceof PsiPrefixExpression) {
+                        if (CodeCloneUtils.prefixExprChangeInVar(entryStringRep, otherEntryStringRep)) {
+                            update = true;
+                        } else if (CodeCloneUtils.prefixExprChangeInOp(entryStringRep, otherEntryStringRep)) {
+                            update = true;
+                        }
+                    } else if (entryKey instanceof PsiPostfixExpression) {
+                        if (CodeCloneUtils.postfixExprChangeInVar(entryStringRep, otherEntryStringRep)) {
+                            update = true;
+                        } else if (CodeCloneUtils.postfixExprChangeInOp(entryStringRep, otherEntryStringRep)) {
+                            update = true;
+                        }
                     }
 
                     if (update) {

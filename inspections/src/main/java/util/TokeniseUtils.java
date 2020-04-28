@@ -481,13 +481,9 @@ public class TokeniseUtils {
         } else if (expr instanceof PsiLiteralExpression) {
             exprAsString.add(getLiteralAsString((PsiLiteralExpression) expr));
         } else if (expr instanceof PsiPostfixExpression) {
-            PsiPostfixExpression postfixExpr = (PsiPostfixExpression) expr;
-            exprAsString.addAll(getExprAsString(postfixExpr.getOperand()));
-            exprAsString.add(getOpAsString(postfixExpr.getOperationSign()));
+            exprAsString.addAll(getPostfixExprAsString((PsiPostfixExpression) expr));
         } else if (expr instanceof PsiPrefixExpression) {
-            PsiPrefixExpression prefixExpr = (PsiPrefixExpression) expr;
-            exprAsString.addAll(getExprAsString(prefixExpr.getOperand()));
-            exprAsString.add(getOpAsString(prefixExpr.getOperationSign()));
+            exprAsString.addAll(getPrefixExprAsString((PsiPrefixExpression) expr));
         } else if (expr instanceof PsiBinaryExpression) {
             exprAsString.addAll(getBinExprAsString((PsiBinaryExpression) expr));
         } else if (expr instanceof PsiNewExpression){
@@ -499,6 +495,36 @@ public class TokeniseUtils {
         exprAsString.add("END-EXPR");
 
         return exprAsString;
+    }
+
+    private static List<String> getPostfixExprAsString(PsiPostfixExpression expr) {
+        List<String> postfixExprAsString = new ArrayList<>();
+
+        postfixExprAsString.add("POSTFIX");
+
+        postfixExprAsString.add("POSTFIX-VAR");
+        postfixExprAsString.addAll(getExprAsString(expr.getOperand()));
+        postfixExprAsString.add("POSTFIX-OP");
+        postfixExprAsString.add(getOpAsString(expr.getOperationSign()));
+
+        postfixExprAsString.add("END-POSTFIX");
+
+        return postfixExprAsString;
+    }
+
+    private static List<String> getPrefixExprAsString(PsiPrefixExpression expr) {
+        List<String> prefixExprAsString = new ArrayList<>();
+
+        prefixExprAsString.add("PREFIX");
+
+        prefixExprAsString.add("PREFIX-VAR");
+        prefixExprAsString.addAll(getExprAsString(expr.getOperand()));
+        prefixExprAsString.add("PREFIX-OP");
+        prefixExprAsString.add(getOpAsString(expr.getOperationSign()));
+
+        prefixExprAsString.add("END-PREFIX");
+
+        return prefixExprAsString;
     }
 
     private static List<String> getPolyExprAsString(PsiPolyadicExpression expr) {

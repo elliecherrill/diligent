@@ -116,7 +116,8 @@ def get_checks_for_download(config_id):
         'config-19': 'this',
         'config-20': 'shorthand-assignment',
         'config-21': 'string-concat',
-        'config-22': 'simplify-if'
+        'config-22': 'simplify-if',
+        'config-23': 'constructors-first'
     }
 
     for highCheck in config["high"]:

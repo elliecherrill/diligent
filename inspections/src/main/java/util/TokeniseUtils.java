@@ -527,6 +527,12 @@ public class TokeniseUtils {
         return prefixExprAsString;
     }
 
+    public static String[] getPolyExprAsStringArray(PsiPolyadicExpression expr) {
+        List<String> polyExprAsString = getPolyExprAsString(expr);
+
+        return polyExprAsString.toArray(new String[0]);
+    }
+
     private static List<String> getPolyExprAsString(PsiPolyadicExpression expr) {
         List<String> polyExprAsString = new ArrayList<>();
 

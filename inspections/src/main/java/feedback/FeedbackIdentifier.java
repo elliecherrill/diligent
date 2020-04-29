@@ -7,23 +7,31 @@ import util.PsiStmtType;
 public class FeedbackIdentifier {
 
     private final SmartPsiElementPointer<PsiElement> pointer;
+    private final SmartPsiElementPointer<PsiElement> clonePointer;
+    private final boolean hasClonePointer;
     private final String feedbackType;
     private final PsiElement initialElement;
     private final PsiStmtType type;
 
-    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType type) {
+    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, SmartPsiElementPointer<PsiElement> clonePointer, String feedbackType, PsiStmtType type) {
         this.pointer = pointer;
+        this.clonePointer = clonePointer;
         this.feedbackType = feedbackType;
         this.type = type;
 
+        hasClonePointer = clonePointer != null;
         initialElement = pointer.getElement();
+    }
+
+    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType type) {
+        this(pointer, null, feedbackType, type);
     }
 
     public SmartPsiElementPointer<PsiElement> getPointer() {
         return pointer;
     }
 
-    public String getFeedbackType() {
+    private String getFeedbackType() {
         return feedbackType;
     }
 
@@ -36,6 +44,10 @@ public class FeedbackIdentifier {
     }
 
     public boolean isDeleted() {
+        if (hasClonePointer) {
+            return clonePointer.getElement() == null || pointer.getElement() == null;
+        }
+
         return pointer.getElement() == null;
     }
 

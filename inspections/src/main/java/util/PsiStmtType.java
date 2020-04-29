@@ -12,5 +12,6 @@ public enum PsiStmtType {
     RIGHT_THIS_EXPR,
     SWITCH,
     BIN_EXPR,
-    STATEMENT
+    STATEMENT,
+    POLYADIC_EXPR
 }

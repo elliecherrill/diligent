@@ -191,6 +191,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 return;
             }
 
+            inspectPolyadicExpressions(aClass);
+
             PsiCodeBlock[] codeBlocks = CodeCloneUtils.getAllCodeBlocks(aClass);
 
             if (codeBlocks.length <= 1) {
@@ -270,9 +272,9 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 for (int blockIndex : rangeOfBlocks) {
                     FeedbackIdentifier feedbackId;
                     if (i > blockIndex) {
-                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[i]), blockIndex + "-block-clone", PsiStmtType.BLOCK);
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[i]), Utils.getPointer(codeBlocks[blockIndex]), blockIndex + "-block-clone", PsiStmtType.BLOCK);
                     } else {
-                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), i + "-block-clone", PsiStmtType.BLOCK);
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), Utils.getPointer(codeBlocks[i]), i + "-block-clone", PsiStmtType.BLOCK);
                     }
 
                     Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> cloneSequence = CodeCloneUtils.containsBlockClone(intersection, blockIndex);
@@ -346,14 +348,13 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
         private <T extends PsiElement> void compareStatements(Map<T, CloneExpression> map) {
             //TODO: should we only be considering statements in *different* method / if / cases ?
             for (Map.Entry<T, CloneExpression> entry : map.entrySet()) {
+                T entryKey = entry.getKey();
+                CloneExpression entryValue = entry.getValue();
+                String[] entryStringRep = entryValue.getStringRep();
+
                 for (Map.Entry<T, CloneExpression> otherEntry : map.entrySet()) {
-                    T entryKey = entry.getKey();
                     T otherEntryKey = otherEntry.getKey();
-
-                    CloneExpression entryValue = entry.getValue();
                     CloneExpression otherEntryValue = otherEntry.getValue();
-
-                    String[] entryStringRep = entryValue.getStringRep();
                     String[] otherEntryStringRep = otherEntryValue.getStringRep();
 
                     if (entryKey.equals(otherEntryKey)) {
@@ -886,6 +887,55 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
             assert false : "Unknown statement type " + stat.toString();
             return null;
+        }
+
+        //TODO: do we want to extend on this further - e.g. similar etc?
+        private void inspectPolyadicExpressions(PsiClass aClass) {
+            //TODO: get all polyadic expressions *as strings* all in one go?
+            // same for codeblocks etc
+            PsiPolyadicExpression[] polyExprs = CodeCloneUtils.getAllPolyadicExpressions(aClass);
+            Map<PsiPolyadicExpression, String[]> polyadicMap = new HashMap<>();
+            Map<PsiPolyadicExpression, Integer> polyadicLocationMap = new HashMap<>();
+
+            for (int i = 0; i < polyExprs.length; i++) {
+                PsiPolyadicExpression expr = polyExprs[i];
+                polyadicMap.put(expr, TokeniseUtils.getPolyExprAsStringArray(expr));
+                polyadicLocationMap.put(expr, i);
+            }
+
+            String filename = aClass.getContainingFile().getName();
+
+            for (Map.Entry<PsiPolyadicExpression, String[]> expr : polyadicMap.entrySet()) {
+                PsiPolyadicExpression exprKey = expr.getKey();
+                String[] exprStringRep = expr.getValue();
+
+                for (Map.Entry<PsiPolyadicExpression, String[]> otherExpr : polyadicMap.entrySet()) {
+                    PsiPolyadicExpression otherExprKey = otherExpr.getKey();
+                    String[] otherExprStringRep = otherExpr.getValue();
+
+                    if (exprKey.equals(otherExprKey)) {
+                        continue;
+                    }
+
+                    FeedbackIdentifier feedbackId;
+                    if (polyadicLocationMap.get(exprKey) > polyadicLocationMap.get(otherExprKey)) {
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(exprKey), Utils.getPointer(otherExprKey), polyadicLocationMap.get(otherExprKey) + "-polyadic-clone", PsiStmtType.POLYADIC_EXPR);
+                    } else {
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(otherExprKey), Utils.getPointer(exprKey), polyadicLocationMap.get(exprKey) + "-polyadic-clone", PsiStmtType.POLYADIC_EXPR);
+                    }
+
+                    if (Arrays.equals(exprStringRep, otherExprStringRep)) {
+                        int line = Utils.getLineNumber(exprKey);
+                        Feedback feedback = new Feedback(line,
+                                "Expression \'" + exprKey.getText() + "\' appears on lines " + line + " and " + Utils.getLineNumber(otherExprKey) + ".",
+                                filename,
+                                line + "-polyadic-clone");
+                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                    } else {
+                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+                    }
+                }
+            }
         }
     }
 }

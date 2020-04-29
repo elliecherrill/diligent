@@ -667,6 +667,25 @@ public class CodeCloneUtils {
         return codeBlocks;
     }
 
+    public static PsiPolyadicExpression[] getAllPolyadicExpressions(PsiClass aClass) {
+        return getPolyadicExpressions(aClass).toArray(new PsiPolyadicExpression[0]);
+    }
+
+    private static List<PsiPolyadicExpression> getPolyadicExpressions(PsiElement elem) {
+        List<PsiPolyadicExpression> polyExprs = new ArrayList<>();
+
+        for (PsiElement child : elem.getChildren()) {
+            if ((child instanceof PsiPolyadicExpression) && !(child instanceof PsiBinaryExpression)) {
+                PsiPolyadicExpression expr = (PsiPolyadicExpression) child;
+                polyExprs.add(expr);
+            }
+
+            polyExprs.addAll(getPolyadicExpressions(child));
+        }
+
+        return polyExprs;
+    }
+
     public static String print(String[] arr) {
         StringBuffer sb = new StringBuffer();
 

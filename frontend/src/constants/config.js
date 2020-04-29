@@ -16,7 +16,7 @@ export const initialConfigs = {
         'config-14': {id: 'config-14', content: 'No redundant else cases'},
         'config-15': {id: 'config-15', content: 'No single character variable names'},
         'config-16': {id: 'config-16', content: 'No methods longer than 20 statements'},
-        'config-17': {id: 'config-17', content: 'No clones'},
+        'config-17': {id: 'config-17', content: 'Minimise code duplication'},
         'config-18': {id: 'config-18', content: 'Field declarations at the top of a class'},
         'config-19': {id: 'config-19', content: 'No redundant \'this\' keywords'},
         'config-20': {id: 'config-20', content: 'Use of shorthand operation-and-assignment'},

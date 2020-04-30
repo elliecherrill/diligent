@@ -10,6 +10,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
 
@@ -44,8 +45,8 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder, "this")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "this");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
         }
@@ -103,7 +104,7 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                     if (thisVar != null) {
                         if (!Utils.isInScope(thisVar, block)) {
                             int line = Utils.getLineNumber(stat);
-                            Feedback feedback = new Feedback(line, "Unnecessary 'this' keyword", filename, line + "-this");
+                            Feedback feedback = new Feedback(line, "Unnecessary 'this' keyword", filename, line + "-this", priority);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

@@ -1,7 +1,11 @@
 package feedback;
 
+import util.InspectionPriority;
 import util.PsiStmtType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,7 +25,7 @@ public class FileFeedbackHolder {
         return filepath;
     }
 
-    public void addFeedback(FeedbackIdentifier id, Feedback newFeedback) {
+    public boolean addFeedback(FeedbackIdentifier id, Feedback newFeedback) {
         if (id.getType() == PsiStmtType.LEFT_THIS_EXPR || id.getType() == PsiStmtType.RIGHT_THIS_EXPR) {
             for (Map.Entry entry : feedback.entrySet()) {
                 FeedbackIdentifier entryId = (FeedbackIdentifier) entry.getKey();
@@ -33,21 +37,36 @@ public class FileFeedbackHolder {
             }
         }
 
-        feedback.remove(id);
+        boolean feedbackIsNew = true;
+        if (feedback.remove(id) != null) {
+            feedbackIsNew = false;
+        }
+
         feedback.put(id, newFeedback);
+
+        return feedbackIsNew;
     }
 
-    public void fixFeedback(FeedbackIdentifier id) {
+    public InspectionPriority fixFeedback(FeedbackIdentifier id) {
         Feedback f = feedback.get(id);
 
         if (f == null) {
-            return;
+            return InspectionPriority.NONE;
         }
 
-        f.setToFixed();
+        if (f.setToFixed()) {
+            return f.getPriority();
+        }
+
+        return InspectionPriority.NONE;
     }
 
-    public void updateDeleted() {
+    public Map<InspectionPriority, Integer> updateDeleted() {
+        Map<InspectionPriority, Integer> changeToPriorities = new HashMap<>(
+                Map.of(InspectionPriority.HIGH, 0,
+                        InspectionPriority.MEDIUM, 0,
+                        InspectionPriority.LOW, 0));
+
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();
 
@@ -59,16 +78,24 @@ public class FileFeedbackHolder {
 
             if (feedbackId.isDeleted()) {
                 f.setToFixed();
+
+                int currCount = changeToPriorities.get(f.getPriority());
+                currCount -= 1;
+                changeToPriorities.put(f.getPriority(), currCount);
             }
         }
+
+        return changeToPriorities;
     }
 
-    public String getFeedbackAsHTMLString() {
+    public String getFeedbackAsHTMLString(List<InspectionPriority> priorities) {
         StringBuffer sb = new StringBuffer();
 
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();
-            sb.append(f.toHTMLString());
+            if (priorities.contains(f.getPriority())) {
+                sb.append(f.toHTMLString());
+            }
         }
 
         return sb.toString();

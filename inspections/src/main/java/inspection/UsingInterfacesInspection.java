@@ -8,6 +8,7 @@ import feedback.FeedbackHolder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.InspectionPriority;
 import util.TipType;
 import util.Utils;
 
@@ -42,11 +43,11 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        if (Utils.isInspectionOn(holder,"interfaces")) {
+        if (Utils.getInspectionPriority(holder,"interfaces") != InspectionPriority.NONE) {
             return new InterfacesVisitor(holder, true);
         }
 
-        if (Utils.isInspectionOn(holder,"no-interfaces")) {
+        if (Utils.getInspectionPriority(holder,"no-interfaces") != InspectionPriority.NONE) {
             return new InterfacesVisitor(holder, false);
         }
 

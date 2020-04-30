@@ -10,6 +10,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
 
@@ -44,8 +45,8 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder, "simplify-if")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "simplify-if");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
         }
@@ -86,7 +87,11 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
 
                 if (getBranchResult(thenStat) + getBranchResult(elseStat) == 1) {
                     int line = Utils.getLineNumber(statement);
-                    Feedback feedback = new Feedback(line, "'if' statement can be simplified", filename, line + "-simplify-if");
+                    Feedback feedback = new Feedback(line,
+                            "'if' statement can be simplified",
+                            filename,
+                            line + "-simplify-if",
+                            priority);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

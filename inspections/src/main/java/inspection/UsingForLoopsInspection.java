@@ -8,6 +8,7 @@ import feedback.FeedbackHolder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.InspectionPriority;
 import util.TipType;
 import util.Utils;
 
@@ -42,11 +43,11 @@ public final class UsingForLoopsInspection extends AbstractBaseJavaLocalInspecti
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        if (Utils.isInspectionOn(holder, "for-loops")) {
+        if (Utils.getInspectionPriority(holder, "for-loops") != InspectionPriority.NONE) {
             return new ForVisitor(holder, true);
         }
 
-        if (Utils.isInspectionOn(holder, "no-for-loops")) {
+        if (Utils.getInspectionPriority(holder, "no-for-loops") != InspectionPriority.NONE) {
             return new ForVisitor(holder, false);
         }
 

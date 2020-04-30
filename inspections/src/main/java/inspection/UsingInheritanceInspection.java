@@ -8,6 +8,7 @@ import feedback.FeedbackHolder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.InspectionPriority;
 import util.TipType;
 import util.Utils;
 
@@ -45,11 +46,11 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
 
-        if (Utils.isInspectionOn(holder, "inheritance")) {
+        if (Utils.getInspectionPriority(holder, "inheritance") != InspectionPriority.NONE) {
             return new InheritanceVisitor(holder, true);
         }
 
-        if (Utils.isInspectionOn(holder, "no-inheritance")) {
+        if (Utils.getInspectionPriority(holder, "no-inheritance") != InspectionPriority.NONE) {
             return new InheritanceVisitor(holder, false);
         }
 

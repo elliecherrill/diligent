@@ -43,8 +43,8 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder, "screaming-snake-case")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "screaming-snake-case");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
         }
@@ -83,7 +83,11 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
 
                         if (!Utils.isUpperSnakeCase(enumConstant.getName())) {
                             int line = Utils.getLineNumber(enumConstant);
-                            Feedback feedback = new Feedback(line, "Enum constants should be in SCREAMING_SNAKE_CASE.", filename, line + "-" + index + "-screaming-snake-case");
+                            Feedback feedback = new Feedback(line,
+                                    "Enum constants should be in SCREAMING_SNAKE_CASE.",
+                                    filename,
+                                    line + "-" + index + "-screaming-snake-case",
+                                    priority);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -116,7 +120,11 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
 
                         if (!Utils.isUpperSnakeCase(field.getName())) {
                             int line = Utils.getLineNumber(field);
-                            Feedback feedback = new Feedback(line, "Constant field names should be in SCREAMING_SNAKE_CASE.", filename, line + "-" + field.getName() + "-screaming-snake-case");
+                            Feedback feedback = new Feedback(line,
+                                    "Constant field names should be in SCREAMING_SNAKE_CASE.",
+                                    filename,
+                                    line + "-" + field.getName() + "-screaming-snake-case",
+                                    priority);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

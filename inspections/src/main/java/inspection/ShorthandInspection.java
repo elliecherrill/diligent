@@ -44,8 +44,8 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder, "shorthand-assignment")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "shorthand-assignment");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
         }
@@ -118,7 +118,11 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
 
                 if (registerProblem) {
                     int line = Utils.getLineNumber(expression);
-                    Feedback feedback = new Feedback(line, "Can use shorthand operation and assignment.", filename, line + "-shorthand-assignment");
+                    Feedback feedback = new Feedback(line,
+                            "Can use shorthand operation and assignment.",
+                            filename,
+                            line + "-shorthand-assignment",
+                            priority);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

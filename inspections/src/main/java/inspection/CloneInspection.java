@@ -46,9 +46,10 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (Utils.isInspectionOn(holder, "clone")) {
-            return new CloneVisitor(holder);
+        InspectionPriority priority = Utils.getInspectionPriority(holder,"clone");
+        if (priority != InspectionPriority.NONE) {
+            // TODO: will this create a new clone visitor everytime? Use singleton?
+            return new CloneVisitor(holder, priority);
         }
 
         return new JavaElementVisitor() {
@@ -58,9 +59,11 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
     private static class CloneVisitor extends JavaElementVisitor {
         private final ProblemsHolder holder;
         private final FeedbackHolder feedbackHolder;
+        private final InspectionPriority priority;
 
-        CloneVisitor(ProblemsHolder holder) {
+        CloneVisitor(ProblemsHolder holder, InspectionPriority priority) {
             this.holder = holder;
+            this.priority = priority;
             feedbackHolder = FeedbackHolder.getInstance();
         }
 
@@ -175,7 +178,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             if (CodeCloneUtils.transitiveClosureOfClones(clones, rangeOfCases)) {
                 Feedback feedback = new Feedback(line,
                         "All cases in switch statement are clones of one another.", filename,
-                        line + "-switch-clone");
+                        line + "-switch-clone", priority);
                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
             } else {
                 feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -287,7 +290,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         Feedback feedback = new Feedback(line,
                                 "Block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[i], cloneSequence.getFirst()) + "\' is clone of block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[blockIndex], cloneSequence.getSecond()) + "\'.",
                                 filename,
-                                line + "-block-clone");
+                                line + "-block-clone",
+                                priority);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         hasClone = true;
                     } else {
@@ -938,7 +942,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         Feedback feedback = new Feedback(line,
                                 "Expression \'" + exprKey.getText() + "\' appears on lines " + line + " and " + Utils.getLineNumber(otherExprKey) + ".",
                                 filename,
-                                line + "-polyadic-clone");
+                                line + "-polyadic-clone",
+                                priority);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

@@ -71,7 +71,7 @@ public final class Utils {
         return project.getBasePath();
     }
 
-    public static boolean isInspectionOn(ProblemsHolder holder, String inspectionName) {
+    public static InspectionPriority getInspectionPriority(ProblemsHolder holder, String inspectionName) {
         String projectPath = holder.getProject().getBasePath();
         try {
             Object obj = new JSONParser().parse(new FileReader(projectPath + "/diligent.json"));
@@ -83,21 +83,21 @@ public final class Utils {
             for (Object inspection : highInspections) {
                 String highInspection = (String) inspection;
                 if (highInspection.equals(inspectionName)) {
-                    return true;
+                    return InspectionPriority.HIGH;
                 }
             }
 
             for (Object inspection : mediumInspections) {
                 String mediumInspection = (String) inspection;
                 if (mediumInspection.equals(inspectionName)) {
-                    return true;
+                    return InspectionPriority.MEDIUM;
                 }
             }
 
             for (Object inspection : lowInspections) {
                 String lowInspection = (String) inspection;
                 if (lowInspection.equals(inspectionName)) {
-                    return true;
+                    return InspectionPriority.LOW;
                 }
             }
 
@@ -106,10 +106,10 @@ public final class Utils {
                 NOTIFIER.notifyError(holder.getProject(), "Diligent", "No configuration file found at '" + projectPath + "/diligent.json'");
             }
             configNotFound = true;
-            return false;
+            return InspectionPriority.NONE;
         }
 
-        return false;
+        return InspectionPriority.NONE;
     }
 
     public static boolean hasErrorsInFile(PsiElement element) {

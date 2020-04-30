@@ -39,6 +39,11 @@ public class FeedbackIdentifier {
         return initialElement;
     }
 
+    //TODO: what about when you fix UPPER_CAMEL_CASE
+    public String getInitialElementText() {
+        return initialElement.getText().toLowerCase();
+    }
+
     public PsiStmtType getType() {
         return type;
     }
@@ -56,20 +61,21 @@ public class FeedbackIdentifier {
         return pointer.getElement() + " : " + feedbackType + " : " + initialElement.getText() + " : " + type;
     }
 
+    // TODO: for x = x + 1 >> x += 1 (these will be same element, i.e. initial element won't be null, but
+    // different text - need to consider this)
     @Override
     public boolean equals(Object other) {
         if (other instanceof FeedbackIdentifier) {
             FeedbackIdentifier otherFeedbackId = (FeedbackIdentifier) other;
 
             PsiStmtType otherType = otherFeedbackId.getType();
-            PsiElement otherElement = otherFeedbackId.getInitialElement();
 
             if ((type == PsiStmtType.LEFT_THIS_EXPR || type == PsiStmtType.RIGHT_THIS_EXPR) && otherType == type) {
                 return otherFeedbackId.getFeedbackType().equals(feedbackType);
             }
 
             return otherType == type &&
-                    otherElement.getText().equals(initialElement.getText()) &&
+                    otherFeedbackId.getInitialElementText().equals(getInitialElementText()) &&
                     otherFeedbackId.getFeedbackType().equals(feedbackType);
         }
 

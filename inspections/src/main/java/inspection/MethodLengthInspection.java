@@ -45,8 +45,8 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder, "method-length")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "method-length");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
         }
@@ -81,7 +81,11 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
 
                 if (body != null && body.getStatementCount() >= MAX_METHOD_LENGTH) {
                     int line = Utils.getLineNumber(method);
-                    Feedback feedback = new Feedback(line, "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.", filename, line + "-method-length");
+                    Feedback feedback = new Feedback(line,
+                            "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.",
+                            filename,
+                            line + "-method-length",
+                            priority);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

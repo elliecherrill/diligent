@@ -2,6 +2,7 @@ package feedback;
 
 import com.intellij.openapi.project.Project;
 import org.apache.commons.io.FileUtils;
+import util.InspectionPriority;
 import util.Notifier;
 import util.TipType;
 
@@ -9,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -20,6 +23,7 @@ public class ProjectFeedbackHolder {
     private static final Notifier NOTIFIER = new Notifier();
 
     private final Map<String, FileFeedbackHolder> files;
+    private final Map<InspectionPriority, Integer> priorityCount;
     private final String projectPath;
     private final Project project;
     private final TipHolder tipHolder;
@@ -30,6 +34,10 @@ public class ProjectFeedbackHolder {
         this.project = project;
 
         files = new ConcurrentHashMap<>();
+        priorityCount = new ConcurrentHashMap<>(
+                Map.of(InspectionPriority.HIGH, 0,
+                        InspectionPriority.MEDIUM, 0,
+                        InspectionPriority.LOW, 0));
         projectPath = project.getBasePath();
         isCurrent = true;
         tipHolder = new TipHolder();
@@ -39,6 +47,8 @@ public class ProjectFeedbackHolder {
         if (isCurrent) {
             return;
         }
+
+        List<InspectionPriority> reportedPriorities = getReportedPriorities();
 
         try {
             String frameTemplate = getFrameTemplate();
@@ -62,11 +72,11 @@ public class ProjectFeedbackHolder {
                 String filename = (String) file.getKey();
                 FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
 
-                fileFeedbackHolder.updateDeleted();
+                updatePriorities(fileFeedbackHolder.updateDeleted());
 
                 String template = getOutputTemplate();
                 template = template.replace("$files", getAllFilesAsHTMLString(filename));
-                template = template.replace("$feedback", fileFeedbackHolder.getFeedbackAsHTMLString());
+                template = template.replace("$feedback", fileFeedbackHolder.getFeedbackAsHTMLString(reportedPriorities));
                 template = template.replace("$project", project.getName());
                 template = template.replace("$current_file", filename);
                 File newHtmlFile = new File(projectPath + "/" + TEMPLATE_FILEPATH.replace("$filename", fileFeedbackHolder.getFilepath()));
@@ -82,12 +92,38 @@ public class ProjectFeedbackHolder {
         }
     }
 
+    private void updatePriorities(Map<InspectionPriority, Integer> changeToPriorities) {
+        for (Map.Entry<InspectionPriority, Integer> p : changeToPriorities.entrySet()) {
+            editCount(p.getKey(), p.getValue());
+        }
+    }
+
+    private List<InspectionPriority> getReportedPriorities() {
+        List<InspectionPriority> reportedPriorities = new ArrayList<>();
+
+        reportedPriorities.add(InspectionPriority.HIGH);
+
+        if (priorityCount.get(InspectionPriority.HIGH) == 0) {
+            reportedPriorities.add(InspectionPriority.MEDIUM);
+
+            if (priorityCount.get(InspectionPriority.MEDIUM) == 0) {
+                reportedPriorities.add(InspectionPriority.LOW);
+            }
+        }
+
+        return reportedPriorities;
+    }
+
+    //TODO: if this is working concurrently do we need locks etc? so if it adds then definitely increments priority counter
     public void addFeedback(String filename, FeedbackIdentifier feedbackId, Feedback feedback) {
         FileFeedbackHolder fileFeedbackHolder = files.get(filename);
         if (fileFeedbackHolder == null) {
             fileFeedbackHolder = new FileFeedbackHolder(filename);
         }
-        fileFeedbackHolder.addFeedback(feedbackId, feedback);
+
+        if (fileFeedbackHolder.addFeedback(feedbackId, feedback)) {
+            editCount(feedback.getPriority(), 1);
+        }
         files.put(filename, fileFeedbackHolder);
 
         isCurrent = false;
@@ -98,9 +134,26 @@ public class ProjectFeedbackHolder {
         if (fileFeedbackHolder == null) {
             return;
         }
-        fileFeedbackHolder.fixFeedback(feedbackId);
+
+        InspectionPriority priority = fileFeedbackHolder.fixFeedback(feedbackId);
+        if (priority != InspectionPriority.NONE) {
+            editCount(priority, -1);
+        }
 
         isCurrent = false;
+    }
+
+    private void editCount(InspectionPriority priority, int change) {
+        if (change == 0) {
+            return;
+        }
+
+        int currCount = priorityCount.get(priority);
+        currCount += change;
+
+        assert currCount >= 0: "Count is negative for " + priority.toString();
+
+        priorityCount.put(priority, currCount);
     }
 
     public void addTip(TipType tipType, String filename){

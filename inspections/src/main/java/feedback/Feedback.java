@@ -1,5 +1,7 @@
 package feedback;
 
+import util.InspectionPriority;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -9,15 +11,17 @@ public class Feedback {
     private final String errorMsg;
     private final String filename;
     private final String id;
+    private final InspectionPriority priority;
 
     private boolean isFixed;
     private LocalDateTime lastUpdated;
 
-    public Feedback(int lineNumber, String errorMsg, String filename, String id) {
+    public Feedback(int lineNumber, String errorMsg, String filename, String id, InspectionPriority priority) {
         this.lineNumber = lineNumber;
         this.errorMsg = errorMsg;
         this.filename = filename;
         this.id = id;
+        this.priority = priority;
 
         isFixed = false;
         lastUpdated = LocalDateTime.now();
@@ -42,7 +46,7 @@ public class Feedback {
         return "<div class=\"feedbackcontainer\" id=\"" + id + "\">\n" +
                 "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                 "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
-                "       <p> Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " </p>\n" +
+                "       <p> Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " > Priority: " + priority.toString() + " </p>\n" +
                 "   </div>\n" +
                 getIgnoreAdviceButton() +
                 "</div>";
@@ -82,8 +86,16 @@ public class Feedback {
         return isFixed;
     }
 
-    public void setToFixed() {
+    public boolean setToFixed() {
+        if (isFixed) {
+            return false;
+        }
         isFixed = true;
         lastUpdated = LocalDateTime.now();
+        return true;
+    }
+
+    public InspectionPriority getPriority() {
+        return priority;
     }
 }

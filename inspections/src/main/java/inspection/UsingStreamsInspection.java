@@ -11,6 +11,7 @@ import feedback.FeedbackHolder;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.InspectionPriority;
 import util.TipType;
 import util.Utils;
 
@@ -46,11 +47,11 @@ public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        if (Utils.isInspectionOn(holder, "streams")) {
+        if (Utils.getInspectionPriority(holder, "streams") != InspectionPriority.NONE) {
             return new StreamVisitor(holder, true);
         }
 
-        if (Utils.isInspectionOn(holder, "no-streams")) {
+        if (Utils.getInspectionPriority(holder, "no-streams") != InspectionPriority.NONE) {
             return new StreamVisitor(holder, false);
         }
 

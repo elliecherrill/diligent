@@ -41,8 +41,8 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder,"redundant-else")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder,"redundant-else");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {};
         }
 
@@ -88,7 +88,11 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
 
                     if (endsWithReturn) {
                         int line = Utils.getLineNumber(statement);
-                        Feedback feedback = new Feedback(line, "Unnecessary 'else' branch", filename, line + "-redundant-else");
+                        Feedback feedback = new Feedback(line,
+                                "Unnecessary 'else' branch",
+                                filename,
+                                line + "-redundant-else",
+                                priority);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

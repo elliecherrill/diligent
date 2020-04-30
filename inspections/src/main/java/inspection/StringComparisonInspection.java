@@ -11,6 +11,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
 
@@ -45,8 +46,8 @@ public final class StringComparisonInspection extends AbstractBaseJavaLocalInspe
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder, "string-comparison")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "string-comparison");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
         }
@@ -85,7 +86,11 @@ public final class StringComparisonInspection extends AbstractBaseJavaLocalInspe
                             int line = Utils.getLineNumber(expression);
                             String aimString = op.equals(JavaTokenType.EQEQ) ? ".equals()" : "! .equals()";
                             String opString = op.equals(JavaTokenType.EQEQ) ? "==" : "!=";
-                            Feedback feedback = new Feedback(line, "String comparison should use '" + aimString + "', instead of '" + opString + "'.", filename, line + "-string-comparison");
+                            Feedback feedback = new Feedback(line,
+                                    "String comparison should use '" + aimString + "', instead of '" + opString + "'.",
+                                    filename,
+                                    line + "-string-comparison",
+                                    priority);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                             return;
                         }

@@ -43,8 +43,8 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder,"fields-first")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "fields-first");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {};
         }
 
@@ -98,7 +98,11 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
 
                 if (registerProblem) {
                     int line = Utils.getLineNumber(field);
-                    Feedback feedback = new Feedback(line, "Declare fields at the top", filename, line + "-" + field.getName() + "-fields-first");
+                    Feedback feedback = new Feedback(line,
+                            "Declare fields at the top",
+                            filename,
+                            line + "-" + field.getName() + "-fields-first",
+                            priority);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

@@ -10,6 +10,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
 
@@ -44,8 +45,8 @@ public final class ConstructorsFirstInspection extends AbstractBaseJavaLocalInsp
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-
-        if (!Utils.isInspectionOn(holder, "constructors-first")) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "constructors-first");
+        if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
         }
@@ -85,7 +86,11 @@ public final class ConstructorsFirstInspection extends AbstractBaseJavaLocalInsp
 
                     if (isClassConstructor(m, className) && !prevIsCons) {
                         int line = Utils.getLineNumber(m);
-                        Feedback feedback = new Feedback(line, "Constructors should be first methods of a class.", filename, line + "-constructors-first");
+                        Feedback feedback = new Feedback(line,
+                                "Constructors should be first methods of a class.",
+                                filename,
+                                line + "-constructors-first",
+                                priority);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         continue;
                     }

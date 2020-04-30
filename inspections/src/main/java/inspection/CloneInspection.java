@@ -193,7 +193,9 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
             inspectPolyadicExpressions(aClass);
 
-            PsiCodeBlock[] codeBlocks = CodeCloneUtils.getAllCodeBlocks(aClass);
+            Pair<PsiCodeBlock[], List<Integer>> codeBlocksWithParents = CodeCloneUtils.getAllCodeBlocks(aClass);
+            PsiCodeBlock[] codeBlocks = codeBlocksWithParents.getFirst();
+            List<Integer> parents = codeBlocksWithParents.getSecond();
 
             if (codeBlocks.length <= 1) {
                 return;
@@ -269,6 +271,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     }
                 }
 
+                boolean hasClone = false;
+
                 for (int blockIndex : rangeOfBlocks) {
                     FeedbackIdentifier feedbackId;
                     if (i > blockIndex) {
@@ -285,9 +289,14 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 filename,
                                 line + "-block-clone");
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                        hasClone = true;
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
+                }
+
+                if (hasClone) {
+                    i = CodeCloneUtils.getNextNonNested(parents, i);
                 }
             }
         }

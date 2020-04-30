@@ -641,30 +641,37 @@ public class CodeCloneUtils {
         return sb.toString();
     }
 
-    public static PsiCodeBlock[] getAllCodeBlocks(PsiClass aClass) {
-        return getCodeBlocks(aClass).toArray(new PsiCodeBlock[0]);
+    public static Pair<PsiCodeBlock[], List<Integer>> getAllCodeBlocks(PsiClass aClass) {
+        Pair<List<PsiCodeBlock>, List<Integer>> codeBlocks = getCodeBlocks(aClass, -1);
+        return new Pair<>(codeBlocks.getFirst().toArray(new PsiCodeBlock[0]), codeBlocks.getSecond());
     }
 
-    private static List<PsiCodeBlock> getCodeBlocks(PsiElement elem) {
+    private static Pair<List<PsiCodeBlock>, List<Integer>> getCodeBlocks(PsiElement elem, int parent) {
         List<PsiCodeBlock> codeBlocks = new ArrayList<>();
+        List<Integer> parentIndex = new ArrayList<>();
 
+        int newParent = parent;
         for (PsiElement child : elem.getChildren()) {
             if (child instanceof PsiCodeBlock) {
                 PsiCodeBlock block = (PsiCodeBlock) child;
                 // Only consider code blocks with more than one statement
                 if (getCodeBlockCount(block) > 1) {
                     codeBlocks.add(block);
+                    parentIndex.add(parent);
+                    newParent++;
                 }
             }
 
             if (child instanceof PsiSwitchStatement) {
                 //TODO
             } else {
-                codeBlocks.addAll(getCodeBlocks(child));
+                Pair<List<PsiCodeBlock>, List<Integer>> childRes = getCodeBlocks(child, newParent);
+                codeBlocks.addAll(childRes.getFirst());
+                parentIndex.addAll(childRes.getSecond());
             }
         }
 
-        return codeBlocks;
+        return new Pair<>(codeBlocks, parentIndex);
     }
 
     public static PsiPolyadicExpression[] getAllPolyadicExpressions(PsiClass aClass) {
@@ -815,5 +822,16 @@ public class CodeCloneUtils {
         }
 
         return currCount;
+    }
+
+    public static int getNextNonNested(List<Integer> list, int currIndex) {
+        int toFind = list.get(currIndex);
+        for (int i = currIndex + 1; i < list.size(); i++) {
+            if (list.get(i) <= toFind) {
+                return i - 1;
+            }
+        }
+
+        return list.size();
     }
 }

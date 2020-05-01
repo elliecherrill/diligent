@@ -85,7 +85,12 @@ export default class Column extends React.Component {
                             isLowPriority={this.props.column.title === 'Low Priority'}
                             style={{maxHeight: '40vh', overflow: 'auto'}}
                         >
-                            <InnerList configs={this.props.configs} searching={this.props.searching} searchText={this.props.searchText}/>
+                            <InnerList
+                                columnId={this.props.column.id}
+                                configs={this.props.configs}
+                                searching={this.props.searching}
+                                searchText={this.props.searchText}
+                            />
                             {provided.placeholder}
                         </ConfigList>
                     )}

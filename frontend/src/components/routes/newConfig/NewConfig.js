@@ -51,6 +51,61 @@ class NewConfig extends React.Component {
         searchBy: ''
     }
 
+    moveToTop = () => {
+        const newColumns = []
+        for (let i = 0; i < this.state.columnOrder.length; i++) {
+            const column = this.state.categories[this.state.columnOrder[i]]
+            const searchedConfigs = []
+
+            for (let j = 0; j < column.configIds.length; j++) {
+                const config = this.state.configs[column.configIds[j]]
+                if (config.content.toLowerCase().includes(this.state.searchBy)) {
+                    searchedConfigs.push(config.id)
+                }
+            }
+
+            if (searchedConfigs.length === 0) {
+                newColumns.push(column)
+                continue
+            }
+
+            const newConfigIds = Array.from(column.configIds)
+            let insertAt = 0
+
+            for (let k = 0; k < searchedConfigs.length; k++) {
+                const currIndex = newConfigIds.indexOf(searchedConfigs[k])
+                if (currIndex === insertAt) {
+                    insertAt++
+                    continue
+                }
+                newConfigIds.splice(currIndex, 1)
+                newConfigIds.splice(insertAt, 0, searchedConfigs[k])
+                insertAt++
+            }
+
+            const newColumn = {
+                ...column,
+                configIds: newConfigIds
+            }
+
+            newColumns.push(newColumn)
+        }
+
+        const newState = {
+            ...this.state,
+            searching: true,
+            categories: {
+                ...this.state.categories,
+                [newColumns[0].id]: newColumns[0],
+                [newColumns[1].id]: newColumns[1],
+                [newColumns[2].id]: newColumns[2],
+                [newColumns[3].id]: newColumns[3],
+            }
+        }
+
+        this.setState(newState)
+    }
+
     onDragEnd = result => {
         const {destination, source, draggableId} = result
 
@@ -97,7 +152,7 @@ class NewConfig extends React.Component {
         }
 
         const finishConfigIds = Array.from(finish.configIds)
-        finishConfigIds.splice(source.index, 0, draggableId)
+        finishConfigIds.splice(destination.index, 0, draggableId)
         const newFinish = {
             ...finish,
             configIds: finishConfigIds
@@ -163,7 +218,7 @@ class NewConfig extends React.Component {
         }
 
         if (!unusedChecks.includes('config-6') && !unusedChecks.includes('config-7')) {
-           return [initialConfigs.configs['config-6'].content, initialConfigs.configs['config-7'].content]
+            return [initialConfigs.configs['config-6'].content, initialConfigs.configs['config-7'].content]
         }
 
         if (!unusedChecks.includes('config-8') && !unusedChecks.includes('config-9')) {
@@ -171,7 +226,7 @@ class NewConfig extends React.Component {
         }
 
         if (!unusedChecks.includes('config-10') && !unusedChecks.includes('config-11')) {
-        return [initialConfigs.configs['config-10'].content, initialConfigs.configs['config-11'].content]
+            return [initialConfigs.configs['config-10'].content, initialConfigs.configs['config-11'].content]
         }
 
         return []
@@ -258,6 +313,7 @@ class NewConfig extends React.Component {
                             <InputBase
                                 style={{marginLeft: '1%', flex: '1'}}
                                 placeholder='Search'
+                                value={this.state.searchBy}
                                 onChange={(e) => {
                                     const newState = {
                                         ...this.state,
@@ -273,7 +329,8 @@ class NewConfig extends React.Component {
                                     onClick={() => {
                                         const newState = {
                                             ...this.state,
-                                            searching: false
+                                            searching: false,
+                                            searchBy: '',
                                         }
                                         this.setState(newState)
                                     }}
@@ -283,13 +340,7 @@ class NewConfig extends React.Component {
                                 :
                                 <IconButton
                                     style={{padding: '1%'}}
-                                    onClick={() => {
-                                        const newState = {
-                                            ...this.state,
-                                            searching: true
-                                        }
-                                        this.setState(newState)
-                                    }}
+                                    onClick={this.moveToTop}
                                 >
                                     <SearchIcon/>
                                 </IconButton>
@@ -304,7 +355,13 @@ class NewConfig extends React.Component {
                                     const column = this.state.categories[columnId]
                                     const configs = column.configIds.map(configId => this.state.configs[configId])
 
-                                    return <Column key={column.id} column={column} configs={configs} searching={this.state.searching} searchText={this.state.searchBy}/>
+                                    return <Column
+                                        key={column.id}
+                                        column={column}
+                                        configs={configs}
+                                        searching={this.state.searching}
+                                        searchText={this.state.searchBy}
+                                    />
                                 })}
                             </Container>
                         </DragDropContext>

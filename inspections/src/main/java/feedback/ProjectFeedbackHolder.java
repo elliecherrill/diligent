@@ -53,6 +53,8 @@ public class ProjectFeedbackHolder {
         updateFeedbackLock.lock();
 
         if (isCurrent) {
+            updateTipsLock.unlock();
+            updateFeedbackLock.unlock();
             return;
         }
 

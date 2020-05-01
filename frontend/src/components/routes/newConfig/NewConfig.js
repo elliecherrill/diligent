@@ -13,7 +13,8 @@ import {
     MenuItem,
     Menu, Fade,
     Paper,
-    InputBase
+    InputBase,
+    Divider
 } from '@material-ui/core'
 import * as API from '../../../api'
 import routes from '../../../constants/routes'
@@ -48,11 +49,14 @@ class NewConfig extends React.Component {
 
         duplicateTitle: false,
 
-        searchBy: ''
+        searchBy: '',
+        searching: false,
+        searchResults: 0
     }
 
     moveToTop = () => {
         const newColumns = []
+        let results = 0
         for (let i = 0; i < this.state.columnOrder.length; i++) {
             const column = this.state.categories[this.state.columnOrder[i]]
             const searchedConfigs = []
@@ -61,6 +65,7 @@ class NewConfig extends React.Component {
                 const config = this.state.configs[column.configIds[j]]
                 if (config.content.toLowerCase().includes(this.state.searchBy)) {
                     searchedConfigs.push(config.id)
+                    results++
                 }
             }
 
@@ -94,6 +99,7 @@ class NewConfig extends React.Component {
         const newState = {
             ...this.state,
             searching: true,
+            searchResults: results,
             categories: {
                 ...this.state.categories,
                 [newColumns[0].id]: newColumns[0],
@@ -323,6 +329,14 @@ class NewConfig extends React.Component {
                                     this.setState(newState)
                                 }}
                             />
+                            {this.state.searching &&
+                            <Divider orientation='vertical' flexItem style={{margin: '0.5%'}}/>
+                            }
+                            {this.state.searching &&
+                            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', color: 'gray', marginLeft: '0.5%'}}>
+                                <p>{this.state.searchResults} search results</p>
+                            </div>
+                            }
                             {this.state.searching ?
                                 <IconButton
                                     style={{padding: '1%'}}

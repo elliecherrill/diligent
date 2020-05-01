@@ -51,7 +51,9 @@ class NewConfig extends React.Component {
 
         searchBy: '',
         searching: false,
-        searchResults: 0
+        searchResults: 0,
+
+        searchOpen: false
     }
 
     moveToTop = () => {
@@ -315,52 +317,77 @@ class NewConfig extends React.Component {
             <div>
                 <Slide direction='down' in={true} mountOnEnter unmountOnExit>
                     <div style={{paddingLeft: '5%', paddingRight: '5%'}}>
-                        <Paper component='form' style={{display: 'flex', margin: '0.5%'}}>
-                            <InputBase
-                                style={{marginLeft: '1%', flex: '1'}}
-                                placeholder='Search'
-                                value={this.state.searchBy}
-                                onChange={(e) => {
-                                    const newState = {
-                                        ...this.state,
-                                        searchBy: e.target.value.toLowerCase(),
-                                        searching: false
-                                    }
-                                    this.setState(newState)
-                                }}
-                            />
-                            {this.state.searching &&
-                            <Divider orientation='vertical' flexItem style={{margin: '0.5%'}}/>
-                            }
-                            {this.state.searching &&
-                            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', color: 'gray', marginLeft: '0.5%'}}>
-                                <p>{this.state.searchResults} search results</p>
-                            </div>
-                            }
-                            {this.state.searching ?
-                                <IconButton
-                                    style={{padding: '1%'}}
-                                    onClick={() => {
+                        <Slide direction='left' in={!this.state.searchOpen} unmountOnExit>
+                        <IconButton
+                            color={"secondary"}
+                            style={{padding: '1%'}}
+                            onClick={() => {
+                                const newState = {
+                                    ...this.state,
+                                    searchOpen: true
+                                }
+                                this.setState(newState)
+                            }}
+                        >
+                            <SearchIcon/>
+                        </IconButton>
+                        </Slide>
+                        <Slide direction='right' in={this.state.searchOpen} mountOnEnter unmountOnExit>
+
+                            <Paper component='form' style={{display: 'flex', margin: '0.5%'}}>
+                                <InputBase
+                                    style={{marginLeft: '1%', flex: '1'}}
+                                    placeholder='Search'
+                                    value={this.state.searchBy}
+                                    onChange={(e) => {
                                         const newState = {
                                             ...this.state,
-                                            searching: false,
-                                            searchBy: '',
+                                            searchBy: e.target.value.toLowerCase(),
+                                            searching: false
                                         }
                                         this.setState(newState)
                                     }}
-                                >
-                                    <DeleteIcon/>
-                                </IconButton>
-                                :
-                                <IconButton
-                                    style={{padding: '1%'}}
-                                    onClick={this.moveToTop}
-                                >
-                                    <SearchIcon/>
-                                </IconButton>
+                                />
+                                {this.state.searching &&
+                                <Divider orientation='vertical' flexItem style={{margin: '0.5%'}}/>
+                                }
+                                {this.state.searching &&
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    color: 'gray',
+                                    marginLeft: '0.5%'
+                                }}>
+                                    <p>{this.state.searchResults} search results</p>
+                                </div>
+                                }
+                                {this.state.searching ?
+                                    <IconButton
+                                        style={{padding: '1%'}}
+                                        onClick={() => {
+                                            const newState = {
+                                                ...this.state,
+                                                searching: false,
+                                                searchBy: '',
+                                            }
+                                            this.setState(newState)
+                                        }}
+                                    >
+                                        <DeleteIcon/>
+                                    </IconButton>
+                                    :
+                                    <IconButton
+                                        style={{padding: '1%'}}
+                                        onClick={this.moveToTop}
+                                    >
+                                        <SearchIcon/>
+                                    </IconButton>
 
-                            }
-                        </Paper>
+                                }
+                            </Paper>
+                        </Slide>
+
                         <DragDropContext
                             onDragEnd={this.onDragEnd}
                         >

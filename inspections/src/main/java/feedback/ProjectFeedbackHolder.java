@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ProjectFeedbackHolder {
 
@@ -27,6 +28,8 @@ public class ProjectFeedbackHolder {
     private final String projectPath;
     private final Project project;
     private final TipHolder tipHolder;
+
+    private final ReentrantLock updateTipsLock = new ReentrantLock();
 
     private boolean isCurrent;
 
@@ -44,6 +47,8 @@ public class ProjectFeedbackHolder {
     }
 
     public void updateReport() {
+        updateTipsLock.lock();
+
         if (isCurrent) {
             return;
         }
@@ -90,6 +95,8 @@ public class ProjectFeedbackHolder {
         } catch (IOException | IndexOutOfBoundsException e) {
             System.err.println(e);
         }
+
+        updateTipsLock.unlock();
     }
 
     private void updatePriorities(Map<InspectionPriority, Integer> changeToPriorities) {
@@ -116,6 +123,12 @@ public class ProjectFeedbackHolder {
 
     //TODO: if this is working concurrently do we need locks etc? so if it adds then definitely increments priority counter
     public void addFeedback(String filename, FeedbackIdentifier feedbackId, Feedback feedback) {
+        try {
+            FileUtils.writeStringToFile(new File("debug.txt"), "ADD FEEDBACK " + feedbackId, CHARSET, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         FileFeedbackHolder fileFeedbackHolder = files.get(filename);
         if (fileFeedbackHolder == null) {
             fileFeedbackHolder = new FileFeedbackHolder(filename);
@@ -130,6 +143,12 @@ public class ProjectFeedbackHolder {
     }
 
     public void fixFeedback(String filename, FeedbackIdentifier feedbackId) {
+        try {
+            FileUtils.writeStringToFile(new File("debug.txt"), "FIX FEEDBACK " + feedbackId, CHARSET, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         FileFeedbackHolder fileFeedbackHolder = files.get(filename);
         if (fileFeedbackHolder == null) {
             return;
@@ -151,21 +170,33 @@ public class ProjectFeedbackHolder {
         int currCount = priorityCount.get(priority);
         currCount += change;
 
-        assert currCount >= 0: "Count is negative for " + priority.toString();
+        assert currCount >= 0 : "Count is negative for " + priority.toString();
 
         priorityCount.put(priority, currCount);
     }
 
-    public void addTip(TipType tipType, String filename){
-        tipHolder.addTip(tipType, filename);
-
-        isCurrent = false;
+    public void addTip(TipType tipType, String filename) {
+        try {
+            updateTipsLock.lock();
+            FileUtils.writeStringToFile(new File("debug.txt"), "ADD TIP " + tipType + "\n", CHARSET, true);
+            isCurrent = tipHolder.addTip(tipType, filename);
+            FileUtils.writeStringToFile(new File("debug.txt"), "END ADD TIP " + tipType + " isCurrent:" + isCurrent + "\n", CHARSET, true);
+            updateTipsLock.unlock();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void fixTip(TipType tipType, String filename) {
-        tipHolder.fixTip(tipType, filename);
-
-        isCurrent = false;
+        try {
+            updateTipsLock.lock();
+            FileUtils.writeStringToFile(new File("debug.txt"), "FIX TIP " + tipType + "\n", CHARSET, true);
+            isCurrent = tipHolder.fixTip(tipType, filename);
+            FileUtils.writeStringToFile(new File("debug.txt"), "END FIX TIP " + tipType + " isCurrent:" + isCurrent + "\n", CHARSET, true);
+            updateTipsLock.unlock();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private String getAllFilesAsHTMLString() {

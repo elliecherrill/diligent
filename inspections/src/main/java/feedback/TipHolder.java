@@ -24,26 +24,27 @@ public class TipHolder {
         isCurrent = true;
     }
 
-    public void addTip(TipType tipType, String filename) {
+    public boolean addTip(TipType tipType, String filename) {
         Tip tip = tips.get(tipType);
 
         if (tip == null) {
             tip = new Tip(tipType);
             tips.put(tipType, tip);
-//            isCurrent = false;
+            isCurrent = false;
         } else {
             boolean updated = tip.removeSatisfied(filename);
-//            if (updated) {
-//                isCurrent = false;
-//            }
+            if (updated) {
+                isCurrent = false;
+            }
         }
-        isCurrent = false;
+
+        return isCurrent;
     }
 
-    public void fixTip(TipType tipType, String filename) {
+    public boolean fixTip(TipType tipType, String filename) {
         Tip tip = tips.get(tipType);
 
-        boolean updated = false;
+        boolean updated;
 
         if (tip == null) {
             tip = new Tip(tipType);
@@ -53,9 +54,11 @@ public class TipHolder {
             updated = tip.addSatisfied(filename);
         }
 
-//        if (updated) {
-        isCurrent = false;
-        //}
+        if (updated) {
+            isCurrent = false;
+        }
+
+        return isCurrent;
     }
 
     public boolean isCurrent() {

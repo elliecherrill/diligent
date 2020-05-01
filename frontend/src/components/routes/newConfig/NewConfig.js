@@ -11,14 +11,17 @@ import {
     Tooltip,
     IconButton,
     MenuItem,
-    Menu, Fade
+    Menu, Fade,
+    Paper,
+    InputBase
 } from '@material-ui/core'
 import * as API from '../../../api'
 import routes from '../../../constants/routes'
 import {Redirect} from 'react-router-dom'
 import {
     NoteAdd as AddDetailIcon,
-    Clear as DeleteIcon
+    Clear as DeleteIcon,
+    Search as SearchIcon
 } from '@material-ui/icons'
 import Alert from '../viewConfigs/Alert'
 
@@ -43,7 +46,9 @@ class NewConfig extends React.Component {
         addExerciseNum: false,
         exerciseNum: '',
 
-        duplicateTitle: false
+        duplicateTitle: false,
+
+        searchBy: ''
     }
 
     onDragEnd = result => {
@@ -249,6 +254,48 @@ class NewConfig extends React.Component {
             <div>
                 <Slide direction='down' in={true} mountOnEnter unmountOnExit>
                     <div style={{paddingLeft: '5%', paddingRight: '5%'}}>
+                        <Paper component='form' style={{display: 'flex', margin: '0.5%'}}>
+                            <InputBase
+                                style={{marginLeft: '1%', flex: '1'}}
+                                placeholder='Search'
+                                onChange={(e) => {
+                                    const newState = {
+                                        ...this.state,
+                                        searchBy: e.target.value.toLowerCase(),
+                                        searching: false
+                                    }
+                                    this.setState(newState)
+                                }}
+                            />
+                            {this.state.searching ?
+                                <IconButton
+                                    style={{padding: '1%'}}
+                                    onClick={() => {
+                                        const newState = {
+                                            ...this.state,
+                                            searching: false
+                                        }
+                                        this.setState(newState)
+                                    }}
+                                >
+                                    <DeleteIcon/>
+                                </IconButton>
+                                :
+                                <IconButton
+                                    style={{padding: '1%'}}
+                                    onClick={() => {
+                                        const newState = {
+                                            ...this.state,
+                                            searching: true
+                                        }
+                                        this.setState(newState)
+                                    }}
+                                >
+                                    <SearchIcon/>
+                                </IconButton>
+
+                            }
+                        </Paper>
                         <DragDropContext
                             onDragEnd={this.onDragEnd}
                         >
@@ -257,7 +304,7 @@ class NewConfig extends React.Component {
                                     const column = this.state.categories[columnId]
                                     const configs = column.configIds.map(configId => this.state.configs[configId])
 
-                                    return <Column key={column.id} column={column} configs={configs}/>
+                                    return <Column key={column.id} column={column} configs={configs} searching={this.state.searching} searchText={this.state.searchBy}/>
                                 })}
                             </Container>
                         </DragDropContext>

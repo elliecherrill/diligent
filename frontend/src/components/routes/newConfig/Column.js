@@ -36,9 +36,10 @@ class InnerList extends React.Component {
     }
 
     render() {
-        return this.props.configs.map((config, index) => (
-            <ConfigComponent key={config.id} config={config} index={index}/>
-        ))
+        return this.props.configs.map((config, index) => {
+            const searchResult = this.props.searching ? config.content.toLowerCase().includes(this.props.searchText) : false
+            return <ConfigComponent key={config.id} config={config} index={index} searchResult={searchResult}/>
+        })
     }
 }
 
@@ -84,7 +85,7 @@ export default class Column extends React.Component {
                             isLowPriority={this.props.column.title === 'Low Priority'}
                             style={{maxHeight: '40vh', overflow: 'auto'}}
                         >
-                            <InnerList configs={this.props.configs}/>
+                            <InnerList configs={this.props.configs} searching={this.props.searching} searchText={this.props.searchText}/>
                             {provided.placeholder}
                         </ConfigList>
                     )}

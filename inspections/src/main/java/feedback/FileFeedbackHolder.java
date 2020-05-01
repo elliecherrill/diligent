@@ -1,9 +1,9 @@
 package feedback;
 
 import util.InspectionPriority;
+import util.Pair;
 import util.PsiStmtType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,26 +25,36 @@ public class FileFeedbackHolder {
         return filepath;
     }
 
-    public boolean addFeedback(FeedbackIdentifier id, Feedback newFeedback) {
+    public Pair<Boolean, Boolean> addFeedback(FeedbackIdentifier id, Feedback newFeedback) {
+        //TODO: tidy up this method
+        boolean hasBeenRemoved = false;
         if (id.getType() == PsiStmtType.LEFT_THIS_EXPR || id.getType() == PsiStmtType.RIGHT_THIS_EXPR) {
             for (Map.Entry entry : feedback.entrySet()) {
                 FeedbackIdentifier entryId = (FeedbackIdentifier) entry.getKey();
 
                 if (entryId.getType() == id.getType() && entryId.getInitialElement().equals(id.getInitialElement())) {
                     feedback.remove(entryId);
+                    hasBeenRemoved = true;
                 }
 
             }
         }
 
         boolean feedbackIsNew = true;
-        if (feedback.remove(id) != null) {
+        Feedback oldFeedback = feedback.remove(id);
+        boolean isCurrent = false;
+        if (oldFeedback != null) {
             feedbackIsNew = false;
+            isCurrent = oldFeedback.equals(newFeedback);
+        }
+
+        if (hasBeenRemoved) {
+            feedbackIsNew = true;
         }
 
         feedback.put(id, newFeedback);
 
-        return feedbackIsNew;
+        return new Pair<>(isCurrent, feedbackIsNew);
     }
 
     public InspectionPriority fixFeedback(FeedbackIdentifier id) {

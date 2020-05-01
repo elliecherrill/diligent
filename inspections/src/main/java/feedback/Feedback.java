@@ -98,4 +98,39 @@ public class Feedback {
     public InspectionPriority getPriority() {
         return priority;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj instanceof Feedback) {
+            Feedback otherFeedback = (Feedback) obj;
+
+            return lineNumber == otherFeedback.getLineNumber() &&
+                    errorMsg.equals(otherFeedback.getErrorMsg()) &&
+                    id.equals(otherFeedback.getId()) &&
+                    filename.equals(otherFeedback.getFilename()) &&
+                    isFixed == otherFeedback.isFixed();
+        }
+
+        return false;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public String getId() {
+        return id;
+    }
 }

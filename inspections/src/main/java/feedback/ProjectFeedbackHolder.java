@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import org.apache.commons.io.FileUtils;
 import util.InspectionPriority;
 import util.Notifier;
+import util.Pair;
 import util.TipType;
 
 import java.io.File;
@@ -30,6 +31,7 @@ public class ProjectFeedbackHolder {
     private final TipHolder tipHolder;
 
     private final ReentrantLock updateTipsLock = new ReentrantLock();
+    private final ReentrantLock updateFeedbackLock = new ReentrantLock();
 
     private boolean isCurrent;
 
@@ -48,6 +50,7 @@ public class ProjectFeedbackHolder {
 
     public void updateReport() {
         updateTipsLock.lock();
+        updateFeedbackLock.lock();
 
         if (isCurrent) {
             return;
@@ -96,6 +99,7 @@ public class ProjectFeedbackHolder {
             System.err.println(e);
         }
 
+        updateFeedbackLock.unlock();
         updateTipsLock.unlock();
     }
 
@@ -122,44 +126,42 @@ public class ProjectFeedbackHolder {
     }
 
     //TODO: if this is working concurrently do we need locks etc? so if it adds then definitely increments priority counter
+    //TODO: consider adding feedback with no actual update
     public void addFeedback(String filename, FeedbackIdentifier feedbackId, Feedback feedback) {
-        try {
-            FileUtils.writeStringToFile(new File("debug.txt"), "ADD FEEDBACK " + feedbackId, CHARSET, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        updateFeedbackLock.lock();
 
         FileFeedbackHolder fileFeedbackHolder = files.get(filename);
         if (fileFeedbackHolder == null) {
             fileFeedbackHolder = new FileFeedbackHolder(filename);
         }
 
-        if (fileFeedbackHolder.addFeedback(feedbackId, feedback)) {
+        Pair<Boolean, Boolean> addFeedbackRes = fileFeedbackHolder.addFeedback(feedbackId, feedback);
+        if (addFeedbackRes.getSecond()) {
             editCount(feedback.getPriority(), 1);
         }
         files.put(filename, fileFeedbackHolder);
 
-        isCurrent = false;
+        isCurrent = addFeedbackRes.getFirst();
+
+        updateFeedbackLock.unlock();
     }
 
     public void fixFeedback(String filename, FeedbackIdentifier feedbackId) {
-        try {
-            FileUtils.writeStringToFile(new File("debug.txt"), "FIX FEEDBACK " + feedbackId, CHARSET, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        updateFeedbackLock.lock();
 
         FileFeedbackHolder fileFeedbackHolder = files.get(filename);
         if (fileFeedbackHolder == null) {
+            updateFeedbackLock.unlock();
             return;
         }
 
         InspectionPriority priority = fileFeedbackHolder.fixFeedback(feedbackId);
         if (priority != InspectionPriority.NONE) {
             editCount(priority, -1);
+            isCurrent = false;
         }
 
-        isCurrent = false;
+        updateFeedbackLock.unlock();
     }
 
     private void editCount(InspectionPriority priority, int change) {
@@ -176,27 +178,15 @@ public class ProjectFeedbackHolder {
     }
 
     public void addTip(TipType tipType, String filename) {
-        try {
-            updateTipsLock.lock();
-            FileUtils.writeStringToFile(new File("debug.txt"), "ADD TIP " + tipType + "\n", CHARSET, true);
-            isCurrent = tipHolder.addTip(tipType, filename);
-            FileUtils.writeStringToFile(new File("debug.txt"), "END ADD TIP " + tipType + " isCurrent:" + isCurrent + "\n", CHARSET, true);
-            updateTipsLock.unlock();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        updateTipsLock.lock();
+        isCurrent = tipHolder.addTip(tipType, filename);
+        updateTipsLock.unlock();
     }
 
     public void fixTip(TipType tipType, String filename) {
-        try {
-            updateTipsLock.lock();
-            FileUtils.writeStringToFile(new File("debug.txt"), "FIX TIP " + tipType + "\n", CHARSET, true);
-            isCurrent = tipHolder.fixTip(tipType, filename);
-            FileUtils.writeStringToFile(new File("debug.txt"), "END FIX TIP " + tipType + " isCurrent:" + isCurrent + "\n", CHARSET, true);
-            updateTipsLock.unlock();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        updateTipsLock.lock();
+        isCurrent = tipHolder.fixTip(tipType, filename);
+        updateTipsLock.unlock();
     }
 
     private String getAllFilesAsHTMLString() {

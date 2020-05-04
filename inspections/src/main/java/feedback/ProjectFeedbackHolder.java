@@ -52,6 +52,8 @@ public class ProjectFeedbackHolder {
         updateTipsLock.lock();
         updateFeedbackLock.lock();
 
+        updateDeleted();
+
         if (isCurrent) {
             updateTipsLock.unlock();
             updateFeedbackLock.unlock();
@@ -82,8 +84,6 @@ public class ProjectFeedbackHolder {
                 String filename = (String) file.getKey();
                 FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
 
-                updatePriorities(fileFeedbackHolder.updateDeleted());
-
                 String template = getOutputTemplate();
                 template = template.replace("$files", getAllFilesAsHTMLString(filename));
                 template = template.replace("$feedback", fileFeedbackHolder.getFeedbackAsHTMLString(reportedPriorities));
@@ -103,6 +103,20 @@ public class ProjectFeedbackHolder {
 
         updateFeedbackLock.unlock();
         updateTipsLock.unlock();
+    }
+
+    private void updateDeleted() {
+        for (Map.Entry file : files.entrySet()) {
+            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+            Map<InspectionPriority, Integer> changeToPriorities = fileFeedbackHolder.updateDeleted();
+
+            if (!(changeToPriorities.get(InspectionPriority.HIGH) == 0 &&
+                    changeToPriorities.get(InspectionPriority.MEDIUM) == 0 &&
+                    changeToPriorities.get(InspectionPriority.LOW) == 0)) {
+                isCurrent = false;
+                updatePriorities(changeToPriorities);
+            }
+        }
     }
 
     private void updatePriorities(Map<InspectionPriority, Integer> changeToPriorities) {
@@ -143,7 +157,9 @@ public class ProjectFeedbackHolder {
         }
         files.put(filename, fileFeedbackHolder);
 
-        isCurrent = addFeedbackRes.getFirst();
+        if (!addFeedbackRes.getFirst()) {
+            isCurrent = false;
+        }
 
         updateFeedbackLock.unlock();
     }
@@ -181,13 +197,17 @@ public class ProjectFeedbackHolder {
 
     public void addTip(TipType tipType, String filename) {
         updateTipsLock.lock();
-        isCurrent = tipHolder.addTip(tipType, filename);
+        if (!tipHolder.addTip(tipType, filename)) {
+            isCurrent = false;
+        }
         updateTipsLock.unlock();
     }
 
     public void fixTip(TipType tipType, String filename) {
         updateTipsLock.lock();
-        isCurrent = tipHolder.fixTip(tipType, filename);
+        if (!tipHolder.fixTip(tipType, filename)) {
+            isCurrent = false;
+        }
         updateTipsLock.unlock();
     }
 

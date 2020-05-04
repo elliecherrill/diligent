@@ -11,10 +11,8 @@ import {
     Tooltip,
     IconButton,
     MenuItem,
-    Menu, Fade,
-    Paper,
-    InputBase,
-    Divider
+    Menu,
+    Fade,
 } from '@material-ui/core'
 import * as API from '../../../api'
 import routes from '../../../constants/routes'
@@ -22,9 +20,9 @@ import {Redirect} from 'react-router-dom'
 import {
     NoteAdd as AddDetailIcon,
     Clear as DeleteIcon,
-    Search as SearchIcon
 } from '@material-ui/icons'
 import Alert from '../viewConfigs/Alert'
+import SearchBar from './SearchBar'
 
 const Container = styled.div`
     display: flex;
@@ -52,8 +50,6 @@ class NewConfig extends React.Component {
         searchBy: '',
         searching: false,
         searchResults: 0,
-
-        searchOpen: false
     }
 
     moveToTop = () => {
@@ -311,82 +307,38 @@ class NewConfig extends React.Component {
         })
     }
 
+    stopSearching = () => {
+        const newState = {
+            ...this.state,
+            searching: false,
+            searchBy: '',
+        }
+        this.setState(newState)
+    }
+
+    updateSearchText = (e) => {
+        const newState = {
+            ...this.state,
+            searchBy: e.target.value.toLowerCase(),
+            searching: false
+        }
+        this.setState(newState)
+    }
+
     render() {
         document.body.style.backgroundColor = colours.PRIMARY
         return (
             <div>
                 <Slide direction='down' in={true} mountOnEnter unmountOnExit>
                     <div style={{paddingLeft: '5%', paddingRight: '5%'}}>
-                        <Slide direction='left' in={!this.state.searchOpen} unmountOnExit>
-                        <IconButton
-                            color={"secondary"}
-                            style={{padding: '1%'}}
-                            onClick={() => {
-                                const newState = {
-                                    ...this.state,
-                                    searchOpen: true
-                                }
-                                this.setState(newState)
-                            }}
-                        >
-                            <SearchIcon/>
-                        </IconButton>
-                        </Slide>
-                        <Slide direction='right' in={this.state.searchOpen} mountOnEnter unmountOnExit>
-
-                            <Paper component='form' style={{display: 'flex', margin: '0.5%'}}>
-                                <InputBase
-                                    style={{marginLeft: '1%', flex: '1'}}
-                                    placeholder='Search'
-                                    value={this.state.searchBy}
-                                    onChange={(e) => {
-                                        const newState = {
-                                            ...this.state,
-                                            searchBy: e.target.value.toLowerCase(),
-                                            searching: false
-                                        }
-                                        this.setState(newState)
-                                    }}
-                                />
-                                {this.state.searching &&
-                                <Divider orientation='vertical' flexItem style={{margin: '0.5%'}}/>
-                                }
-                                {this.state.searching &&
-                                <div style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    color: 'gray',
-                                    marginLeft: '0.5%'
-                                }}>
-                                    <p>{this.state.searchResults} search results</p>
-                                </div>
-                                }
-                                {this.state.searching ?
-                                    <IconButton
-                                        style={{padding: '1%'}}
-                                        onClick={() => {
-                                            const newState = {
-                                                ...this.state,
-                                                searching: false,
-                                                searchBy: '',
-                                            }
-                                            this.setState(newState)
-                                        }}
-                                    >
-                                        <DeleteIcon/>
-                                    </IconButton>
-                                    :
-                                    <IconButton
-                                        style={{padding: '1%'}}
-                                        onClick={this.moveToTop}
-                                    >
-                                        <SearchIcon/>
-                                    </IconButton>
-
-                                }
-                            </Paper>
-                        </Slide>
+                        <SearchBar
+                            searchBy={this.state.searchBy}
+                            updateSearchText={(e) => this.updateSearchText(e)}
+                            searching={this.state.searching}
+                            searchResults={this.state.searchResults}
+                            stopSearching={this.stopSearching}
+                            moveToTop={this.moveToTop}
+                        />
 
                         <DragDropContext
                             onDragEnd={this.onDragEnd}

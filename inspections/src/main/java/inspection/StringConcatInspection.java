@@ -232,7 +232,9 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                             "String concatenation should be avoided within a loop.",
                             filename,
                             line + "-string-concat",
-                            priority);
+                            priority,
+                            Utils.getClassName(stat),
+                            Utils.getMethodName(stat));
                     FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT, line);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 }

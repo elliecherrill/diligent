@@ -1,6 +1,7 @@
 package feedback;
 
 import util.InspectionPriority;
+import util.ReportLevel;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -11,23 +12,33 @@ public class Feedback {
     private final int lineNumber;
     private final String errorMsg;
     private final String filename;
+    private final String className;
+    private final String methodName;
     private final String id;
     private final InspectionPriority priority;
 
     private boolean isFixed;
     private boolean hasBeenShown;
     private LocalDateTime lastUpdated;
+    private ReportLevel reportLevel;
 
-    public Feedback(int lineNumber, String errorMsg, String filename, String id, InspectionPriority priority) {
+    public Feedback(int lineNumber, String errorMsg, String filename, String id, InspectionPriority priority, String className, String methodName) {
         this.lineNumber = lineNumber;
         this.errorMsg = errorMsg;
         this.filename = filename;
+        this.className = className;
+        this.methodName = methodName;
         this.id = id;
         this.priority = priority;
 
         isFixed = false;
         hasBeenShown = false;
         lastUpdated = LocalDateTime.now();
+        reportLevel = ReportLevel.CLASS;
+    }
+
+    public Feedback(int lineNumber, String errorMsg, String filename, String id, InspectionPriority priority, String className) {
+        this(lineNumber, errorMsg, filename, id, priority, className, null);
     }
 
     @Override
@@ -58,12 +69,28 @@ public class Feedback {
                                     getPriorityIcons(priority) +
                     "           </div>\n" +
                     "       </div>\n"+
-                    "       <p> Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " > Priority: " + priority.toString() + " </p>\n" +
+                    "       <p> Location: " + getLocation() + " > Last Updated: " + getLastUpdatedFormatted() + " > Priority: " + priority.toString() + " </p>\n" +
                     "   </div>\n" +
                     getIgnoreAdviceButton() +
                     "</div>";
         }
 
+        return "";
+    }
+
+    private String getLocation() {
+        if (reportLevel == ReportLevel.CLASS) {
+            return className;
+
+        }
+        if (reportLevel == ReportLevel.METHOD) {
+            return methodName;
+
+        }
+        if (reportLevel == ReportLevel.LINE) {
+            return String.valueOf(lineNumber);
+
+        }
         return "";
     }
 
@@ -76,15 +103,6 @@ public class Feedback {
         }
 
         return sb.toString();
-    }
-
-    private String getLineNumberFormatted() {
-        if (lineNumber >= 0) {
-            return String.valueOf(lineNumber);
-        }
-
-        //TODO: change this
-        return "WHOLE FILE";
     }
 
     private String getLastUpdatedFormatted() {

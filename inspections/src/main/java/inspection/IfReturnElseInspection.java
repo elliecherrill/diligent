@@ -92,7 +92,9 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                                 "Unnecessary 'else' branch",
                                 filename,
                                 line + "-redundant-else",
-                                priority);
+                                priority,
+                                Utils.getClassName(statement),
+                                Utils.getMethodName(statement));
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

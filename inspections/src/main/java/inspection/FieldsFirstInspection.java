@@ -102,7 +102,8 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
                             "Declare fields at the top",
                             filename,
                             line + "-" + field.getName() + "-fields-first",
-                            priority);
+                            priority,
+                            Utils.getClassName(field));
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

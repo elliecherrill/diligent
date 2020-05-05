@@ -178,7 +178,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             if (CodeCloneUtils.transitiveClosureOfClones(clones, rangeOfCases)) {
                 Feedback feedback = new Feedback(line,
                         "All cases in switch statement are clones of one another.", filename,
-                        line + "-switch-clone", priority);
+                        line + "-switch-clone", priority, Utils.getClassName(statement), Utils.getMethodName(statement));
                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
             } else {
                 feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -280,11 +280,14 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 for (int blockIndex : rangeOfBlocks) {
                     FeedbackIdentifier feedbackId;
                     int line;
+                    String methodName;
                     if (i > blockIndex) {
                         line = Utils.getLineNumber(codeBlocks[i]);
+                        methodName = Utils.getMethodName(codeBlocks[i]);
                         feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[i]), Utils.getPointer(codeBlocks[blockIndex]), blockIndex + "-block-clone", PsiStmtType.BLOCK, line);
                     } else {
                         line = Utils.getLineNumber(codeBlocks[blockIndex]);
+                        methodName = Utils.getMethodName(codeBlocks[blockIndex]);
                         feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), Utils.getPointer(codeBlocks[i]), i + "-block-clone", PsiStmtType.BLOCK, line);
                     }
 
@@ -294,7 +297,9 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 "Block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[i], cloneSequence.getFirst()) + "\' is clone of block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[blockIndex], cloneSequence.getSecond()) + "\'.",
                                 filename,
                                 line + "-block-clone",
-                                priority);
+                                priority,
+                                aClass.getName(),
+                                methodName);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         hasClone = true;
                     } else {
@@ -935,11 +940,14 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
                     FeedbackIdentifier feedbackId;
                     int line;
+                    String methodName;
                     if (polyadicLocationMap.get(exprKey) > polyadicLocationMap.get(otherExprKey)) {
                         line = Utils.getLineNumber(exprKey);
+                        methodName = Utils.getMethodName(exprKey);
                         feedbackId = new FeedbackIdentifier(Utils.getPointer(exprKey), Utils.getPointer(otherExprKey), polyadicLocationMap.get(otherExprKey) + "-polyadic-clone", PsiStmtType.POLYADIC_EXPR, line);
                     } else {
                         line = Utils.getLineNumber(otherExprKey);
+                        methodName = Utils.getMethodName(otherExprKey);
                         feedbackId = new FeedbackIdentifier(Utils.getPointer(otherExprKey), Utils.getPointer(exprKey), polyadicLocationMap.get(exprKey) + "-polyadic-clone", PsiStmtType.POLYADIC_EXPR, line);
                     }
 
@@ -948,7 +956,9 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 "Expression \'" + exprKey.getText() + "\' appears on lines " + line + " and " + Utils.getLineNumber(otherExprKey) + ".",
                                 filename,
                                 line + "-polyadic-clone",
-                                priority);
+                                priority,
+                                aClass.getName(),
+                                methodName);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

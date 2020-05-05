@@ -90,7 +90,8 @@ public final class ConstructorsFirstInspection extends AbstractBaseJavaLocalInsp
                                 "Constructors should be first methods of a class.",
                                 filename,
                                 line + "-constructors-first",
-                                priority);
+                                priority,
+                                className);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         continue;
                     }

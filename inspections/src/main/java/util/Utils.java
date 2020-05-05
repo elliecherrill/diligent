@@ -64,6 +64,30 @@ public final class Utils {
         return document.getLineNumber(textOffset) + 1;
     }
 
+    public static String getClassName(PsiElement element) {
+        assert element != null : "No containing class found";
+
+        if (element instanceof PsiClass) {
+            PsiClass aClass = (PsiClass) element;
+            return aClass.getName();
+        }
+
+        return getClassName(element.getParent());
+    }
+
+    public static String getMethodName(PsiElement element) {
+        if (element == null) {
+            return null;
+        }
+
+        if (element instanceof PsiMethod) {
+            PsiMethod method = (PsiMethod) element;
+            return method.getName();
+        }
+
+        return getMethodName(element.getParent());
+    }
+
     public static String getProjectPath(PsiElement element) {
         PsiFile containingFile = element.getContainingFile();
         Project project = containingFile.getProject();

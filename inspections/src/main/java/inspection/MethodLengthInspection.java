@@ -85,7 +85,8 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
                             "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.",
                             filename,
                             line + "-method-length",
-                            priority);
+                            priority,
+                            Utils.getClassName(method));
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

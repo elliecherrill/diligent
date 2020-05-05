@@ -82,7 +82,8 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                             "Field names should be more than one character in length.",
                             filename,
                             line + "-" + field.getName() + "-single-char-name",
-                            priority);
+                            priority,
+                            Utils.getClassName(field));
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename,feedbackId);
@@ -115,7 +116,9 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                                         "Variable names should be more than one character in length.",
                                         filename,
                                         line + "-" + index + "-single-char-name",
-                                        priority);
+                                        priority,
+                                        Utils.getClassName(statement),
+                                        Utils.getMethodName(statement));
                                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                             } else {
                                 feedbackHolder.fixFeedback(holder.getProject(), filename,feedbackId);
@@ -138,6 +141,7 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 // Method names
                 String filename = method.getContainingFile().getName();
                 int line = Utils.getLineNumber(method);
+                String className = Utils.getClassName(method);
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "single-char-name", PsiStmtType.METHOD, line);
 
                 if (method.getName().length() == 1) {
@@ -145,7 +149,8 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                             "Method names should be more than one character in length.",
                             filename,
                             line + "-single-char-name",
-                            priority);
+                            priority,
+                            className);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -165,7 +170,8 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                                 "Parameter names should be more than one character in length.",
                                 filename,
                                 line + "-" + index + "-single-char-name",
-                                priority);
+                                priority,
+                                className);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

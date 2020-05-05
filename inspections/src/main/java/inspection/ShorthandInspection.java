@@ -122,7 +122,9 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
                             "Can use shorthand operation and assignment.",
                             filename,
                             line + "-shorthand-assignment",
-                            priority);
+                            priority,
+                            Utils.getClassName(expression),
+                            Utils.getMethodName(expression));
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

@@ -90,7 +90,9 @@ public final class StringComparisonInspection extends AbstractBaseJavaLocalInspe
                                     "String comparison should use '" + aimString + "', instead of '" + opString + "'.",
                                     filename,
                                     line + "-string-comparison",
-                                    priority);
+                                    priority,
+                                    Utils.getClassName(expression),
+                                    Utils.getMethodName(expression));
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                             return;
                         }

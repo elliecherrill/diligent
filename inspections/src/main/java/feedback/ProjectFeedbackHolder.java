@@ -270,6 +270,27 @@ public class ProjectFeedbackHolder {
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\">\n" +
                 "    <title>Diligent</title>\n" +
                 "    <style>\n" +
+                "        .material-icons {\n" +
+                "            font-family: 'Material Icons';\n" +
+                "            font-weight: normal;\n" +
+                "            font-style: normal;\n" +
+                "            font-size: 24px;\n" +
+                "            display: inline-block;\n" +
+                "            line-height: 1;\n" +
+                "            text-transform: none;\n" +
+                "            letter-spacing: normal;\n" +
+                "            word-wrap: normal;\n" +
+                "            white-space: nowrap;\n" +
+                "            direction: ltr;\n" +
+                "            /* Support for all WebKit browsers. */\n" +
+                "            -webkit-font-smoothing: antialiased;\n" +
+                "            /* Support for Safari and Chrome. */\n" +
+                "            text-rendering: optimizeLegibility;\n" +
+                "            /* Support for Firefox. */\n" +
+                "            -moz-osx-font-smoothing: grayscale;\n" +
+                "            /* Support for IE. */\n" +
+                "            font-feature-settings: 'liga';\n" +
+                "        }\n" +
                 "        #topbar {\n" +
                 "            min-height: 64px;\n" +
                 "            background-color: #34558b;\n" +

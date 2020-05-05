@@ -50,7 +50,14 @@ public class Feedback {
             hasBeenShown = true;
             return "<div class=\"feedbackcontainer\" id=\"" + id + "\">\n" +
                     "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
-                    "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
+                    "       <div style=\"display: flex; align-items: center;\">\n" +
+                    "           <div style=\"flex-grow: 1;\">\n"  +
+                    "               <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
+                    "           </div>\n" +
+                    "           <div>\n" +
+                                    getPriorityIcons(priority) +
+                    "           </div>\n" +
+                    "       </div>\n"+
                     "       <p> Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " > Priority: " + priority.toString() + " </p>\n" +
                     "   </div>\n" +
                     getIgnoreAdviceButton() +
@@ -58,6 +65,17 @@ public class Feedback {
         }
 
         return "";
+    }
+
+    private String getPriorityIcons(InspectionPriority priority) {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < priority.getNumberOfIcons(); i++) {
+            sb.append("<i class=\"material-icons\">priority_high</i>");
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 
     private String getLineNumberFormatted() {

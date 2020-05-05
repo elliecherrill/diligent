@@ -78,7 +78,8 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
                 PsiStatement elseStat = statement.getElseBranch();
 
                 String filename = statement.getContainingFile().getName();
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "simplify-if", PsiStmtType.IF);
+                int line = Utils.getLineNumber(statement);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "simplify-if", PsiStmtType.IF, line);
 
                 if (thenStat == null || elseStat == null) {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -86,7 +87,6 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
                 }
 
                 if (getBranchResult(thenStat) + getBranchResult(elseStat) == 1) {
-                    int line = Utils.getLineNumber(statement);
                     Feedback feedback = new Feedback(line,
                             "'if' statement can be simplified",
                             filename,

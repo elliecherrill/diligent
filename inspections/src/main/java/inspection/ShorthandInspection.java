@@ -74,7 +74,8 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
                 }
 
                 String filename = expression.getContainingFile().getName();
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "shorthand-assignment", PsiStmtType.BIN_EXPR);
+                int line = Utils.getLineNumber(expression);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "shorthand-assignment", PsiStmtType.BIN_EXPR, line);
 
                 IElementType op = expression.getOperationTokenType();
                 if (!op.equals(JavaTokenType.EQ)) {
@@ -117,7 +118,6 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
                 }
 
                 if (registerProblem) {
-                    int line = Utils.getLineNumber(expression);
                     Feedback feedback = new Feedback(line,
                             "Can use shorthand operation and assignment.",
                             filename,

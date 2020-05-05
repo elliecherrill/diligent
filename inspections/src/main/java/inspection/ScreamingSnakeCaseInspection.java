@@ -79,10 +79,10 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                 for (PsiField field : aClass.getAllFields()) {
                     if (field instanceof PsiEnumConstant) {
                         PsiEnumConstant enumConstant = (PsiEnumConstant) field;
-                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(enumConstant), "screaming-snake-case", PsiStmtType.ENUM);
+                        int line = Utils.getLineNumber(enumConstant);
+                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(enumConstant), "screaming-snake-case", PsiStmtType.ENUM, line);
 
                         if (!Utils.isUpperSnakeCase(enumConstant.getName())) {
-                            int line = Utils.getLineNumber(enumConstant);
                             Feedback feedback = new Feedback(line,
                                     "Enum constants should be in SCREAMING_SNAKE_CASE.",
                                     filename,
@@ -114,12 +114,13 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                         return;
                     }
 
+                    //TODO: fix in missing else of this?
                     if (modifierList.hasModifierProperty(PsiModifier.FINAL) && modifierList.hasModifierProperty(PsiModifier.STATIC)) {
-                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "screaming-snake-case", PsiStmtType.FIELD);
+                        int line = Utils.getLineNumber(field);
+                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "screaming-snake-case", PsiStmtType.FIELD, line);
                         String filename = field.getContainingFile().getName();
 
                         if (!Utils.isUpperSnakeCase(field.getName())) {
-                            int line = Utils.getLineNumber(field);
                             Feedback feedback = new Feedback(line,
                                     "Constant field names should be in SCREAMING_SNAKE_CASE.",
                                     filename,

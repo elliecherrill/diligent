@@ -12,8 +12,9 @@ public class FeedbackIdentifier {
     private final String feedbackType;
     private final PsiElement initialElement;
     private final PsiStmtType type;
+    private final int line;
 
-    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, SmartPsiElementPointer<PsiElement> clonePointer, String feedbackType, PsiStmtType type) {
+    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, SmartPsiElementPointer<PsiElement> clonePointer, String feedbackType, PsiStmtType type, int line) {
         this.pointer = pointer;
         this.clonePointer = clonePointer;
         this.feedbackType = feedbackType;
@@ -21,10 +22,11 @@ public class FeedbackIdentifier {
 
         hasClonePointer = clonePointer != null;
         initialElement = pointer.getElement();
+        this.line = line;
     }
 
-    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType type) {
-        this(pointer, null, feedbackType, type);
+    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType type, int line) {
+        this(pointer, null, feedbackType, type, line);
     }
 
     public SmartPsiElementPointer<PsiElement> getPointer() {
@@ -39,7 +41,7 @@ public class FeedbackIdentifier {
         return initialElement;
     }
 
-    //TODO: what about when you fix UPPER_CAMEL_CASE
+    //TODO: what about when you fix UPPER_CAMEL_CASE, x += 1 vs x = x + 1
     public String getInitialElementText() {
         return initialElement.getText().toLowerCase();
     }
@@ -56,9 +58,35 @@ public class FeedbackIdentifier {
         return pointer.getElement() == null;
     }
 
+    public int getLine() {
+        return line;
+    }
+
     @Override
     public String toString() {
-        return pointer.getElement() + " : " + feedbackType + " : " + initialElement.getText() + " : " + type;
+        StringBuffer sb = new StringBuffer();
+
+        sb.append("\n");
+        sb.append("\t POINTER: " +pointer.getElement());
+
+        sb.append("\n");
+        sb.append("\t CLONE POINTER: " + (hasClonePointer ? clonePointer.getElement() : "none"));
+
+        sb.append("\n");
+        sb.append("\t FEEDBACK TYPE: " +feedbackType);
+
+        sb.append("\n");
+        sb.append("\t INITIAL ELEMENT: "+initialElement.getText());
+
+        sb.append("\n");
+        sb.append("\t TYPE: "+type);
+
+        sb.append("\n");
+        sb.append("\t LINE: "+line);
+        
+        sb.append("\n");
+
+        return sb.toString();
     }
 
     // TODO: for x = x + 1 >> x += 1 (these will be same element, i.e. initial element won't be null, but
@@ -74,8 +102,14 @@ public class FeedbackIdentifier {
                 return otherFeedbackId.getFeedbackType().equals(feedbackType);
             }
 
-            return otherType == type &&
+            if (otherType == type &&
                     otherFeedbackId.getInitialElementText().equals(getInitialElementText()) &&
+                    otherFeedbackId.getFeedbackType().equals(feedbackType)) {
+                return true;
+            }
+
+            return otherType == type &&
+                    otherFeedbackId.getLine() == line &&
                     otherFeedbackId.getFeedbackType().equals(feedbackType);
         }
 

@@ -73,11 +73,11 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                     return;
                 }
 
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "single-char-name", PsiStmtType.FIELD);
                 String filename = field.getContainingFile().getName();
+                int line = Utils.getLineNumber(field);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "single-char-name", PsiStmtType.FIELD, line);
 
                 if (field.getName().length() == 1) {
-                    int line = Utils.getLineNumber(field);
                     Feedback feedback = new Feedback(line,
                             "Field names should be more than one character in length.",
                             filename,
@@ -105,12 +105,12 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                     if (e instanceof PsiLocalVariable) {
                         PsiLocalVariable localElement = (PsiLocalVariable) e;
 
-                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(localElement), "single-char-name", PsiStmtType.LOCAL_VAR);
                         String filename = statement.getContainingFile().getName();
+                        int line = Utils.getLineNumber(localElement);
+                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(localElement), "single-char-name", PsiStmtType.LOCAL_VAR, line);
 
                         if (!(statement.getParent() instanceof PsiForeachStatement || statement.getParent() instanceof PsiForStatement)) {
                             if (localElement.getName().length() == 1) {
-                                int line = Utils.getLineNumber(localElement);
                                 Feedback feedback = new Feedback(line,
                                         "Variable names should be more than one character in length.",
                                         filename,
@@ -136,11 +136,11 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 }
 
                 // Method names
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "single-char-name", PsiStmtType.METHOD);
                 String filename = method.getContainingFile().getName();
+                int line = Utils.getLineNumber(method);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "single-char-name", PsiStmtType.METHOD, line);
 
                 if (method.getName().length() == 1) {
-                    int line = Utils.getLineNumber(method);
                     Feedback feedback = new Feedback(line,
                             "Method names should be more than one character in length.",
                             filename,
@@ -157,10 +157,10 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                 int index = 0;
                 for (PsiParameter p : params) {
-                    feedbackId = new FeedbackIdentifier(Utils.getPointer(p), "single-char-name", PsiStmtType.PARAMETER);
+                    line = Utils.getLineNumber(p);
+                    feedbackId = new FeedbackIdentifier(Utils.getPointer(p), "single-char-name", PsiStmtType.PARAMETER, line);
 
                     if (p.getName().length() == 1) {
-                        int line = Utils.getLineNumber(p);
                         Feedback feedback = new Feedback(line,
                                 "Parameter names should be more than one character in length.",
                                 filename,

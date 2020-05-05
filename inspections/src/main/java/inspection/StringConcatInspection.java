@@ -233,12 +233,13 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                             filename,
                             line + "-string-concat",
                             priority);
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT);
+                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT, line);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 }
 
                 for (PsiStatement stat : fixStatements) {
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT);
+                    int line = Utils.getLineNumber(stat);
+                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT, line);
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }
             }

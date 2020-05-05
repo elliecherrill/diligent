@@ -4,6 +4,7 @@ import util.InspectionPriority;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class Feedback {
 
@@ -14,6 +15,7 @@ public class Feedback {
     private final InspectionPriority priority;
 
     private boolean isFixed;
+    private boolean hasBeenShown;
     private LocalDateTime lastUpdated;
 
     public Feedback(int lineNumber, String errorMsg, String filename, String id, InspectionPriority priority) {
@@ -24,6 +26,7 @@ public class Feedback {
         this.priority = priority;
 
         isFixed = false;
+        hasBeenShown = false;
         lastUpdated = LocalDateTime.now();
     }
 
@@ -42,14 +45,19 @@ public class Feedback {
         return sb.toString();
     }
 
-    public String toHTMLString() {
-        return "<div class=\"feedbackcontainer\" id=\"" + id + "\">\n" +
-                "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
-                "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
-                "       <p> Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " > Priority: " + priority.toString() + " </p>\n" +
-                "   </div>\n" +
-                getIgnoreAdviceButton() +
-                "</div>";
+    public String toHTMLString(List<InspectionPriority> currentPriorities) {
+        if (currentPriorities.contains(priority) || hasBeenShown) {
+            hasBeenShown = true;
+            return "<div class=\"feedbackcontainer\" id=\"" + id + "\">\n" +
+                    "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
+                    "       <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
+                    "       <p> Line: " + getLineNumberFormatted() + " > Last Updated: " + getLastUpdatedFormatted() + " > Priority: " + priority.toString() + " </p>\n" +
+                    "   </div>\n" +
+                    getIgnoreAdviceButton() +
+                    "</div>";
+        }
+
+        return "";
     }
 
     private String getLineNumberFormatted() {
@@ -116,6 +124,14 @@ public class Feedback {
         }
 
         return false;
+    }
+
+    public boolean getHasBeenShown() {
+        return hasBeenShown;
+    }
+
+    public void setHasBeenShown(boolean hasBeenShown) {
+        this.hasBeenShown = hasBeenShown;
     }
 
     public int getLineNumber() {

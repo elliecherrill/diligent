@@ -82,10 +82,10 @@ public final class ConstructorsFirstInspection extends AbstractBaseJavaLocalInsp
                 boolean prevIsCons = true;
 
                 for (PsiMethod m : methods) {
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(m), "constructors-first", PsiStmtType.METHOD);
+                    int line = Utils.getLineNumber(m);
+                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(m), "constructors-first", PsiStmtType.METHOD, line);
 
                     if (isClassConstructor(m, className) && !prevIsCons) {
-                        int line = Utils.getLineNumber(m);
                         Feedback feedback = new Feedback(line,
                                 "Constructors should be first methods of a class.",
                                 filename,

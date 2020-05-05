@@ -84,12 +84,13 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
 
                         if (expr instanceof PsiAssignmentExpression) {
                             PsiAssignmentExpression assExpr = (PsiAssignmentExpression) expr;
+                            int line = Utils.getLineNumber(stat);
 
-                            FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(assExpr), "this-" + Utils.getLineNumber(stat), PsiStmtType.LEFT_THIS_EXPR);
+                            FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(assExpr), "this-" + line, PsiStmtType.LEFT_THIS_EXPR, line);
                             PsiExpression leftExpr = assExpr.getLExpression();
                             inspectThisExpression(leftExpr, block, stat, filename, feedbackId);
 
-                            feedbackId = new FeedbackIdentifier(Utils.getPointer(assExpr), "this-" + Utils.getLineNumber(stat), PsiStmtType.RIGHT_THIS_EXPR);
+                            feedbackId = new FeedbackIdentifier(Utils.getPointer(assExpr), "this-" + line, PsiStmtType.RIGHT_THIS_EXPR, line);
                             PsiExpression rightExpr = assExpr.getRExpression();
                             inspectThisExpression(rightExpr, block, stat, filename, feedbackId);
                         }

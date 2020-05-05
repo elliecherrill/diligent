@@ -77,10 +77,10 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
                 PsiCodeBlock body = method.getBody();
 
                 String filename = method.getContainingFile().getName();
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "method-length", PsiStmtType.METHOD);
+                int line = Utils.getLineNumber(method);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "method-length", PsiStmtType.METHOD, line);
 
                 if (body != null && body.getStatementCount() >= MAX_METHOD_LENGTH) {
-                    int line = Utils.getLineNumber(method);
                     Feedback feedback = new Feedback(line,
                             "Method length should not be longer than " + MAX_METHOD_LENGTH + " statements.",
                             filename,

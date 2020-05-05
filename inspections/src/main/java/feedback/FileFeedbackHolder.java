@@ -44,8 +44,9 @@ public class FileFeedbackHolder {
         Feedback oldFeedback = feedback.remove(id);
         boolean isCurrent = false;
         if (oldFeedback != null) {
-            feedbackIsNew = false;
+            feedbackIsNew = oldFeedback.isFixed() && !newFeedback.isFixed();
             isCurrent = oldFeedback.equals(newFeedback);
+            newFeedback.setHasBeenShown(oldFeedback.getHasBeenShown());
         }
 
         if (hasBeenRemoved) {
@@ -103,9 +104,7 @@ public class FileFeedbackHolder {
 
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();
-            if (priorities.contains(f.getPriority())) {
-                sb.append(f.toHTMLString());
-            }
+            sb.append(f.toHTMLString(priorities));
         }
 
         return sb.toString();

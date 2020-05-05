@@ -77,13 +77,13 @@ public final class StringComparisonInspection extends AbstractBaseJavaLocalInspe
 
 
                 String filename = expression.getContainingFile().getName();
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "string-comparison", PsiStmtType.BIN_EXPR);
+                int line = Utils.getLineNumber(expression);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "string-comparison", PsiStmtType.BIN_EXPR, line);
 
                 if ((expression.getROperand() != null) && (expression.getLOperand().getType() != null) && (expression.getROperand().getType() != null)) {
                     IElementType op = expression.getOperationTokenType();
                     if (op.equals(JavaTokenType.EQEQ) || op.equals(JavaTokenType.NE)) {
                         if (Utils.isString(expression.getLOperand().getType()) && Utils.isString(expression.getROperand().getType())) {
-                            int line = Utils.getLineNumber(expression);
                             String aimString = op.equals(JavaTokenType.EQEQ) ? ".equals()" : "! .equals()";
                             String opString = op.equals(JavaTokenType.EQEQ) ? "==" : "!=";
                             Feedback feedback = new Feedback(line,

@@ -70,7 +70,8 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                 }
 
                 String filename = statement.getContainingFile().getName();
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "redundant-else", PsiStmtType.IF);
+                int line = Utils.getLineNumber(statement);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "redundant-else", PsiStmtType.IF, line);
 
                 // Check if there is an else case
                 if (statement.getElseBranch() != null) {
@@ -87,7 +88,6 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                     }
 
                     if (endsWithReturn) {
-                        int line = Utils.getLineNumber(statement);
                         Feedback feedback = new Feedback(line,
                                 "Unnecessary 'else' branch",
                                 filename,

@@ -52,57 +52,59 @@ public class ProjectFeedbackHolder {
         updateTipsLock.lock();
         updateFeedbackLock.lock();
 
-        updateDeleted();
-
-        if (isCurrent) {
-            updateTipsLock.unlock();
-            updateFeedbackLock.unlock();
-            return;
-        }
-
-        List<InspectionPriority> reportedPriorities = getReportedPriorities();
-
         try {
-            String frameTemplate = getFrameTemplate();
-            frameTemplate = frameTemplate.replace("$files", getAllFilesAsHTMLString());
-            File frameHtmlFile = new File(projectPath + "/" + FILEPATH);
-            FileUtils.writeStringToFile(frameHtmlFile, frameTemplate, CHARSET);
 
-            if (!tipHolder.isCurrent()) {
-                String template = getOutputTemplate();
-                template = template.replace("$files", getAllFilesAsHTMLString("project-tips"));
-                template = template.replace("$feedback", tipHolder.getTipsAsHTMLString());
-                template = template.replace("$project", project.getName());
-                template = template.replace("$current_file", "project-tips");
-                File newHtmlFile = new File(projectPath + "/" + TEMPLATE_FILEPATH.replace("$filename", "project-tips.html"));
-                FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
+            updateDeleted();
 
-                tipHolder.update();
+            if (isCurrent) {
+                return;
             }
 
-            for (Map.Entry file : files.entrySet()) {
-                String filename = (String) file.getKey();
-                FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+            List<InspectionPriority> reportedPriorities = getReportedPriorities();
 
-                String template = getOutputTemplate();
-                template = template.replace("$files", getAllFilesAsHTMLString(filename));
-                template = template.replace("$feedback", fileFeedbackHolder.getFeedbackAsHTMLString(reportedPriorities));
-                template = template.replace("$project", project.getName());
-                template = template.replace("$current_file", filename);
-                File newHtmlFile = new File(projectPath + "/" + TEMPLATE_FILEPATH.replace("$filename", fileFeedbackHolder.getFilepath()));
-                FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
+            try {
+                String frameTemplate = getFrameTemplate();
+                frameTemplate = frameTemplate.replace("$files", getAllFilesAsHTMLString());
+                File frameHtmlFile = new File(projectPath + "/" + FILEPATH);
+                FileUtils.writeStringToFile(frameHtmlFile, frameTemplate, CHARSET);
+
+                if (!tipHolder.isCurrent()) {
+                    String template = getOutputTemplate();
+                    template = template.replace("$files", getAllFilesAsHTMLString("project-tips"));
+                    template = template.replace("$feedback", tipHolder.getTipsAsHTMLString());
+                    template = template.replace("$project", project.getName());
+                    template = template.replace("$current_file", "project-tips");
+                    File newHtmlFile = new File(projectPath + "/" + TEMPLATE_FILEPATH.replace("$filename", "project-tips.html"));
+                    FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
+
+                    tipHolder.update();
+                }
+
+                for (Map.Entry file : files.entrySet()) {
+                    String filename = (String) file.getKey();
+                    FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+
+                    String template = getOutputTemplate();
+                    template = template.replace("$files", getAllFilesAsHTMLString(filename));
+                    template = template.replace("$feedback", fileFeedbackHolder.getFeedbackAsHTMLString(reportedPriorities));
+                    template = template.replace("$project", project.getName());
+                    template = template.replace("$current_file", filename);
+                    File newHtmlFile = new File(projectPath + "/" + TEMPLATE_FILEPATH.replace("$filename", fileFeedbackHolder.getFilepath()));
+                    FileUtils.writeStringToFile(newHtmlFile, template, CHARSET);
+                }
+
+                String browserLink = "http://localhost:63342/" + project.getName() + "/" + FILEPATH;
+                NOTIFIER.notify(project, "Diligent", "Updated <a href=\"" + browserLink + "\"> Diligent Feedback Report </a>");
+
+                isCurrent = true;
+            } catch (IOException | IndexOutOfBoundsException e) {
+                System.err.println(e);
             }
 
-            String browserLink = "http://localhost:63342/" + project.getName() + "/" + FILEPATH;
-            NOTIFIER.notify(project, "Diligent", "Updated <a href=\"" + browserLink + "\"> Diligent Feedback Report </a>");
-
-            isCurrent = true;
-        } catch (IOException | IndexOutOfBoundsException e) {
-            System.err.println(e);
+        } finally {
+            updateFeedbackLock.unlock();
+            updateTipsLock.unlock();
         }
-
-        updateFeedbackLock.unlock();
-        updateTipsLock.unlock();
     }
 
     private void updateDeleted() {
@@ -145,41 +147,42 @@ public class ProjectFeedbackHolder {
     //TODO: consider adding feedback with no actual update
     public void addFeedback(String filename, FeedbackIdentifier feedbackId, Feedback feedback) {
         updateFeedbackLock.lock();
+        try {
+            FileFeedbackHolder fileFeedbackHolder = files.get(filename);
+            if (fileFeedbackHolder == null) {
+                fileFeedbackHolder = new FileFeedbackHolder(filename);
+            }
 
-        FileFeedbackHolder fileFeedbackHolder = files.get(filename);
-        if (fileFeedbackHolder == null) {
-            fileFeedbackHolder = new FileFeedbackHolder(filename);
+            Pair<Boolean, Boolean> addFeedbackRes = fileFeedbackHolder.addFeedback(feedbackId, feedback);
+            if (addFeedbackRes.getSecond()) {
+                editCount(feedback.getPriority(), 1);
+            }
+            files.put(filename, fileFeedbackHolder);
+
+            if (!addFeedbackRes.getFirst()) {
+                isCurrent = false;
+            }
+        } finally {
+            updateFeedbackLock.unlock();
         }
-
-        Pair<Boolean, Boolean> addFeedbackRes = fileFeedbackHolder.addFeedback(feedbackId, feedback);
-        if (addFeedbackRes.getSecond()) {
-            editCount(feedback.getPriority(), 1);
-        }
-        files.put(filename, fileFeedbackHolder);
-
-        if (!addFeedbackRes.getFirst()) {
-            isCurrent = false;
-        }
-
-        updateFeedbackLock.unlock();
     }
 
     public void fixFeedback(String filename, FeedbackIdentifier feedbackId) {
         updateFeedbackLock.lock();
+        try {
+            FileFeedbackHolder fileFeedbackHolder = files.get(filename);
+            if (fileFeedbackHolder == null) {
+                return;
+            }
 
-        FileFeedbackHolder fileFeedbackHolder = files.get(filename);
-        if (fileFeedbackHolder == null) {
+            InspectionPriority priority = fileFeedbackHolder.fixFeedback(feedbackId);
+            if (priority != InspectionPriority.NONE) {
+                editCount(priority, -1);
+                isCurrent = false;
+            }
+        } finally {
             updateFeedbackLock.unlock();
-            return;
         }
-
-        InspectionPriority priority = fileFeedbackHolder.fixFeedback(feedbackId);
-        if (priority != InspectionPriority.NONE) {
-            editCount(priority, -1);
-            isCurrent = false;
-        }
-
-        updateFeedbackLock.unlock();
     }
 
     private void editCount(InspectionPriority priority, int change) {
@@ -197,18 +200,24 @@ public class ProjectFeedbackHolder {
 
     public void addTip(TipType tipType, String filename) {
         updateTipsLock.lock();
-        if (!tipHolder.addTip(tipType, filename)) {
-            isCurrent = false;
+        try {
+            if (!tipHolder.addTip(tipType, filename)) {
+                isCurrent = false;
+            }
+        } finally {
+            updateTipsLock.unlock();
         }
-        updateTipsLock.unlock();
     }
 
     public void fixTip(TipType tipType, String filename) {
         updateTipsLock.lock();
-        if (!tipHolder.fixTip(tipType, filename)) {
-            isCurrent = false;
+        try {
+            if (!tipHolder.fixTip(tipType, filename)) {
+                isCurrent = false;
+            }
+        } finally {
+            updateTipsLock.unlock();
         }
-        updateTipsLock.unlock();
     }
 
     private String getAllFilesAsHTMLString() {

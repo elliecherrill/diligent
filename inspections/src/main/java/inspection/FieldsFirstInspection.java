@@ -94,10 +94,10 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
                 }
 
                 String filename = field.getContainingFile().getName();
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "fields-first", PsiStmtType.FIELD);
+                int line = Utils.getLineNumber(field);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "fields-first", PsiStmtType.FIELD, line);
 
                 if (registerProblem) {
-                    int line = Utils.getLineNumber(field);
                     Feedback feedback = new Feedback(line,
                             "Declare fields at the top",
                             filename,

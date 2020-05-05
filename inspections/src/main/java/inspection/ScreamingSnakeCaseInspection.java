@@ -84,11 +84,11 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
 
                         if (!Utils.isUpperSnakeCase(enumConstant.getName())) {
                             Feedback feedback = new Feedback(line,
-                                    "Enum constants should be in SCREAMING_SNAKE_CASE.",
                                     filename,
                                     line + "-" + index + "-screaming-snake-case",
                                     priority,
-                                    aClass.getName());
+                                    aClass.getName(),
+                                    FeedbackType.SCREAMING_SNAKE_CASE);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -123,11 +123,11 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
 
                         if (!Utils.isUpperSnakeCase(field.getName())) {
                             Feedback feedback = new Feedback(line,
-                                    "Constant field names should be in SCREAMING_SNAKE_CASE.",
                                     filename,
                                     line + "-" + field.getName() + "-screaming-snake-case",
                                     priority,
-                                    Utils.getClassName(field));
+                                    Utils.getClassName(field),
+                                    FeedbackType.SCREAMING_SNAKE_CASE);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

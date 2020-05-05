@@ -10,6 +10,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.FeedbackType;
 import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
@@ -106,12 +107,12 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                         if (!Utils.isInScope(thisVar, block)) {
                             int line = Utils.getLineNumber(stat);
                             Feedback feedback = new Feedback(line,
-                                    "Unnecessary 'this' keyword",
                                     filename,
                                     line + "-this",
                                     priority,
                                     Utils.getClassName(stat),
-                                    Utils.getMethodName(stat));
+                                    Utils.getMethodName(stat),
+                                    FeedbackType.REDUNDANT_THIS);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

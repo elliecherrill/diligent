@@ -99,11 +99,11 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
 
                 if (registerProblem) {
                     Feedback feedback = new Feedback(line,
-                            "Declare fields at the top",
                             filename,
                             line + "-" + field.getName() + "-fields-first",
                             priority,
-                            Utils.getClassName(field));
+                            Utils.getClassName(field),
+                            FeedbackType.FIELDS_FIRST);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

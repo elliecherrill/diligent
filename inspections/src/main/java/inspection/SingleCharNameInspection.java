@@ -10,6 +10,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.FeedbackType;
 import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
@@ -79,11 +80,11 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                 if (field.getName().length() == 1) {
                     Feedback feedback = new Feedback(line,
-                            "Field names should be more than one character in length.",
                             filename,
                             line + "-" + field.getName() + "-single-char-name",
                             priority,
-                            Utils.getClassName(field));
+                            Utils.getClassName(field),
+                            FeedbackType.SINGLE_CHAR_NAME);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename,feedbackId);
@@ -113,12 +114,12 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                         if (!(statement.getParent() instanceof PsiForeachStatement || statement.getParent() instanceof PsiForStatement)) {
                             if (localElement.getName().length() == 1) {
                                 Feedback feedback = new Feedback(line,
-                                        "Variable names should be more than one character in length.",
                                         filename,
                                         line + "-" + index + "-single-char-name",
                                         priority,
                                         Utils.getClassName(statement),
-                                        Utils.getMethodName(statement));
+                                        Utils.getMethodName(statement),
+                                        FeedbackType.SINGLE_CHAR_NAME);
                                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                             } else {
                                 feedbackHolder.fixFeedback(holder.getProject(), filename,feedbackId);
@@ -146,11 +147,11 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                 if (method.getName().length() == 1) {
                     Feedback feedback = new Feedback(line,
-                            "Method names should be more than one character in length.",
                             filename,
                             line + "-single-char-name",
                             priority,
-                            className);
+                            className,
+                            FeedbackType.SINGLE_CHAR_NAME);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -167,11 +168,11 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                     if (p.getName().length() == 1) {
                         Feedback feedback = new Feedback(line,
-                                "Parameter names should be more than one character in length.",
                                 filename,
                                 line + "-" + index + "-single-char-name",
                                 priority,
-                                className);
+                                className,
+                                FeedbackType.SINGLE_CHAR_NAME);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

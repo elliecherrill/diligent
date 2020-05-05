@@ -11,6 +11,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.FeedbackType;
 import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
@@ -84,15 +85,13 @@ public final class StringComparisonInspection extends AbstractBaseJavaLocalInspe
                     IElementType op = expression.getOperationTokenType();
                     if (op.equals(JavaTokenType.EQEQ) || op.equals(JavaTokenType.NE)) {
                         if (Utils.isString(expression.getLOperand().getType()) && Utils.isString(expression.getROperand().getType())) {
-                            String aimString = op.equals(JavaTokenType.EQEQ) ? ".equals()" : "! .equals()";
-                            String opString = op.equals(JavaTokenType.EQEQ) ? "==" : "!=";
                             Feedback feedback = new Feedback(line,
-                                    "String comparison should use '" + aimString + "', instead of '" + opString + "'.",
                                     filename,
                                     line + "-string-comparison",
                                     priority,
                                     Utils.getClassName(expression),
-                                    Utils.getMethodName(expression));
+                                    Utils.getMethodName(expression),
+                                    FeedbackType.STRING_COMPARISON);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                             return;
                         }

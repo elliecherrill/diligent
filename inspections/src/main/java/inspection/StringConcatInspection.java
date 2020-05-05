@@ -10,10 +10,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.InspectionPriority;
-import util.Pair;
-import util.PsiStmtType;
-import util.Utils;
+import util.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,12 +226,12 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                 for (PsiStatement stat : errorStatements) {
                     int line = Utils.getLineNumber(stat);
                     Feedback feedback = new Feedback(line,
-                            "String concatenation should be avoided within a loop.",
                             filename,
                             line + "-string-concat",
                             priority,
                             Utils.getClassName(stat),
-                            Utils.getMethodName(stat));
+                            Utils.getMethodName(stat),
+                            FeedbackType.STRING_CONCAT);
                     FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT, line);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 }

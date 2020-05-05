@@ -10,6 +10,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.FeedbackType;
 import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
@@ -88,12 +89,12 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
 
                 if (getBranchResult(thenStat) + getBranchResult(elseStat) == 1) {
                     Feedback feedback = new Feedback(line,
-                            "'if' statement can be simplified",
                             filename,
                             line + "-simplify-if",
                             priority,
                             Utils.getClassName(statement),
-                            Utils.getMethodName(statement));
+                            Utils.getMethodName(statement),
+                            FeedbackType.SIMPLIFY_IF);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

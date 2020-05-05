@@ -177,8 +177,12 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
             if (CodeCloneUtils.transitiveClosureOfClones(clones, rangeOfCases)) {
                 Feedback feedback = new Feedback(line,
-                        "All cases in switch statement are clones of one another.", filename,
-                        line + "-switch-clone", priority, Utils.getClassName(statement), Utils.getMethodName(statement));
+                        filename,
+                        line + "-switch-clone",
+                        priority,
+                        Utils.getClassName(statement),
+                        Utils.getMethodName(statement),
+                        FeedbackType.CLONE);
                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
             } else {
                 feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -294,12 +298,12 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> cloneSequence = CodeCloneUtils.containsBlockClone(intersection, blockIndex);
                     if (cloneSequence != null) {
                         Feedback feedback = new Feedback(line,
-                                "Block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[i], cloneSequence.getFirst()) + "\' is clone of block \'" + CodeCloneUtils.printCodeBlock(codeBlocks[blockIndex], cloneSequence.getSecond()) + "\'.",
                                 filename,
                                 line + "-block-clone",
                                 priority,
                                 aClass.getName(),
-                                methodName);
+                                methodName,
+                                FeedbackType.CLONE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         hasClone = true;
                     } else {
@@ -953,12 +957,12 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
                     if (Arrays.equals(exprStringRep, otherExprStringRep)) {
                         Feedback feedback = new Feedback(line,
-                                "Expression \'" + exprKey.getText() + "\' appears on lines " + line + " and " + Utils.getLineNumber(otherExprKey) + ".",
                                 filename,
                                 line + "-polyadic-clone",
                                 priority,
                                 aClass.getName(),
-                                methodName);
+                                methodName,
+                                FeedbackType.CLONE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

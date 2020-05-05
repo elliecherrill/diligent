@@ -119,12 +119,12 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
 
                 if (registerProblem) {
                     Feedback feedback = new Feedback(line,
-                            "Can use shorthand operation and assignment.",
                             filename,
                             line + "-shorthand-assignment",
                             priority,
                             Utils.getClassName(expression),
-                            Utils.getMethodName(expression));
+                            Utils.getMethodName(expression),
+                            FeedbackType.SHORTHAND_ASSIGNMENT);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

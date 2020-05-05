@@ -10,6 +10,7 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.FeedbackType;
 import util.InspectionPriority;
 import util.PsiStmtType;
 import util.Utils;
@@ -87,11 +88,11 @@ public final class ConstructorsFirstInspection extends AbstractBaseJavaLocalInsp
 
                     if (isClassConstructor(m, className) && !prevIsCons) {
                         Feedback feedback = new Feedback(line,
-                                "Constructors should be first methods of a class.",
                                 filename,
                                 line + "-constructors-first",
                                 priority,
-                                className);
+                                className,
+                                FeedbackType.CONSTRUCTORS_FIRST);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         continue;
                     }

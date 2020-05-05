@@ -1,5 +1,6 @@
 package feedback;
 
+import util.FeedbackType;
 import util.InspectionPriority;
 import util.ReportLevel;
 
@@ -10,26 +11,26 @@ import java.util.List;
 public class Feedback {
 
     private final int lineNumber;
-    private final String errorMsg;
     private final String filename;
     private final String className;
     private final String methodName;
     private final String id;
     private final InspectionPriority priority;
+    private final FeedbackType feedbackType;
 
     private boolean isFixed;
     private boolean hasBeenShown;
     private LocalDateTime lastUpdated;
     private ReportLevel reportLevel;
 
-    public Feedback(int lineNumber, String errorMsg, String filename, String id, InspectionPriority priority, String className, String methodName) {
+    public Feedback(int lineNumber, String filename, String id, InspectionPriority priority, String className, String methodName, FeedbackType feedbackType) {
         this.lineNumber = lineNumber;
-        this.errorMsg = errorMsg;
         this.filename = filename;
         this.className = className;
         this.methodName = methodName;
         this.id = id;
         this.priority = priority;
+        this.feedbackType = feedbackType;
 
         isFixed = false;
         hasBeenShown = false;
@@ -37,8 +38,8 @@ public class Feedback {
         reportLevel = ReportLevel.CLASS;
     }
 
-    public Feedback(int lineNumber, String errorMsg, String filename, String id, InspectionPriority priority, String className) {
-        this(lineNumber, errorMsg, filename, id, priority, className, null);
+    public Feedback(int lineNumber, String filename, String id, InspectionPriority priority, String className, FeedbackType feedbackType) {
+        this(lineNumber, filename, id, priority, className, null, feedbackType);
     }
 
     @Override
@@ -49,7 +50,7 @@ public class Feedback {
         sb.append(" > ");
         sb.append(lineNumber);
         sb.append(" : ");
-        sb.append(errorMsg);
+        sb.append(feedbackType.getMessage());
         sb.append(" : ");
         sb.append(isFixed);
 
@@ -63,13 +64,13 @@ public class Feedback {
                     "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                     "       <div style=\"display: flex; align-items: center;\">\n" +
                     "           <div style=\"flex-grow: 1;\">\n"  +
-                    "               <p style=\"font-weight: 500;\"> " + errorMsg + " </p>\n" +
+                    "               <p style=\"font-weight: 500; \"> " + feedbackType.getMessage().replace("$className", className) + " </p>\n" +
                     "           </div>\n" +
-                    "           <div>\n" +
+                    "           <div style=\"display: flex;\">\n" +
                                     getPriorityIcons(priority) +
                     "           </div>\n" +
                     "       </div>\n"+
-                    "       <p> Location: " + getLocation() + " > Last Updated: " + getLastUpdatedFormatted() + " > Priority: " + priority.toString() + " </p>\n" +
+                    "       <p> Last Updated: " + getLastUpdatedFormatted() + " </p>\n" +
                     "   </div>\n" +
                     getIgnoreAdviceButton() +
                     "</div>";
@@ -153,7 +154,7 @@ public class Feedback {
             Feedback otherFeedback = (Feedback) obj;
 
             return lineNumber == otherFeedback.getLineNumber() &&
-                    errorMsg.equals(otherFeedback.getErrorMsg()) &&
+                    feedbackType == otherFeedback.getFeedbackType() &&
                     id.equals(otherFeedback.getId()) &&
                     filename.equals(otherFeedback.getFilename()) &&
                     isFixed == otherFeedback.isFixed();
@@ -174,15 +175,15 @@ public class Feedback {
         return lineNumber;
     }
 
-    public String getErrorMsg() {
-        return errorMsg;
-    }
-
     public String getFilename() {
         return filename;
     }
 
     public String getId() {
         return id;
+    }
+
+    public FeedbackType getFeedbackType() {
+        return feedbackType;
     }
 }

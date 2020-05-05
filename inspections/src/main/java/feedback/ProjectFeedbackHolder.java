@@ -172,6 +172,8 @@ public class ProjectFeedbackHolder {
         try {
             FileFeedbackHolder fileFeedbackHolder = files.get(filename);
             if (fileFeedbackHolder == null) {
+                files.put(filename, new FileFeedbackHolder(filename));
+                isCurrent = false;
                 return;
             }
 

@@ -31,17 +31,20 @@ public class FeedbackHolder {
 
         if (projectFeedbackHolder == null) {
             projectFeedbackHolder = new ProjectFeedbackHolder(project);
+            projects.put(project, projectFeedbackHolder);
         }
 
         projectFeedbackHolder.addFeedback(filename, feedbackId, feedback);
-        projects.put(project, projectFeedbackHolder);
     }
 
     public void fixFeedback(Project project, String filename, FeedbackIdentifier feedbackId) {
         ProjectFeedbackHolder projectFeedbackHolder = projects.get(project);
+
         if (projectFeedbackHolder == null) {
-            return;
+            projectFeedbackHolder = new ProjectFeedbackHolder(project);
+            projects.put(project, projectFeedbackHolder);
         }
+
         projectFeedbackHolder.fixFeedback(filename, feedbackId);
     }
 
@@ -50,17 +53,19 @@ public class FeedbackHolder {
 
         if (projectFeedbackHolder == null) {
             projectFeedbackHolder = new ProjectFeedbackHolder(project);
+            projects.put(project, projectFeedbackHolder);
         }
 
         projectFeedbackHolder.addTip(tipType, filename);
-        projects.put(project, projectFeedbackHolder);
     }
 
     public void fixTip(Project project, TipType tipType, String filename) {
         ProjectFeedbackHolder projectFeedbackHolder = projects.get(project);
+
         if (projectFeedbackHolder == null) {
             return;
         }
+
         projectFeedbackHolder.fixTip(tipType, filename);
     }
 }

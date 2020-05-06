@@ -51,8 +51,13 @@ public class FileFeedbackHolder {
             feedbackIsNew = oldFeedback.isFixed() && !newFeedback.isFixed();
             isCurrent = oldFeedback.equals(newFeedback);
             newFeedback.setHasBeenShown(oldFeedback.getHasBeenShown());
+            newFeedback.setReportLevel(oldFeedback.getReportLevel());
+            if (newFeedback.setAndIncrementReportCount(oldFeedback.getReportCount())) {
+                isCurrent = false;
+            }
         }
 
+        //TODO: check this (THIS INSPECTION)
         if (hasBeenRemoved) {
             feedbackIsNew = true;
         }

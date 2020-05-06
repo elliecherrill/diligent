@@ -22,6 +22,7 @@ public class Feedback {
     private boolean hasBeenShown;
     private LocalDateTime lastUpdated;
     private ReportLevel reportLevel;
+    private int reportCount;
 
     public Feedback(int lineNumber, String filename, String id, InspectionPriority priority, String className, String methodName, FeedbackType feedbackType) {
         this.lineNumber = lineNumber;
@@ -36,6 +37,7 @@ public class Feedback {
         hasBeenShown = false;
         lastUpdated = LocalDateTime.now();
         reportLevel = ReportLevel.CLASS;
+        reportCount = 1;
     }
 
     public Feedback(int lineNumber, String filename, String id, InspectionPriority priority, String className, FeedbackType feedbackType) {
@@ -64,13 +66,14 @@ public class Feedback {
                     "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                     "       <div style=\"display: flex; align-items: center;\">\n" +
                     "           <div style=\"flex-grow: 1;\">\n"  +
-                    "               <p style=\"font-weight: 500; \"> " + feedbackType.getMessage().replace("$className", className) + " </p>\n" +
+                    "               <p style=\"font-weight: 500;\"> " + feedbackType.getMessage().replace("$className", className) + " </p>\n" +
                     "           </div>\n" +
                     "           <div style=\"display: flex;\">\n" +
                                     getPriorityIcons(priority) +
                     "           </div>\n" +
                     "       </div>\n"+
-                    "       <p> Last Updated: " + getLastUpdatedFormatted() + " </p>\n" +
+                    getLevelMessages() +
+                    "       <p style=\"font-style: italic; text-align: right;\"> Last Updated: " + getLastUpdatedFormatted() + " </p>\n" +
                     "   </div>\n" +
                     getIgnoreAdviceButton() +
                     "</div>";
@@ -79,19 +82,19 @@ public class Feedback {
         return "";
     }
 
-    private String getLocation() {
-        if (reportLevel == ReportLevel.CLASS) {
-            return className;
-
-        }
+    private String getLevelMessages() {
         if (reportLevel == ReportLevel.METHOD) {
-            return methodName;
-
+            return "<p> What about in method " + methodName + "? </p>\n";
         }
+
         if (reportLevel == ReportLevel.LINE) {
-            return String.valueOf(lineNumber);
+            if (methodName == null) {
+                return "<p> Check line " + lineNumber + ". </p>\n";
+            }
 
+            return "<p> What about in method " + methodName + "? </p>\n <p> Check line " + lineNumber + ". </p>\n";
         }
+
         return "";
     }
 
@@ -185,5 +188,42 @@ public class Feedback {
 
     public FeedbackType getFeedbackType() {
         return feedbackType;
+    }
+
+    public int getReportCount() {
+        return reportCount;
+    }
+
+    public boolean setAndIncrementReportCount(int reportCount) {
+        if (!isFixed && hasBeenShown) {
+            this.reportCount = reportCount + 1;
+            return updateReportLevel();
+        }
+
+        return false;
+    }
+
+    private boolean updateReportLevel() {
+        if (methodName != null) {
+            if (reportCount == 5) {
+                reportLevel = ReportLevel.METHOD;
+                return true;
+            }
+        }
+
+        if (reportCount == 10) {
+            reportLevel = ReportLevel.LINE;
+            return true;
+        }
+
+        return false;
+    }
+
+    public ReportLevel getReportLevel() {
+        return reportLevel;
+    }
+
+    public void setReportLevel(ReportLevel reportLevel) {
+        this.reportLevel = reportLevel;
     }
 }

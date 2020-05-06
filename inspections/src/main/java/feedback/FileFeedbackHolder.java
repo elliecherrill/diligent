@@ -1,9 +1,8 @@
 package feedback;
 
-import util.InspectionPriority;
-import util.Pair;
-import util.PsiStmtType;
+import util.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,12 +115,40 @@ public class FileFeedbackHolder {
         sb.append(addPriorityPraise(InspectionPriority.MEDIUM, priorityErrors[InspectionPriority.MEDIUM.getIndex()], priorities));
         sb.append(addPriorityPraise(InspectionPriority.LOW, priorityErrors[InspectionPriority.LOW.getIndex()], priorities));
 
-        for (Map.Entry entry : feedback.entrySet()) {
-            Feedback f = (Feedback) entry.getValue();
+        List<Feedback> feedbackToReport = getFeedbackToReport();
+
+        for (Feedback f : feedbackToReport) {
             sb.append(f.toHTMLString(priorities));
         }
 
         return sb.toString();
+    }
+
+    private List<Feedback> getFeedbackToReport() {
+        Map<FeedbackType, List<ReportLevel>> currentReport = new HashMap<>();
+        List<Feedback> feedbackToReport = new ArrayList<>();
+
+        //TODO: use generics like this whenver we have Map.Entry
+        for (Map.Entry<FeedbackIdentifier, Feedback> entry : feedback.entrySet()) {
+            Feedback f = entry.getValue();
+            if (f.isFixed()) {
+                feedbackToReport.add(f);
+                continue;
+            }
+            List<ReportLevel> currentValue = currentReport.get(f.getFeedbackType());
+            if (currentValue == null) {
+                feedbackToReport.add(f);
+                List<ReportLevel> newValue = new ArrayList<>();
+                newValue.add(f.getReportLevel());
+                currentReport.put(f.getFeedbackType(), newValue);
+            } else if (!currentValue.contains(f.getReportLevel())) {
+                feedbackToReport.add(f);
+                currentValue.add(f.getReportLevel());
+                currentReport.put(f.getFeedbackType(), currentValue);
+            }
+        }
+
+        return feedbackToReport;
     }
 
     private String addPriorityPraise(InspectionPriority priority, boolean error, List<InspectionPriority> priorities) {
@@ -167,8 +194,12 @@ public class FileFeedbackHolder {
 
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();
-            if (f.isFixed() && f.getPriority() == priority) {
-                count++;
+            if (f.getPriority() == priority) {
+                if (f.isFixed()) {
+                    count++;
+                } else {
+                    return -1;
+                }
             }
         }
 

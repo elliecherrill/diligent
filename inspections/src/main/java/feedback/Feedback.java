@@ -66,7 +66,7 @@ public class Feedback {
                     "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                     "       <div style=\"display: flex; align-items: center;\">\n" +
                     "           <div style=\"flex-grow: 1;\">\n"  +
-                    "               <p style=\"font-weight: 500;\"> " + feedbackType.getMessage().replace("$className", className) + " </p>\n" +
+                    "               <p style=\"font-weight: 500;\"> " + getTitleMessage() + " </p>\n" +
                     "           </div>\n" +
                     "           <div style=\"display: flex;\">\n" +
                                     getPriorityIcons(priority) +
@@ -80,6 +80,14 @@ public class Feedback {
         }
 
         return "";
+    }
+
+    private String getTitleMessage() {
+        if (!isFixed) {
+            return feedbackType.getMessage().replace("$className", className);
+        }
+
+        return feedbackType.getFixedMessage().replace("$lineNumber", String.valueOf(lineNumber));
     }
 
     private String getLevelMessages() {
@@ -207,16 +215,22 @@ public class Feedback {
         if (methodName != null) {
             if (reportCount == 5) {
                 reportLevel = ReportLevel.METHOD;
+                setLastUpdatedToNow();
                 return true;
             }
         }
 
         if (reportCount == 10) {
             reportLevel = ReportLevel.LINE;
+            setLastUpdatedToNow();
             return true;
         }
 
         return false;
+    }
+
+    private void setLastUpdatedToNow() {
+        lastUpdated = LocalDateTime.now();
     }
 
     public ReportLevel getReportLevel() {

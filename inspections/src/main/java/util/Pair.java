@@ -16,4 +16,14 @@ public class Pair<T, S> {
     public S getSecond() {
         return second;
     }
+
+    @Override
+    public String toString() {
+        return "(" + first.toString() + ", " + second.toString() + ")";
+    }
+
+    @Override
+    public int hashCode() {
+        return 11 * first.hashCode() + 71 * second.hashCode();
+    }
 }

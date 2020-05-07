@@ -20,8 +20,8 @@ public class FeedbackHolder {
     }
 
     public void writeToFile() {
-        for (Map.Entry project : projects.entrySet()) {
-            ProjectFeedbackHolder projectFeedbackHolder = (ProjectFeedbackHolder) project.getValue();
+        for (Map.Entry<Project, ProjectFeedbackHolder> project : projects.entrySet()) {
+            ProjectFeedbackHolder projectFeedbackHolder = project.getValue();
             projectFeedbackHolder.updateReport();
         }
     }

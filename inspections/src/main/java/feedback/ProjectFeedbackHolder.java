@@ -80,9 +80,9 @@ public class ProjectFeedbackHolder {
                     tipHolder.update();
                 }
 
-                for (Map.Entry file : files.entrySet()) {
-                    String filename = (String) file.getKey();
-                    FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+                for (Map.Entry<String, FileFeedbackHolder> file : files.entrySet()) {
+                    String filename = file.getKey();
+                    FileFeedbackHolder fileFeedbackHolder = file.getValue();
 
                     String template = getOutputTemplate();
                     template = template.replace("$files", getAllFilesAsHTMLString(filename));
@@ -108,8 +108,8 @@ public class ProjectFeedbackHolder {
     }
 
     private void updateDeleted() {
-        for (Map.Entry file : files.entrySet()) {
-            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+        for (Map.Entry<String, FileFeedbackHolder> file : files.entrySet()) {
+            FileFeedbackHolder fileFeedbackHolder = file.getValue();
             Map<InspectionPriority, Integer> changeToPriorities = fileFeedbackHolder.updateDeleted();
 
             if (!(changeToPriorities.get(InspectionPriority.HIGH) == 0 &&
@@ -229,8 +229,8 @@ public class ProjectFeedbackHolder {
             sb.append(tipHolder.toHTMLString());
         }
 
-        for (Map.Entry file : files.entrySet()) {
-            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+        for (Map.Entry<String, FileFeedbackHolder> file : files.entrySet()) {
+            FileFeedbackHolder fileFeedbackHolder = file.getValue();
             sb.append(fileFeedbackHolder.toHTMLString());
         }
 
@@ -248,9 +248,9 @@ public class ProjectFeedbackHolder {
             }
         }
 
-        for (Map.Entry file : files.entrySet()) {
-            String filename = (String) file.getKey();
-            FileFeedbackHolder fileFeedbackHolder = (FileFeedbackHolder) file.getValue();
+        for (Map.Entry<String, FileFeedbackHolder> file : files.entrySet()) {
+            String filename = file.getKey();
+            FileFeedbackHolder fileFeedbackHolder = file.getValue();
 
             if (filename.equals(selectedFile)) {
                 sb.append(fileFeedbackHolder.toSelectedHTMLString());

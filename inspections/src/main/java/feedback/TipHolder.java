@@ -88,8 +88,8 @@ public class TipHolder {
     public String getTipsAsHTMLString() {
         StringBuffer sb = new StringBuffer();
 
-        for (Map.Entry entry : tips.entrySet()) {
-            Tip t = (Tip) entry.getValue();
+        for (Map.Entry<TipType, Tip> entry : tips.entrySet()) {
+            Tip t = entry.getValue();
             sb.append(t.toHTMLString());
         }
 

@@ -35,8 +35,8 @@ public class FileFeedbackHolder {
         //TODO: tidy up this method
         boolean hasBeenRemoved = false;
         if (id.getType() == PsiStmtType.LEFT_THIS_EXPR || id.getType() == PsiStmtType.RIGHT_THIS_EXPR) {
-            for (Map.Entry entry : feedback.entrySet()) {
-                FeedbackIdentifier entryId = (FeedbackIdentifier) entry.getKey();
+            for (Map.Entry<FeedbackIdentifier, Feedback> entry : feedback.entrySet()) {
+                FeedbackIdentifier entryId = entry.getKey();
 
                 if (entryId.getType() == id.getType() && entryId.getInitialElement().equals(id.getInitialElement())) {
                     feedback.remove(entryId);
@@ -90,14 +90,14 @@ public class FileFeedbackHolder {
                         InspectionPriority.MEDIUM, 0,
                         InspectionPriority.LOW, 0));
 
-        for (Map.Entry entry : feedback.entrySet()) {
-            Feedback f = (Feedback) entry.getValue();
+        for (Map.Entry<FeedbackIdentifier, Feedback> entry : feedback.entrySet()) {
+            Feedback f = entry.getValue();
 
             if (f.isFixed()) {
                 continue;
             }
 
-            FeedbackIdentifier feedbackId = (FeedbackIdentifier) entry.getKey();
+            FeedbackIdentifier feedbackId = entry.getKey();
 
             if (feedbackId.isDeleted()) {
                 f.setToFixed();
@@ -131,7 +131,6 @@ public class FileFeedbackHolder {
         List<FeedbackSignature> alreadyReported = new ArrayList<>();
         List<Feedback> feedbackToReport = new ArrayList<>();
 
-        //TODO: use generics like this whenver we have Map.Entry
         for (Map.Entry<FeedbackIdentifier, Feedback> entry : feedback.entrySet()) {
             Feedback f = entry.getValue();
             if (f.isFixed()) {
@@ -209,8 +208,8 @@ public class FileFeedbackHolder {
     private int getPriorityFixedCount(InspectionPriority priority) {
         int count = 0;
 
-        for (Map.Entry entry : feedback.entrySet()) {
-            Feedback f = (Feedback) entry.getValue();
+        for (Map.Entry<FeedbackIdentifier, Feedback> entry : feedback.entrySet()) {
+            Feedback f = entry.getValue();
             if (f.getPriority() == priority) {
                 if (f.isFixed()) {
                     count++;
@@ -246,8 +245,8 @@ public class FileFeedbackHolder {
     }
 
     private String getStatus() {
-        for (Map.Entry entry : feedback.entrySet()) {
-            Feedback f = (Feedback) entry.getValue();
+        for (Map.Entry<FeedbackIdentifier, Feedback> entry : feedback.entrySet()) {
+            Feedback f = entry.getValue();
             if (!f.isFixed()) {
                 return "error_outline";
             }

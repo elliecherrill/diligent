@@ -125,7 +125,7 @@ public class FileFeedbackHolder {
     }
 
     private List<Feedback> getFeedbackToReport() {
-        Map<FeedbackType, List<ReportLevel>> currentReport = new HashMap<>();
+        List<FeedbackSignature> alreadyReported = new ArrayList<>();
         List<Feedback> feedbackToReport = new ArrayList<>();
 
         //TODO: use generics like this whenver we have Map.Entry
@@ -135,16 +135,23 @@ public class FileFeedbackHolder {
                 feedbackToReport.add(f);
                 continue;
             }
-            List<ReportLevel> currentValue = currentReport.get(f.getFeedbackType());
-            if (currentValue == null) {
+
+            String location = "";
+            ReportLevel reportLevel = f.getReportLevel();
+
+            if (reportLevel == ReportLevel.CLASS) {
+                location = f.getClassName();
+            } else if (reportLevel == ReportLevel.METHOD) {
+                location = f.getMethodName();
+            } else if (reportLevel == ReportLevel.LINE) {
+                location = String.valueOf(f.getLineNumber());
+            }
+
+            FeedbackSignature feedbackSignature = new FeedbackSignature(f.getFeedbackType(), reportLevel, location);
+
+            if (!alreadyReported.contains(feedbackSignature)) {
                 feedbackToReport.add(f);
-                List<ReportLevel> newValue = new ArrayList<>();
-                newValue.add(f.getReportLevel());
-                currentReport.put(f.getFeedbackType(), newValue);
-            } else if (!currentValue.contains(f.getReportLevel())) {
-                feedbackToReport.add(f);
-                currentValue.add(f.getReportLevel());
-                currentReport.put(f.getFeedbackType(), currentValue);
+                alreadyReported.add(feedbackSignature);
             }
         }
 

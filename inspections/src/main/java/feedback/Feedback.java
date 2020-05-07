@@ -240,4 +240,12 @@ public class Feedback {
     public void setReportLevel(ReportLevel reportLevel) {
         this.reportLevel = reportLevel;
     }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
 }

@@ -23,6 +23,7 @@ public class Feedback {
     private LocalDateTime lastUpdated;
     private ReportLevel reportLevel;
     private int reportCount;
+    private int copyCount;
 
     public Feedback(int lineNumber, String filename, String id, InspectionPriority priority, String className, String methodName, FeedbackType feedbackType) {
         this.lineNumber = lineNumber;
@@ -38,6 +39,7 @@ public class Feedback {
         lastUpdated = LocalDateTime.now();
         reportLevel = ReportLevel.CLASS;
         reportCount = 1;
+        copyCount = 1;
     }
 
     public Feedback(int lineNumber, String filename, String id, InspectionPriority priority, String className, FeedbackType feedbackType) {
@@ -65,12 +67,11 @@ public class Feedback {
             return "<div class=\"feedbackcontainer\" id=\"" + id + "\">\n" +
                     "   <div style=\"border: " + getColour() + " solid 2px;\" id=\"feedback\">\n" +
                     "       <div style=\"display: flex; align-items: center;\">\n" +
+                    getCopyCount() +
                     "           <div style=\"flex-grow: 1;\">\n"  +
                     "               <p style=\"font-weight: 500;\"> " + getTitleMessage() + " </p>\n" +
                     "           </div>\n" +
-                    "           <div style=\"display: flex;\">\n" +
-                                    getPriorityIcons(priority) +
-                    "           </div>\n" +
+                    getPriorityIcons() +
                     "       </div>\n"+
                     getLevelMessages() +
                     "       <p style=\"font-style: italic; text-align: right;\"> Last Updated: " + getLastUpdatedFormatted() + " </p>\n" +
@@ -82,6 +83,22 @@ public class Feedback {
         return "";
     }
 
+    private String getCopyCount() {
+        if (isFixed || copyCount < 2) {
+            return "";
+        }
+
+        if (copyCount < 10) {
+            return "             <div style=\"margin-right: 2%;\">\n" +
+                    "                <i class=\"material-icons\">filter_" + copyCount + "</i>\n" +
+                    "            </div>";
+        }
+
+        return "             <div style=\"margin-right: 2%;\">\n" +
+                "                <i class=\"material-icons\">filter_9_plus</i>\n" +
+                "            </div>";
+    }
+
     private String getTitleMessage() {
         if (!isFixed) {
             return feedbackType.getMessage().replace("$className", className);
@@ -91,6 +108,10 @@ public class Feedback {
     }
 
     private String getLevelMessages() {
+        if (isFixed) {
+            return "";
+        }
+
         if (reportLevel == ReportLevel.METHOD) {
             return "<p> What about in method " + methodName + "? </p>\n";
         }
@@ -106,13 +127,19 @@ public class Feedback {
         return "";
     }
 
-    private String getPriorityIcons(InspectionPriority priority) {
+    private String getPriorityIcons() {
+        if (isFixed) {
+            return "";
+        }
+
         StringBuilder sb = new StringBuilder();
 
+        sb.append("           <div style=\"display: flex;\">\n");
         for (int i = 0; i < priority.getNumberOfIcons(); i++) {
-            sb.append("<i class=\"material-icons\">priority_high</i>");
+            sb.append("             <i class=\"material-icons\">priority_high</i>");
             sb.append("\n");
         }
+        sb.append("           </div>\n");
 
         return sb.toString();
     }
@@ -247,5 +274,9 @@ public class Feedback {
 
     public String getMethodName() {
         return methodName;
+    }
+
+    public void incrementCopyCount() {
+        copyCount++;
     }
 }

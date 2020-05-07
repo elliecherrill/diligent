@@ -8,11 +8,13 @@ public class FeedbackSignature {
     private final FeedbackType feedbackType;
     private final ReportLevel reportLevel;
     private final String location;
+    private final Feedback feedback;
 
-    public FeedbackSignature(FeedbackType feedbackType, ReportLevel reportLevel, String location) {
+    public FeedbackSignature(FeedbackType feedbackType, ReportLevel reportLevel, String location, Feedback feedback) {
         this.feedbackType = feedbackType;
         this.reportLevel = reportLevel;
         this.location = location;
+        this.feedback = feedback;
     }
 
     public FeedbackType getFeedbackType() {
@@ -23,8 +25,8 @@ public class FeedbackSignature {
         return reportLevel;
     }
 
-    public String getLocation() {
-        return location;
+    public Feedback getFeedback() {
+        return feedback;
     }
 
     @Override

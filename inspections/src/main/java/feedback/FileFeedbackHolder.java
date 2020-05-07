@@ -1,6 +1,9 @@
 package feedback;
 
-import util.*;
+import util.InspectionPriority;
+import util.Pair;
+import util.PsiStmtType;
+import util.ReportLevel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -115,7 +118,7 @@ public class FileFeedbackHolder {
         sb.append(addPriorityPraise(InspectionPriority.MEDIUM, priorityErrors[InspectionPriority.MEDIUM.getIndex()], priorities));
         sb.append(addPriorityPraise(InspectionPriority.LOW, priorityErrors[InspectionPriority.LOW.getIndex()], priorities));
 
-        List<Feedback> feedbackToReport = getFeedbackToReport();
+        List<Feedback> feedbackToReport = getFeedbackToReport(priorities);
 
         for (Feedback f : feedbackToReport) {
             sb.append(f.toHTMLString(priorities));
@@ -124,7 +127,7 @@ public class FileFeedbackHolder {
         return sb.toString();
     }
 
-    private List<Feedback> getFeedbackToReport() {
+    private List<Feedback> getFeedbackToReport(List<InspectionPriority> priorities) {
         List<FeedbackSignature> alreadyReported = new ArrayList<>();
         List<Feedback> feedbackToReport = new ArrayList<>();
 
@@ -147,11 +150,18 @@ public class FileFeedbackHolder {
                 location = String.valueOf(f.getLineNumber());
             }
 
-            FeedbackSignature feedbackSignature = new FeedbackSignature(f.getFeedbackType(), reportLevel, location);
+            FeedbackSignature feedbackSignature = new FeedbackSignature(f.getFeedbackType(), reportLevel, location, f);
 
             if (!alreadyReported.contains(feedbackSignature)) {
                 feedbackToReport.add(f);
                 alreadyReported.add(feedbackSignature);
+            } else {
+                int index = alreadyReported.indexOf(feedbackSignature);
+                Feedback feedback = alreadyReported.get(index).getFeedback();
+                feedback.incrementCopyCount();
+                if (priorities.contains(feedback.getPriority())) {
+                    f.setHasBeenShown(true);
+                }
             }
         }
 

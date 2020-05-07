@@ -176,7 +176,7 @@ public class FileFeedbackHolder {
         if (!error) {
             return "<div class=\"feedbackcontainer\" id=\"praise-" + priority + "\">\n" +
                     "   <div style=\"border: green solid 2px;\" id=\"feedback\">\n" +
-                    "       <p style=\"font-weight: 500;\"> Your code is looking " + getPraiseMessage(priority) + "! You have no " + priority + "-priority errors. </p>\n" +
+                    "       <p style=\"font-weight: 500;\"> Your code is looking " + getPraiseMessage(priority) + "! You have no " + priority.getOutputString() + "-priority errors. </p>\n" +
                     "   </div>\n" +
                     "</div>";
         }
@@ -185,7 +185,7 @@ public class FileFeedbackHolder {
         if (fixedCount > 0) {
             return "<div class=\"feedbackcontainer\" id=\"praise-" + priority + "\">\n" +
                     "   <div style=\"border: green solid 2px;\" id=\"feedback\">\n" +
-                    "       <p style=\"font-weight: 500;\"> Your code is looking " + getPraiseMessage(priority) + "! You fixed " + fixedCount + " " + priority + "-priority error" + (fixedCount > 1 ? "s" : "") + ". </p>\n" +
+                    "       <p style=\"font-weight: 500;\"> Your code is looking " + getPraiseMessage(priority) + "! You fixed " + fixedCount + " " + priority.getOutputString() + "-priority error" + (fixedCount > 1 ? "s" : "") + ". </p>\n" +
                     "   </div>\n" +
                     "</div>";
         }
@@ -229,7 +229,7 @@ public class FileFeedbackHolder {
                 "       <div id=\"filetitle\">\n" +
                 filename +
                 "       </div>\n" +
-                "       <div style=\"background-color: " + getStatus() + ";\" id=\"progress\"> </div>\n" +
+                "       <i class=\"material-icons\">" + getStatus() + "</i>\n" +
                 "   </div> " +
                 "</div>\n";
     }
@@ -240,7 +240,7 @@ public class FileFeedbackHolder {
                 "       <div id=\"filetitle\">\n" +
                 filename +
                 "       </div>\n" +
-                "       <div style=\"background-color: " + getStatus() + ";\" id=\"progress\"> </div>\n" +
+                "       <i class=\"material-icons\">" + getStatus() + "</i>\n" +
                 "   </div> " +
                 "</div>\n";
     }
@@ -249,11 +249,11 @@ public class FileFeedbackHolder {
         for (Map.Entry entry : feedback.entrySet()) {
             Feedback f = (Feedback) entry.getValue();
             if (!f.isFixed()) {
-                return "red";
+                return "error_outline";
             }
         }
 
-        return "green";
+        return "check_circle_outline";
     }
 
 

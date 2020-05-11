@@ -122,7 +122,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             for (int i = 0; i < cases.length; i++) {
                 // Empty case
                 //TODO: consider fallthrough
-                if ((cases[i][0] == null) || (cases[i][1] == null)) {
+                if (cases[i][0] == null || cases[i].length == 1 || cases[i][1] == null) {
                     return;
                     //Only consider error when all cases are > 1 in length (excluding break;)
                 }
@@ -371,7 +371,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
         }
 
         private <T extends PsiElement> void compareStatements(Map<T, CloneExpression> map) {
-            //TODO: should we only be considering statements in *different* method / if / cases ?
             for (Map.Entry<T, CloneExpression> entry : map.entrySet()) {
                 T entryKey = entry.getKey();
                 CloneExpression entryValue = entry.getValue();
@@ -426,7 +425,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                             update = true;
                         }
                     } else if (entryKey instanceof PsiForStatement) {
-                        //TODO: to ask about vice versa (same body, similar condition)
                         if (CodeCloneUtils.sameForSetup(entryStringRep, otherEntryStringRep)) {
                             PsiForStatement forStmt = (PsiForStatement) entryKey;
                             PsiForStatement otherForStmt = (PsiForStatement) otherEntryKey;

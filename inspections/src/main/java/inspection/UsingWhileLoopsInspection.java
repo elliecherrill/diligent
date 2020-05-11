@@ -12,7 +12,6 @@ import util.InspectionPriority;
 import util.TipType;
 import util.Utils;
 
-//TODO: Extract commonality out (this, for loops, streams)
 public final class UsingWhileLoopsInspection extends AbstractBaseJavaLocalInspectionTool {
 
     @Override

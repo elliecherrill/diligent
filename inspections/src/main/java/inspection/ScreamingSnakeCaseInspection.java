@@ -115,23 +115,20 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                         return;
                     }
 
-                    //TODO: fix in missing else of this?
-                    if (modifierList.hasModifierProperty(PsiModifier.FINAL) && modifierList.hasModifierProperty(PsiModifier.STATIC)) {
-                        int line = Utils.getLineNumber(field);
-                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "screaming-snake-case", PsiStmtType.FIELD, line);
-                        String filename = field.getContainingFile().getName();
+                    int line = Utils.getLineNumber(field);
+                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "screaming-snake-case", PsiStmtType.FIELD, line);
+                    String filename = field.getContainingFile().getName();
 
-                        if (!Utils.isUpperSnakeCase(field.getName())) {
-                            Feedback feedback = new Feedback(line,
-                                    filename,
-                                    line + "-" + field.getName() + "-screaming-snake-case",
-                                    priority,
-                                    Utils.getClassName(field),
-                                    FeedbackType.SCREAMING_SNAKE_CASE);
-                            feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                        } else {
-                            feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
-                        }
+                    if (modifierList.hasModifierProperty(PsiModifier.FINAL) && modifierList.hasModifierProperty(PsiModifier.STATIC) && !Utils.isUpperSnakeCase(field.getName())) {
+                        Feedback feedback = new Feedback(line,
+                                filename,
+                                line + "-" + field.getName() + "-screaming-snake-case",
+                                priority,
+                                Utils.getClassName(field),
+                                FeedbackType.SCREAMING_SNAKE_CASE);
+                        feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                    } else {
+                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
                 }
             }

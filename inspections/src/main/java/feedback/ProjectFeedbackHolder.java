@@ -143,8 +143,6 @@ public class ProjectFeedbackHolder {
         return reportedPriorities;
     }
 
-    //TODO: if this is working concurrently do we need locks etc? so if it adds then definitely increments priority counter
-    //TODO: consider adding feedback with no actual update
     public void addFeedback(String filename, FeedbackIdentifier feedbackId, Feedback feedback) {
         updateFeedbackLock.lock();
         try {

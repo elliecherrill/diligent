@@ -7,10 +7,14 @@ import com.intellij.psi.*;
 import feedback.Feedback;
 import feedback.FeedbackHolder;
 import feedback.FeedbackIdentifier;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import util.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -119,11 +123,9 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             //TODO: update these checks from block clone detection
             // If we have an entire case where duplicate / similar has been detected for every line in another case
             for (int i = 0; i < cases.length; i++) {
-                // Empty case
-                //TODO: consider fallthrough
+                //Only consider error when all cases are > 1 in length (excluding break;)
                 if (cases[i].length < 2 || cases[i][0] == null || cases[i][1] == null) {
                     return;
-                    //Only consider error when all cases are > 1 in length (excluding break;)
                 }
 
                 Set<Location> firstClones = getClones(cases[i][0],
@@ -304,6 +306,11 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 FeedbackType.CLONE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         hasClone = true;
+                        try {
+                            FileUtils.writeStringToFile(new File("debug.txt"), "CODE BLOCK CLONE: " + CodeCloneUtils.printCodeBlock(codeBlocks[i], cloneSequence.getFirst()) + "\n", StandardCharsets.UTF_8, true);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
@@ -396,15 +403,11 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                             update = true;
                         }
                     } else if (entryKey instanceof PsiIfStatement) {
-                        // If statements are considered similar if
-                        // 1. They are identical
-                        // 2. They have identical conditions and similar bodies
-                        // 3. They have identical bodies and similar conditions
                         if (CodeCloneUtils.sameIfCondition(entryStringRep, otherEntryStringRep)) {
                             PsiIfStatement ifStmt = (PsiIfStatement) entryKey;
                             PsiIfStatement otherIfStmt = (PsiIfStatement) otherEntryKey;
 
-                            if (haveSimilarIfBodies(ifStmt, otherIfStmt)) {
+                            if (areSimilarBlocks(ifStmt.getThenBranch(), otherIfStmt.getThenBranch())) {
                                 update = true;
                             }
                         } else if (CodeCloneUtils.sameIfBody(entryStringRep, otherEntryStringRep)) {
@@ -489,11 +492,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             }
         }
 
-        private boolean haveSimilarIfBodies(PsiIfStatement ifStmt, PsiIfStatement otherIfStmt) {
-            //TODO: consider else cases (else vs else-if)
-            return areSimilarBlocks(ifStmt.getThenBranch(), otherIfStmt.getThenBranch());
-        }
-
         private boolean haveSimilarSwitchBodies(PsiSwitchStatement switchStmt, PsiSwitchStatement otherSwitchStmt) {
             Map<PsiDeclarationStatement, CloneExpression> declarationMap = new HashMap<>();
             Map<PsiAssignmentExpression, CloneExpression> assignmentMap = new HashMap<>();
@@ -569,14 +567,12 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         intersection = CodeCloneUtils.getCombinedClones(intersection, currClones);
                     }
                 }
-                //TODO: remove this when we stop comparing to ourselves in compareStatements
-                intersection = CodeCloneUtils.removeCodeBlock(intersection, i);
 
                 if (intersection.isEmpty()) {
                     return false;
                 }
 
-                //Must be a clone of the following
+                // Must be a clone of the following
                 if (CodeCloneUtils.getClonesInCodeBlock(intersection, i + 1, false).isEmpty()) {
                     return false;
                 }
@@ -657,8 +653,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                             intersection = CodeCloneUtils.getCombinedClones(intersection, currClones);
                         }
                     }
-                    //TODO: remove this when we stop comparing to ourselves in compareStatements
-                    intersection = CodeCloneUtils.removeCodeBlock(intersection, i);
 
                     if (intersection.isEmpty()) {
                         return false;
@@ -695,15 +689,12 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                   Map<PsiThrowStatement, CloneExpression> throwMap,
                                   Map<PsiPrefixExpression, CloneExpression> prefixMap,
                                   Map<PsiPostfixExpression, CloneExpression> postfixMap) {
-            //TODO: make this nicer - we find the type here but then do it inside getStatAsStringArray as well
             String[] stringRep = TokeniseUtils.getStmtAsStringArray(stat);
 
             int statementCount = CodeCloneUtils.getStatementCount(stat);
             location.setStatementCount(statementCount);
 
             if (stringRep == null) {
-                //TODO: remove assertion
-                assert false : "Unknown statement type " + stat.toString();
                 return;
             }
 
@@ -911,8 +902,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
         }
 
         private void inspectPolyadicExpressions(PsiClass aClass) {
-            //TODO: get all polyadic expressions *as strings* all in one go?
-            // same for codeblocks etc
             PsiPolyadicExpression[] polyExprs = CodeCloneUtils.getAllPolyadicExpressions(aClass);
             Map<PsiPolyadicExpression, String[]> polyadicMap = new HashMap<>();
             Map<PsiPolyadicExpression, Integer> polyadicLocationMap = new HashMap<>();

@@ -523,7 +523,7 @@ public class CodeCloneUtils {
             if (index == 0) {
                 currOtherStart = l.getLine();
             }
-            // TODO: is this condition too strict?
+
             if (l.getLine() != prev + 1) {
                 if (currSeq > longestSeq) {
                     longestSeq = currSeq;
@@ -730,6 +730,16 @@ public class CodeCloneUtils {
         }
 
         return newClones;
+    }
+
+    public static boolean contains(Set<Location> clones, int toFind) {
+        for (Location l : clones) {
+            if (l.getCodeBlock() == toFind) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static int getStatementCount(PsiStatement stat) {

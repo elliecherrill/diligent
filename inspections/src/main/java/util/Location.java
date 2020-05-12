@@ -7,14 +7,9 @@ public class Location {
 
     private int statementCount;
 
-    private Location(int codeBlock, int line, int statementCount) {
+    public Location(int codeBlock, int line) {
         this.codeBlock = codeBlock;
         this.line = line;
-        this.statementCount = statementCount;
-    }
-
-    public Location(int codeBlock, int line) {
-        this(codeBlock, line, 1);
     }
 
     public int getCodeBlock() {
@@ -47,7 +42,7 @@ public class Location {
 
     @Override
     public String toString() {
-        return "<" + codeBlock + ", " + line + ">";
+        return "< Code Block:" + codeBlock + ", Line:" + line + ", Statement Count:" + statementCount + ">";
     }
 
     public int getStatementCount() {

@@ -32,23 +32,12 @@ public class FileFeedbackHolder {
     }
 
     public Pair<Boolean, Boolean> addFeedback(FeedbackIdentifier id, Feedback newFeedback) {
-        //TODO: tidy up this method
-        boolean hasBeenRemoved = false;
-        if (id.getType() == PsiStmtType.LEFT_THIS_EXPR || id.getType() == PsiStmtType.RIGHT_THIS_EXPR) {
-            for (Map.Entry<FeedbackIdentifier, Feedback> entry : feedback.entrySet()) {
-                FeedbackIdentifier entryId = entry.getKey();
-
-                if (entryId.getType() == id.getType() && entryId.getInitialElement().equals(id.getInitialElement())) {
-                    feedback.remove(entryId);
-                    hasBeenRemoved = true;
-                }
-
-            }
-        }
-
+        // feedbackIsNew is used for priority counters in ProjectFeedbackHolder
         boolean feedbackIsNew = true;
-        Feedback oldFeedback = feedback.remove(id);
+        // isCurrent is used as a flag to update the file in ProjectFeedbackHolder
         boolean isCurrent = false;
+
+        Feedback oldFeedback = feedback.remove(id);
         if (oldFeedback != null) {
             feedbackIsNew = oldFeedback.isFixed() && !newFeedback.isFixed();
             isCurrent = oldFeedback.equals(newFeedback);
@@ -57,11 +46,6 @@ public class FileFeedbackHolder {
             if (newFeedback.setAndIncrementReportCount(oldFeedback.getReportCount())) {
                 isCurrent = false;
             }
-        }
-
-        //TODO: check this (THIS INSPECTION)
-        if (hasBeenRemoved) {
-            feedbackIsNew = true;
         }
 
         feedback.put(id, newFeedback);

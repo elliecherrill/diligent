@@ -11,22 +11,22 @@ public class FeedbackIdentifier {
     private final boolean hasClonePointer;
     private final String feedbackType;
     private final PsiElement initialElement;
-    private final PsiStmtType type;
+    private final PsiStmtType stmtType;
     private final int line;
 
-    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, SmartPsiElementPointer<PsiElement> clonePointer, String feedbackType, PsiStmtType type, int line) {
+    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, SmartPsiElementPointer<PsiElement> clonePointer, String feedbackType, PsiStmtType stmtType, int line) {
         this.pointer = pointer;
         this.clonePointer = clonePointer;
         this.feedbackType = feedbackType;
-        this.type = type;
+        this.stmtType = stmtType;
 
         hasClonePointer = clonePointer != null;
         initialElement = pointer.getElement();
         this.line = line;
     }
 
-    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType type, int line) {
-        this(pointer, null, feedbackType, type, line);
+    public FeedbackIdentifier(SmartPsiElementPointer<PsiElement> pointer, String feedbackType, PsiStmtType stmtType, int line) {
+        this(pointer, null, feedbackType, stmtType, line);
     }
 
     public SmartPsiElementPointer<PsiElement> getPointer() {
@@ -37,17 +37,12 @@ public class FeedbackIdentifier {
         return feedbackType;
     }
 
-    public PsiElement getInitialElement() {
-        return initialElement;
-    }
-
-    //TODO: what about when you fix UPPER_CAMEL_CASE, x += 1 vs x = x + 1
     public String getInitialElementText() {
-        return initialElement.getText().toLowerCase();
+        return initialElement.getText();
     }
 
-    public PsiStmtType getType() {
-        return type;
+    public PsiStmtType getStmtType() {
+        return stmtType;
     }
 
     public boolean isDeleted() {
@@ -60,6 +55,32 @@ public class FeedbackIdentifier {
 
     public int getLine() {
         return line;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof FeedbackIdentifier) {
+            FeedbackIdentifier otherFeedbackId = (FeedbackIdentifier) other;
+
+            PsiStmtType otherType = otherFeedbackId.getStmtType();
+
+            if (otherType == stmtType &&
+                    otherFeedbackId.getInitialElementText().equals(getInitialElementText()) &&
+                    otherFeedbackId.getFeedbackType().equals(feedbackType)) {
+                return true;
+            }
+
+            return otherType == stmtType &&
+                    otherFeedbackId.getLine() == line &&
+                    otherFeedbackId.getFeedbackType().equals(feedbackType);
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return 29 * pointer.hashCode() + 13 * feedbackType.hashCode();
     }
 
     @Override
@@ -79,7 +100,7 @@ public class FeedbackIdentifier {
         sb.append("\t INITIAL ELEMENT: "+initialElement.getText());
 
         sb.append("\n");
-        sb.append("\t TYPE: "+type);
+        sb.append("\t TYPE: "+ stmtType);
 
         sb.append("\n");
         sb.append("\t LINE: "+line);
@@ -87,37 +108,5 @@ public class FeedbackIdentifier {
         sb.append("\n");
 
         return sb.toString();
-    }
-
-    // TODO: for x = x + 1 >> x += 1 (these will be same element, i.e. initial element won't be null, but
-    // different text - need to consider this)
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof FeedbackIdentifier) {
-            FeedbackIdentifier otherFeedbackId = (FeedbackIdentifier) other;
-
-            PsiStmtType otherType = otherFeedbackId.getType();
-
-            if ((type == PsiStmtType.LEFT_THIS_EXPR || type == PsiStmtType.RIGHT_THIS_EXPR) && otherType == type) {
-                return otherFeedbackId.getFeedbackType().equals(feedbackType);
-            }
-
-            if (otherType == type &&
-                    otherFeedbackId.getInitialElementText().equals(getInitialElementText()) &&
-                    otherFeedbackId.getFeedbackType().equals(feedbackType)) {
-                return true;
-            }
-
-            return otherType == type &&
-                    otherFeedbackId.getLine() == line &&
-                    otherFeedbackId.getFeedbackType().equals(feedbackType);
-        }
-
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return 29 * pointer.hashCode() + 13 * feedbackType.hashCode();
     }
 }

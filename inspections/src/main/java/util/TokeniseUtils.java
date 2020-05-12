@@ -6,7 +6,6 @@ import java.util.*;
 
 public class TokeniseUtils {
 
-    //TODO: standardise tokenisation (e.g. start and end flags)
     public static String[] getStmtAsStringArray(PsiStatement stmt) {
         List<String> stmtAsString = getStmtAsString(stmt);
         if (stmtAsString == null) {
@@ -130,7 +129,7 @@ public class TokeniseUtils {
     }
 
     private static List<String> getAssertStmtAsString(PsiAssertStatement stmt) {
-        //Only consider assertion condition (not description)
+        // Only consider assertion condition (not description)
         List<String> assertStmtAsString = new ArrayList<>();
 
         assertStmtAsString.add("ASSERT");
@@ -334,14 +333,11 @@ public class TokeniseUtils {
 
         declStmtAsString.add("DECLARATION");
 
-        //TODO: try with multiple elements
         PsiElement[] elements = stmt.getDeclaredElements();
 
         for (PsiElement elem : elements) {
             if (elem instanceof PsiLocalVariable) {
                 declStmtAsString.addAll(getLocalVarAsString((PsiLocalVariable) elem));
-            } else {
-                assert false: "Unknown element in declaration " + elem.toString();
             }
         }
 
@@ -425,7 +421,7 @@ public class TokeniseUtils {
     }
 
     private static Map<String, String> getConditionVar(PsiExpression expr) {
-        Map<String, String> replaceVars = new Hashtable<>();
+        Map<String, String> replaceVars = new HashMap<>();
 
         getConditionVar(replaceVars, expr);
 
@@ -470,8 +466,6 @@ public class TokeniseUtils {
     public static List<String> getExprAsString(PsiExpression expr) {
         List<String> exprAsString = new ArrayList<>();
 
-        exprAsString.add("EXPR");
-
         if (expr instanceof PsiAssignmentExpression) {
             exprAsString.addAll(getAssExprAsString((PsiAssignmentExpression) expr));
         } else if (expr instanceof PsiMethodCallExpression) {
@@ -492,8 +486,6 @@ public class TokeniseUtils {
             exprAsString.addAll(getPolyExprAsString((PsiPolyadicExpression) expr));
         }
 
-        exprAsString.add("END-EXPR");
-
         return exprAsString;
     }
 
@@ -501,7 +493,10 @@ public class TokeniseUtils {
         List<String> postfixExprAsString = new ArrayList<>();
 
         postfixExprAsString.add("POSTFIX");
-
+        if (expr.getOperand().getType() != null) {
+            postfixExprAsString.add("POSTFIX-TYPE");
+            postfixExprAsString.add(getTypeAsString(expr.getOperand().getType()));
+        }
         postfixExprAsString.add("POSTFIX-VAR");
         postfixExprAsString.addAll(getExprAsString(expr.getOperand()));
         postfixExprAsString.add("POSTFIX-OP");
@@ -516,9 +511,14 @@ public class TokeniseUtils {
         List<String> prefixExprAsString = new ArrayList<>();
 
         prefixExprAsString.add("PREFIX");
-
-        prefixExprAsString.add("PREFIX-VAR");
-        prefixExprAsString.addAll(getExprAsString(expr.getOperand()));
+        if (expr.getOperand() != null) {
+            if (expr.getOperand().getType() != null) {
+                prefixExprAsString.add("PREFIX-TYPE");
+                prefixExprAsString.add(getTypeAsString(expr.getOperand().getType()));
+            }
+            prefixExprAsString.add("PREFIX-VAR");
+            prefixExprAsString.addAll(getExprAsString(expr.getOperand()));
+        }
         prefixExprAsString.add("PREFIX-OP");
         prefixExprAsString.add(getOpAsString(expr.getOperationSign()));
 
@@ -556,6 +556,11 @@ public class TokeniseUtils {
 
         assExprAsString.add("LHS");
         PsiExpression leftExpr = expr.getLExpression();
+        if (leftExpr.getType() != null) {
+            assExprAsString.add("LHS-TYPE");
+            assExprAsString.add(getTypeAsString(leftExpr.getType()));
+        }
+        assExprAsString.add("LHS-VAR");
         assExprAsString.addAll(getExprAsString(leftExpr));
 
         assExprAsString.add("OP");

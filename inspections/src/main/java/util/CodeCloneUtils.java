@@ -7,9 +7,9 @@ import java.util.*;
 
 public class CodeCloneUtils {
 
-    //TODO: do we want to ignore default case?
     public static PsiStatement[][] getCaseBlocks(@Nonnull PsiCodeBlock body) {
-        // TODO: How to not iterate through twice?
+        // Ignoring default case
+
         PsiStatement[] bodyStatements = body.getStatements();
 
         int numCases = 0;
@@ -59,8 +59,7 @@ public class CodeCloneUtils {
     }
 
     public static PsiStatement[][] getSameCaseBlocks(@Nonnull PsiCodeBlock body, @Nonnull PsiCodeBlock otherBody) {
-        //TODO: consider default case??
-        // TODO: How to not iterate through twice?
+        // Ignoring default case
 
         int sameCases = 0;
         // Returns a pair of case labels and number of statements in cases
@@ -150,7 +149,7 @@ public class CodeCloneUtils {
         List<Integer> statements = new ArrayList<>();
         PsiStatement[] bodyStatements = body.getStatements();
 
-        String currCase = null;
+        String currCase;
         int currStats = 0;
         for (PsiStatement stat : bodyStatements) {
             if (stat instanceof PsiSwitchLabelStatement) {
@@ -261,15 +260,21 @@ public class CodeCloneUtils {
             }
         }
     }
-    //TODO: for assignment / prefix / postfix - when comparing variable names, is this enough?
-    // do we also need to consider their types?
+
     public static boolean changeInLHS(String[] first, String[] second) {
-        // RHS and operator the same
+        // RHS, type of LHS, operator the same
         // LHS different
+        int firstTypeIndex = getStartIndex("LHS-TYPE", first) + 1;
+        int firstEndTypeIndex = getStartIndex("LHS-VAR", first);
+
+        int secondTypeIndex = getStartIndex("LHS-TYPE", first) + 1;
+        int secondEndTypeIndex = getStartIndex("LHS-VAR", first);
+
         int firstOpIndex = getStartIndex("OP", first);
         int secondOpIndex = getStartIndex("OP", second);
 
-        return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
+        return Arrays.equals(first, firstTypeIndex, firstEndTypeIndex, second, secondTypeIndex, secondEndTypeIndex) &&
+                Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
     }
 
     public static boolean changeInRHS(String[] first, String[] second) {
@@ -295,15 +300,22 @@ public class CodeCloneUtils {
     }
 
     public static boolean prefixExprChangeInVar(String[] first, String[] second) {
-        // Same operator, Change in var
+        // Same operator and type of var, Change in var name
+        int firstTypeIndex = getStartIndex("PREFIX-TYPE", first) + 1;
+        int firstEndTypeIndex = getStartIndex("PREFIX-VAR", first);
+
+        int secondTypeIndex = getStartIndex("PREFIX-TYPE", first) + 1;
+        int secondEndTypeIndex = getStartIndex("PREFIX-VAR", first);
+
         int firstOpIndex = getStartIndex("PREFIX-OP", first);
         int secondOpIndex = getStartIndex("PREFIX-OP", second);
 
-        return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
+        return Arrays.equals(first, firstTypeIndex, firstEndTypeIndex, second, secondTypeIndex, secondEndTypeIndex) &&
+                Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
     }
 
     public static boolean prefixExprChangeInOp(String[] first, String[] second) {
-        // Same var, Change in op
+        // Same var name and type, Change in op
         int firstEndVarIndex = getStartIndex("PREFIX-OP", first);
         int secondEndVarIndex = getStartIndex("PREFIX-OP", second);
 
@@ -311,15 +323,22 @@ public class CodeCloneUtils {
     }
 
     public static boolean postfixExprChangeInVar(String[] first, String[] second) {
-        // Same operator, Change in var
+        // Same operator and type of var, Change in var name
+        int firstTypeIndex = getStartIndex("POSTFIX-TYPE", first) + 1;
+        int firstEndTypeIndex = getStartIndex("POSTFIX-VAR", first);
+
+        int secondTypeIndex = getStartIndex("POSTFIX-TYPE", first) + 1;
+        int secondEndTypeIndex = getStartIndex("POSTFIX-VAR", first);
+
         int firstOpIndex = getStartIndex("POSTFIX-OP", first);
         int secondOpIndex = getStartIndex("POSTFIX-OP", second);
 
-        return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
+        return Arrays.equals(first, firstTypeIndex, firstEndTypeIndex, second, secondTypeIndex, secondEndTypeIndex) &&
+                Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
     }
 
     public static boolean postfixExprChangeInOp(String[] first, String[] second) {
-        // Same var, Change in op
+        // Same var name and type, Change in op
         int firstEndVarIndex = getStartIndex("POSTFIX-OP", first);
         int secondEndVarIndex = getStartIndex("POSTFIX-OP", second);
 

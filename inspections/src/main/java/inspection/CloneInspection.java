@@ -48,7 +48,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
         InspectionPriority priority = Utils.getInspectionPriority(holder,"clone");
         if (priority != InspectionPriority.NONE) {
-            // TODO: will this create a new clone visitor everytime? Use singleton?
             return new CloneVisitor(holder, priority);
         }
 
@@ -122,7 +121,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             for (int i = 0; i < cases.length; i++) {
                 // Empty case
                 //TODO: consider fallthrough
-                if (cases[i][0] == null || cases[i].length == 1 || cases[i][1] == null) {
+                if (cases[i].length < 2 || cases[i][0] == null || cases[i][1] == null) {
                     return;
                     //Only consider error when all cases are > 1 in length (excluding break;)
                 }
@@ -280,7 +279,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
                 boolean hasClone = false;
 
-                //TODO: check that adding line number to feedbackId hasn't broken this
                 for (int blockIndex : rangeOfBlocks) {
                     FeedbackIdentifier feedbackId;
                     int line;
@@ -912,7 +910,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
             return null;
         }
 
-        //TODO: do we want to extend on this further - e.g. similar etc?
         private void inspectPolyadicExpressions(PsiClass aClass) {
             //TODO: get all polyadic expressions *as strings* all in one go?
             // same for codeblocks etc

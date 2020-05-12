@@ -162,6 +162,7 @@ public class CodeCloneUtils {
                 currStats++;
             }
         }
+        statements.add(currStats);
 
         return new Pair<>(labels, statements);
     }
@@ -671,7 +672,7 @@ public class CodeCloneUtils {
 
         int newParent = parent;
         for (PsiElement child : elem.getChildren()) {
-            if (child instanceof PsiCodeBlock) {
+            if (child instanceof PsiCodeBlock && !(elem instanceof PsiSwitchStatement)) {
                 PsiCodeBlock block = (PsiCodeBlock) child;
                 // Only consider code blocks with more than one statement
                 if (getCodeBlockCount(block) > 1) {
@@ -681,13 +682,9 @@ public class CodeCloneUtils {
                 }
             }
 
-            if (child instanceof PsiSwitchStatement) {
-                //TODO
-            } else {
-                Pair<List<PsiCodeBlock>, List<Integer>> childRes = getCodeBlocks(child, newParent);
-                codeBlocks.addAll(childRes.getFirst());
-                parentIndex.addAll(childRes.getSecond());
-            }
+            Pair<List<PsiCodeBlock>, List<Integer>> childRes = getCodeBlocks(child, newParent);
+            codeBlocks.addAll(childRes.getFirst());
+            parentIndex.addAll(childRes.getSecond());
         }
 
         return new Pair<>(codeBlocks, parentIndex);

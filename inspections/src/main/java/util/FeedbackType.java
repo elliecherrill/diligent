@@ -1,6 +1,5 @@
 package util;
 
-//TODO: are the fixed messages right? they might have just deleted them?
 public enum FeedbackType {
     CAMELCASE("Have you used camelCase throughout class $className?",
             "Great job! You used camelCase on line $lineNumber."),

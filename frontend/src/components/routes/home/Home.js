@@ -69,7 +69,7 @@ const Home = (props) => {
                                         color: 'rgb(220, 220, 220)',
                                         marginBottom: '5%'
                                     }}>
-                                    A tool which does something.
+                                    Improving your coding practices
                                 </h1>
                             </Fade>
                         </div>
@@ -101,7 +101,7 @@ const Home = (props) => {
                             onClick={() => downloadPlugin()}
                             style={{marginLeft: '1.5%'}}
                         >
-                            Download Diligent Plugin
+                            Download IntelliJ Plugin
                         </Button>
                     </div>
                 </Fade>

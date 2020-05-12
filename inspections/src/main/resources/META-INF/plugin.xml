@@ -2,7 +2,7 @@
   <id>Diligent</id>
   <name>Diligent</name>
   <version>1.0.0</version>
-  <description>TODO: (update) A tool which does something.</description>
+  <description>Improving your coding practices</description>
   <vendor>Helena Cherrill</vendor>
   <idea-version since-build="174.0" />
   <depends>com.intellij.modules.java</depends>

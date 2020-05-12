@@ -59,7 +59,7 @@ export default props => {
                                     marginBottom: '5%',
                                     marginLeft: '5%'
                                 }}>
-                                A tool which does something.
+                                Improving your coding practices
                             </h1>
                         </div>
                     </div>

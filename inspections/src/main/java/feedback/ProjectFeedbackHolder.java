@@ -306,6 +306,7 @@ public class ProjectFeedbackHolder {
                 "            color:white;\n" +
                 "            margin: 0px;\n" +
                 "            padding-left: 24px;\n" +
+                "            flex-grow: 1;\n" +
                 "        }\n" +
                 "        #page {\n" +
                 "            display: flex;\n" +
@@ -313,7 +314,7 @@ public class ProjectFeedbackHolder {
                 "            height: 100%;\n" +
                 "        }\n" +
                 "        #filesidebar {\n" +
-                "            width: 15%;\n" +
+                "            width: 20%;\n" +
                 "            background-color: #34558b;\n" +
                 "            color: white;\n" +
                 "            height: 100%;\n" +
@@ -344,7 +345,7 @@ public class ProjectFeedbackHolder {
                 "            margin-left: 2.5%;\n" +
                 "        }\n" +
                 "        #feedback {\n" +
-                "            width: 40%;\n" +
+                "            width: 50%;\n" +
                 "            border-radius: 5px;\n" +
                 "            padding: 1%;\n" +
                 "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
@@ -355,6 +356,8 @@ public class ProjectFeedbackHolder {
                 "            border: none;\n" +
                 "            border-radius: 5px;\n" +
                 "            font-family: Roboto, Helvetica, Arial, sans-serif;\n" +
+                "            padding: 10%;\n" +
+                "            cursor: pointer;\n" +
                 "        }\n" +
                 "        #filetitle {\n" +
                 "            display: flex;\n" +
@@ -365,6 +368,11 @@ public class ProjectFeedbackHolder {
                 "            flex-direction: row;\n" +
                 "            align-items: center;\n" +
                 "        }\n" +
+                "        #homeicon {\n" +
+                "            color: white;\n" +
+                "            padding-right: 24px;\n" +
+                "            cursor: pointer;\n" +
+                "        }\n" +
                 "    </style>\n" +
                 "</head>\n" +
                 "<body style=\"margin: 0px;height: 100%;\">\n" +
@@ -373,6 +381,7 @@ public class ProjectFeedbackHolder {
                 "        <h1 id=\"topbartitle\">\n" +
                 "            Diligent\n" +
                 "        </h1>\n" +
+                "        <i class=\"material-icons\" id=\"homeicon\" onClick=\"location.href = './diligent.html'\">home</i>\n" +
                 "    </div>\n" +
                 "    <div id=\"page\">\n" +
                 "        <div id=\"filesidebar\">\n" +
@@ -465,6 +474,7 @@ public class ProjectFeedbackHolder {
                 "            color:white;\n" +
                 "            margin: 0px;\n" +
                 "            padding-left: 24px;\n" +
+                "            flex-grow: 1;\n" +
                 "        }\n" +
                 "        #page {\n" +
                 "            display: flex;\n" +
@@ -472,7 +482,7 @@ public class ProjectFeedbackHolder {
                 "            height: 100%;\n" +
                 "        }\n" +
                 "        #filesidebar {\n" +
-                "            width: 15%;\n" +
+                "            width: 20%;\n" +
                 "            background-color: #34558b;\n" +
                 "            color: white;\n" +
                 "            height: 100%;\n" +
@@ -504,6 +514,11 @@ public class ProjectFeedbackHolder {
                 "            flex-direction: row;\n" +
                 "            align-items: center;\n" +
                 "        }\n" +
+                "        #homeicon {\n" +
+                "            color: white;\n" +
+                "            padding-right: 24px;\n" +
+                "            cursor: pointer;\n" +
+                "        }\n" +
                 "    </style>\n" +
                 "</head>\n" +
                 "<body style=\"margin: 0px;height: 100%;\">\n" +
@@ -512,6 +527,7 @@ public class ProjectFeedbackHolder {
                 "        <h1 id=\"topbartitle\">\n" +
                 "            Diligent\n" +
                 "        </h1>\n" +
+                "        <i class=\"material-icons\" id=\"homeicon\" onClick=\"location.href = './diligent.html'\">home</i>\n" +
                 "    </div>\n" +
                 "    <div id=\"page\">\n" +
                 "        <div id=\"filesidebar\">\n" +
@@ -519,7 +535,7 @@ public class ProjectFeedbackHolder {
                 "        </div>\n" +
                 "        <div id=\"mainpage\">\n" +
                 "            <div style=\"width: 40%; margin-top: 2.5%; margin-left: 2.5%;padding: 1%;font-family: Roboto, Helvetica, Arial, sans-serif;\">\n" +
-                "                <p style=\"font-weight: 500;\"> Please select a file. </p>\n" +
+                "                <p style=\"font-weight: 500;\"> Please select a file from the sidebar. </p>\n" +
                 "            </div>\n" +
                 "        </div>\n" +
                 "    </div>\n" +

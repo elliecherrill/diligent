@@ -189,7 +189,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         priority,
                         Utils.getClassName(statement),
                         Utils.getMethodName(statement),
-                        FeedbackType.CLONE);
+                        FeedbackType.SWITCH_CLONE);
                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
             } else {
                 feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
@@ -948,7 +948,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 priority,
                                 aClass.getName(),
                                 methodName,
-                                FeedbackType.CLONE);
+                                FeedbackType.EXPR_CLONE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

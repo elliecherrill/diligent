@@ -28,14 +28,6 @@ public final class Utils {
         return prev;
     }
 
-    public static PsiElement removeWhitespaceUntilNext(PsiElement next) {
-        while (next instanceof PsiWhiteSpace) {
-            next = next.getNextSibling();
-        }
-
-        return next;
-    }
-
     public static boolean isCamelCase(String name) {
         return name.matches(CAMEL_CASE);
     }
@@ -86,13 +78,6 @@ public final class Utils {
         }
 
         return getMethodName(element.getParent());
-    }
-
-    public static String getProjectPath(PsiElement element) {
-        PsiFile containingFile = element.getContainingFile();
-        Project project = containingFile.getProject();
-
-        return project.getBasePath();
     }
 
     public static InspectionPriority getInspectionPriority(ProblemsHolder holder, String inspectionName) {

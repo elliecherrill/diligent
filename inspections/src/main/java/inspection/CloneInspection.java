@@ -7,14 +7,10 @@ import com.intellij.psi.*;
 import feedback.Feedback;
 import feedback.FeedbackHolder;
 import feedback.FeedbackIdentifier;
-import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import util.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -117,10 +113,9 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     whileLoopMap, doWhileLoopMap, switchMap, assertMap,
                     tryMap, throwMap, prefixMap, postfixMap);
 
-            List<Integer> rangeOfCases = IntStream.range(0, cases.length - 1).boxed().collect(Collectors.toList());
-            List<Set<Location>> clones = new ArrayList<>(cases.length);
+            List<Integer> rangeOfCases = IntStream.range(0, cases.length).boxed().collect(Collectors.toList());
+            List<Set<Integer>> clones = new ArrayList<>(cases.length);
 
-            //TODO: update these checks from block clone detection
             // If we have an entire case where duplicate / similar has been detected for every line in another case
             for (int i = 0; i < cases.length; i++) {
                 //Only consider error when all cases are > 1 in length (excluding break;)
@@ -128,7 +123,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     return;
                 }
 
-                Set<Location> firstClones = getClones(cases[i][0],
+                Set<Location> intersection = getClones(cases[i][0],
                         declarationMap, assignmentMap,
                         ifStmtMap, methodCallMap,
                         returnMap, forLoopMap,
@@ -138,11 +133,10 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         tryMap, throwMap,
                         prefixMap, postfixMap);
 
-                if (firstClones == null || firstClones.size() == 0) {
-                    continue;
+                if (intersection == null || intersection.size() == 0) {
+                    intersection = new LinkedHashSet<>();
+                    intersection.add(new Location(-1, -1));
                 }
-
-                Set<Location> intersection = new LinkedHashSet<>(firstClones);
 
                 for (int j = 1; j < cases[0].length; j++) {
                     if (cases[i][j] == null) {
@@ -159,17 +153,25 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                             prefixMap, postfixMap);
 
                     if (currClones == null) {
-                        intersection.clear();
-                        break;
+                        Set<Location> dummy = new LinkedHashSet<>();
+                        dummy.add(new Location(-1, -1));
+                        intersection = CodeCloneUtils.getCombinedClones(intersection, dummy);
                     } else {
                         intersection = CodeCloneUtils.getCombinedClones(intersection, currClones);
                     }
                 }
 
                 // Add itself to its clones
-                intersection.add(new Location(i, 0));
+                Set<Integer> caseClones = new LinkedHashSet<>();
+                caseClones.add(i);
 
-                clones.add(intersection);
+                for (int blockIndex : rangeOfCases) {
+                    if (CodeCloneUtils.containsBlockClone(intersection, blockIndex) != null) {
+                        caseClones.add(blockIndex);
+                    }
+                }
+
+                clones.add(caseClones);
             }
 
             String filename = statement.getContainingFile().getName();
@@ -231,7 +233,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     whileLoopMap, doWhileLoopMap, switchMap, assertMap,
                     tryMap, throwMap, prefixMap, postfixMap);
 
-            List<Integer> rangeOfBlocks = IntStream.range(0, blockBodies.length - 1).boxed().collect(Collectors.toList());
+            List<Integer> rangeOfBlocks = IntStream.range(0, blockBodies.length).boxed().collect(Collectors.toList());
             String filename = aClass.getContainingFile().getName();
 
             // If we have an entire method where duplicate / similar has been detected for every line in another method
@@ -306,11 +308,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 FeedbackType.CLONE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         hasClone = true;
-                        try {
-                            FileUtils.writeStringToFile(new File("debug.txt"), "CODE BLOCK CLONE: " + CodeCloneUtils.printCodeBlock(codeBlocks[i], cloneSequence.getFirst()) + "\n", StandardCharsets.UTF_8, true);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }

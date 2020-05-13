@@ -9,19 +9,22 @@ public class CodeCloneUtils {
 
     public static PsiStatement[][] getCaseBlocks(@Nonnull PsiCodeBlock body) {
         // Ignoring default case
-
         PsiStatement[] bodyStatements = body.getStatements();
 
         int numCases = 0;
         int numStats = 0;
         boolean defaultCase = false;
         List<Integer> statements = new ArrayList<>();
+
         for (PsiStatement stat : bodyStatements) {
             if (stat instanceof PsiSwitchLabelStatement) {
-                if (((PsiSwitchLabelStatement) stat).isDefaultCase()) {
+                PsiSwitchLabelStatement labelStat = (PsiSwitchLabelStatement) stat;
+
+                if (labelStat.isDefaultCase()) {
                     defaultCase = true;
                     continue;
                 }
+
                 defaultCase = false;
                 numCases++;
                 statements.add(numStats);
@@ -38,20 +41,19 @@ public class CodeCloneUtils {
         defaultCase = false;
         for (PsiStatement stat : bodyStatements) {
             if (stat instanceof PsiSwitchLabelStatement) {
-                if (((PsiSwitchLabelStatement) stat).isDefaultCase()) {
+                PsiSwitchLabelStatement labelStat = (PsiSwitchLabelStatement) stat;
+
+                if (labelStat.isDefaultCase()) {
                     defaultCase = true;
                     continue;
                 }
+
                 defaultCase = false;
                 caseIndex++;
                 statIndex = 0;
-            }
-
-            if (!defaultCase) {
-                if (!(stat instanceof PsiSwitchLabelStatement) && !(stat instanceof PsiBreakStatement)) {
-                    caseBlocks[caseIndex][statIndex] = stat;
-                    statIndex++;
-                }
+            } else if (!defaultCase && !(stat instanceof PsiBreakStatement)) {
+                caseBlocks[caseIndex][statIndex] = stat;
+                statIndex++;
             }
         }
 
@@ -464,12 +466,12 @@ public class CodeCloneUtils {
         return -1;
     }
 
-    public static boolean transitiveClosureOfClones(List<Set<Location>> cases, List<Integer> aim) {
+    public static boolean transitiveClosureOfClones(List<Set<Integer>> cases, List<Integer> aim) {
         if (cases.isEmpty()) {
             return false;
         }
 
-        Set<Location> currClones = new LinkedHashSet<>(cases.get(0));
+        Set<Integer> currClones = new LinkedHashSet<>(cases.get(0));
 
         for (int i = 1; i < cases.size(); i++) {
             if (Collections.disjoint(currClones, cases.get(i))) {
@@ -478,22 +480,12 @@ public class CodeCloneUtils {
                 currClones.addAll(cases.get(i));
             }
 
-            if (containsAll(currClones, aim)) {
+            if (currClones.containsAll(aim)) {
                 return true;
             }
         }
 
         return false;
-    }
-
-    private static boolean containsAll(Set<Location> clones, List<Integer> aim) {
-        for (int i : aim) {
-            if (getClonesInCodeBlock(clones, i, false).isEmpty()) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> containsBlockClone(Set<Location> clones, int blockIndex) {

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin-repository>
+	<ff>"Inspection"</ff>
+	<category name="Inspection">
+		<idea-plugin url='https://gitlab.doc.ic.ac.uk/hac17/individual_project'>
+			<id>Diligent for Python</id>
+			<name>Diligent for Python</name>
+			<version>1.0.0</version>
+			<description>Improving your coding practices</description>
+		</idea-plugin>
+	</category>
+</plugin-repository>

@@ -1,0 +1,15 @@
+<idea-plugin>
+  <id>Diligent for Python</id>
+  <name>Diligent for Python</name>
+  <version>1.0.0</version>
+  <description>Improving your coding practices</description>
+  <vendor>Helena Cherrill</vendor>
+  <idea-version since-build="174.0" />
+  <depends>com.intellij.modules.lang</depends>
+  <depends>com.intellij.modules.python</depends>
+  <application-components>
+    <component>
+      <implementation-class>inspection.InspectionRegistration</implementation-class>
+    </component>
+  </application-components>
+</idea-plugin>

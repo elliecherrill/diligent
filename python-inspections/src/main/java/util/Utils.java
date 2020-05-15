@@ -36,17 +36,17 @@ public final class Utils {
         return document.getLineNumber(textOffset) + 1;
     }
 
-    public static String getMethodName(PsiElement element) {
+    public static String getFunctionName(PsiElement element) {
         if (element == null) {
             return null;
         }
 
-        if (element instanceof PsiMethod) {
-            PsiMethod method = (PsiMethod) element;
-            return method.getName();
+        if (element instanceof PyFunction) {
+            PyFunction function = (PyFunction) element;
+            return function.getName();
         }
 
-        return getMethodName(element.getParent());
+        return getFunctionName(element.getParent());
     }
 
     public static PyFunction getFunction(PsiElement element) {
@@ -130,5 +130,9 @@ public final class Utils {
 
     public static SmartPsiElementPointer<PsiElement> getPointer(PsiElement element) {
         return SmartPointerManager.createPointer(element);
+    }
+
+    public static boolean isIgnored(String funcName) {
+        return funcName.startsWith("__") && funcName.endsWith("__");
     }
 }

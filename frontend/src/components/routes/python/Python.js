@@ -2,16 +2,17 @@ import {
     Grid,
     CircularProgress,
 } from '@material-ui/core'
-import React, {useState} from 'react'
+import React from 'react'
 import colours from '../../../constants/colours'
 
+//TODO: to finish
 const Python = (props) => {
     document.body.style.backgroundColor = colours.PRIMARY
     props.setGoToPython(false)
 
-    const [loaded, setLoaded] = useState(false)
+    // const [loaded, setLoaded] = useState(false)
 
-    if (!loaded) {
+    // if (!loaded) {
         return (<div>
             <Grid container justify='center'>
                 <Grid item>
@@ -19,12 +20,12 @@ const Python = (props) => {
                 </Grid>
             </Grid>
         </div>)
-    }
+    // }
 
-    return (
-        <div>
-        </div>
-    )
+    // return (
+    //     <div>
+    //     </div>
+    // )
 }
 
 

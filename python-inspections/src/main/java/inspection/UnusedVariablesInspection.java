@@ -2,13 +2,19 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
-import com.intellij.psi.*;
+import com.intellij.psi.JavaElementVisitor;
+import com.intellij.psi.PsiElementVisitor;
 import com.jetbrains.python.psi.*;
+import feedback.Feedback;
+import feedback.FeedbackHolder;
+import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import util.FeedbackType;
+import util.InspectionPriority;
+import util.PsiStmtType;
 import util.Utils;
 
 public final class UnusedVariablesInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -42,10 +48,38 @@ public final class UnusedVariablesInspection extends AbstractBaseJavaLocalInspec
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "unused-var");
+        if (priority == InspectionPriority.NONE) {
+            return new JavaElementVisitor() {
+            };
+        }
+
         return new PyElementVisitor() {
+
+            FeedbackHolder feedbackHolder = FeedbackHolder.getInstance();
+
+            @Override
+            public void visitPyFile(PyFile node) {
+                super.visitPyFile(node);
+
+                if (Utils.hasErrorsInFile(node)) {
+                    return;
+                }
+
+                feedbackHolder.writeToFile();
+            }
+
             @Override
             public void visitPyAssignmentStatement(PyAssignmentStatement node) {
                 super.visitPyAssignmentStatement(node);
+
+                if (Utils.hasErrorsInFile(node)) {
+                    return;
+                }
+
+                String filename = node.getContainingFile().getName();
+                int line = Utils.getLineNumber(node);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(node), "unused-var", PsiStmtType.METHOD, line);
 
                 PyExpression expr = node.getLeftHandSideExpression();
 
@@ -55,7 +89,15 @@ public final class UnusedVariablesInspection extends AbstractBaseJavaLocalInspec
 
                     for (PyExpression e : elems) {
                         if (isNotUsed(e, Utils.getFunction(e), node)) {
-                            holder.registerProblem(e, "Unused variables can be replaced with '_'", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+                            Feedback feedback = new Feedback(line,
+                                    filename,
+                                    line + "-unused-var",
+                                    priority,
+                                    filename,
+                                    FeedbackType.UNUSED_VARIABLES);
+                            feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                        } else {
+                            feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                         }
                     }
                 }

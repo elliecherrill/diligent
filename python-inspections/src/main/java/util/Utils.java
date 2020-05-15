@@ -21,7 +21,7 @@ public final class Utils {
     private static boolean configNotFound = false;
 
     public static boolean isSnakeCase(String name) {
-        return name.matches(SNAKE_CASE);
+        return name.matches(SNAKE_CASE) || name.equals("_");
     }
 
     public static int getLineNumber(PsiElement element) {

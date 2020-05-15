@@ -1,17 +1,10 @@
 package util;
 
-import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import java.io.FileReader;
-import java.io.IOException;
+import com.jetbrains.python.psi.PyFunction;
 
 public final class Utils {
 
@@ -78,6 +71,18 @@ public final class Utils {
         }
 
         return getMethodName(element.getParent());
+    }
+
+    public static PyFunction getFunction(PsiElement element) {
+        if (element == null) {
+            return null;
+        }
+
+        if (element instanceof PyFunction) {
+            return (PyFunction) element;
+        }
+
+        return getFunction(element.getParent());
     }
 
 //    public static InspectionPriority getInspectionPriority(ProblemsHolder holder, String inspectionName) {

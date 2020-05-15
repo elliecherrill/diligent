@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {
     AppBar,
     IconButton,
@@ -15,6 +15,8 @@ import {useStyles} from './style'
 import routes from '../../../constants/routes'
 import Tooltip from '@material-ui/core/Tooltip'
 import logo from '../../../images/diligent-white.svg'
+import python from '../../../images/python_icon.png'
+import clsx from 'clsx'
 
 function ElevationScroll({children, window}) {
     return React.cloneElement(children, {
@@ -28,17 +30,37 @@ export default props => {
     const {onLogoutAction} = props
     const classes = useStyles()
 
+    const [expanded, setExpanded] = useState(false)
+
     return (
         <div>
             <ElevationScroll {...props}>
                 <AppBar className={props.newWindow ? '' : classes.appBar}>
                     <Toolbar className={classes.toolbar}>
                         <img src={logo} alt='Diligent Logo' className={classes.logo}/>
-                        <div className={classes.lastItemLeft} onClick={() => props.setGoToHome(true)} style={{'cursor': 'pointer'}}>
+                        <div className={classes.lastItemLeft} onClick={() => props.setGoToHome(true)}
+                             style={{'cursor': 'pointer'}}>
                             <Typography variant='h6'>
                                 Diligent
                             </Typography>
                         </div>
+                        <Tooltip title='Diligent for Python'>
+                            <IconButton
+                                edge='end'
+                                aria-label='Diligent for Python'
+                                color='inherit'
+                                onClick={() => {
+                                    setExpanded(!expanded)
+                                    props.setGoToPython(true)
+                                }}>
+                                <img
+                                    src={python}
+                                    alt='Diligent for Python'
+                                    className={clsx(classes.expand, {
+                                        [classes.expandOpen]: expanded,
+                                    })}/>
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title='Home'>
                             <IconButton
                                 edge='end'
@@ -62,7 +84,8 @@ export default props => {
 
             </ElevationScroll>
 
-            {props.goToHome && <Redirect to={routes.HOME}/>}
+            {props.goToHome && <Redirect push to={routes.HOME}/>}
+            {props.goToPython && <Redirect push to={routes.PYTHON}/>}
 
         </div>
     )

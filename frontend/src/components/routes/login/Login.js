@@ -35,7 +35,7 @@ export default props => {
         }
     }
 
-    if (allowRedirection) return <Redirect to={from}/>
+    if (allowRedirection) return <Redirect push to={from}/>
     return (
 
         <Container component='main'>

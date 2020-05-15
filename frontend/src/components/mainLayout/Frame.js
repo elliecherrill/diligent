@@ -11,10 +11,12 @@ import useStyles from './style'
 import PageNotFound from '../routes/404/PageNotFound'
 import ViewConfigs from '../routes/viewConfigs/ViewConfigs'
 import EditConfig from '../routes/editConfig/EditConfig'
+import Python from '../routes/python/Python'
 
 const Frame = props => {
 
     const [goToHome, setGoToHome] = useState(false)
+    const [goToPython, setGoToPython] = useState(false)
     const userInfo = useUserInformation(props.history)
     const classes = useStyles()
 
@@ -33,6 +35,8 @@ const Frame = props => {
                     goToHome={goToHome}
                     setGoToHome={setGoToHome}
                     userInfo={userInfo}
+                    setGoToPython={setGoToPython}
+                    goToPython={goToPython}
                 />
                 <div className={classes.main}>
                     <Container className={classes.container} maxWidth={false}>
@@ -43,6 +47,14 @@ const Frame = props => {
                                 render={routeProps => {
                                     window.scrollTo(0, 0)
                                     return <Home userInfo={userInfo} setGoToHome={setGoToHome} {...routeProps} />
+                                }}
+                            />
+                            <Route
+                                exact
+                                path={routes.PYTHON}
+                                render={() => {
+                                    window.scrollTo(0, 0)
+                                    return <Python setGoToPython={setGoToPython} />
                                 }}
                             />
                             <Route

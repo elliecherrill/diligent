@@ -22,5 +22,17 @@ export const useStyles = makeStyles(theme => ({
         height: '24px',
         width: '24px',
         marginRight: theme.spacing(2)
-    }
+    },
+    expand: {
+        transform: 'rotate(0deg)',
+        marginLeft: 'auto',
+        height: '24px',
+        width: '24px',
+        transition: theme.transitions.create('transform', {
+            duration: theme.transitions.duration.shortest,
+        }),
+    },
+    expandOpen: {
+        transform: 'rotate(180deg)',
+    },
 }))

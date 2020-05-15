@@ -22,7 +22,8 @@ public final class InspectionRegistration implements ApplicationComponent, Inspe
     @NotNull
     public Class<? extends LocalInspectionTool>[] getInspectionClasses() {
         return new Class[]{
-                MethodLengthInspection.class
+                MethodLengthInspection.class,
+                SnakeCaseInspection.class
         };
 
     }

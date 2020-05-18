@@ -64,7 +64,7 @@ public final class Utils {
     public static InspectionPriority getInspectionPriority(ProblemsHolder holder, String inspectionName) {
         String projectPath = holder.getProject().getBasePath();
         try {
-            Object obj = new JSONParser().parse(new FileReader(projectPath + "/diligent.json"));
+            Object obj = new JSONParser().parse(new FileReader(projectPath + "/diligent_py.json"));
             JSONObject jo = (JSONObject) obj;
             JSONArray highInspections = (JSONArray) jo.get("high");
             JSONArray mediumInspections = (JSONArray) jo.get("medium");
@@ -93,7 +93,7 @@ public final class Utils {
 
         } catch (IOException | ParseException e) {
             if (!configNotFound) {
-                NOTIFIER.notifyError(holder.getProject(), "Diligent", "No configuration file found at '" + projectPath + "/diligent.json'");
+                NOTIFIER.notifyError(holder.getProject(), "Diligent", "No configuration file found at '" + projectPath + "/diligent_py.json'");
             }
             configNotFound = true;
             return InspectionPriority.NONE;

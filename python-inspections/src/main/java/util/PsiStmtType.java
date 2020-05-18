@@ -13,5 +13,6 @@ public enum PsiStmtType {
     SWITCH,
     BIN_EXPR,
     STATEMENT,
-    POLYADIC_EXPR
+    POLYADIC_EXPR,
+    EXPR
 }

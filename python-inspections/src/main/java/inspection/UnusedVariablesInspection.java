@@ -79,7 +79,6 @@ public final class UnusedVariablesInspection extends AbstractBaseJavaLocalInspec
 
                 String filename = node.getContainingFile().getName();
                 int line = Utils.getLineNumber(node);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(node), "unused-var", PsiStmtType.METHOD, line);
 
                 PyExpression expr = node.getLeftHandSideExpression();
 
@@ -88,6 +87,8 @@ public final class UnusedVariablesInspection extends AbstractBaseJavaLocalInspec
                     PyExpression[] elems = tupleExpr.getElements();
 
                     for (PyExpression e : elems) {
+                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(e), "unused-var", PsiStmtType.EXPR, line);
+
                         if (isNotUsed(e, Utils.getFunction(e), node)) {
                             Feedback feedback = new Feedback(line,
                                     filename,

@@ -46,18 +46,18 @@ class InnerList extends React.Component {
 export default class Column extends React.Component {
     getInfo = (title) => {
         if (title === 'High Priority') {
-            return 'TODO: Explain what high priority means'
+            return 'These checks will always be performed.'
         }
 
         if (title === 'Medium Priority') {
-            return 'TODO: Explain what medium priority means'
+            return 'These checks will be performed when there are no high-priority errors.'
         }
 
         if (title === 'Low Priority') {
-            return 'TODO: Explain what low priority means'
+            return 'These checks will be performed when there are no high-priority errors and no medium-priority errors.'
         }
 
-        return 'TODO: Explain what not in use means'
+        return 'These checks will not be performed.'
     }
 
     render() {

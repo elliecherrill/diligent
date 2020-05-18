@@ -4,7 +4,7 @@ import {
     CircularProgress,
     Fade
 } from '@material-ui/core'
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useRef} from 'react'
 import colours from '../../../constants/colours'
 import {Redirect} from 'react-router-dom'
 import routes from '../../../constants/routes'
@@ -12,6 +12,16 @@ import NewConfigSnackbar from './NewConfigSnackbar'
 import * as API from '../../../api'
 import EditConfigSnackbar from './EditConfigSnackbar'
 import HowTo from './HowTo'
+import {
+    KeyboardArrowDown as DownArrow
+} from '@material-ui/icons'
+
+const scrollToRef = (ref) => window.scrollTo({
+    top: ref.current.offsetTop,
+    left: 0,
+    behavior: 'smooth'
+})
+
 
 const Home = (props) => {
     document.body.style.backgroundColor = colours.PRIMARY
@@ -21,6 +31,7 @@ const Home = (props) => {
     const [goToViewConfigs, setGoToViewsConfigs] = useState(false)
     const [configs, setConfigs] = useState(null)
     const [loaded, setLoaded] = useState(false)
+    const howTo = useRef(null)
 
     useEffect(() => {
         API.get_my_configs().then(r => {
@@ -105,10 +116,26 @@ const Home = (props) => {
                         </Button>
                     </div>
                 </Fade>
+                <Fade in={loaded} {...(loaded ? {timeout: 3000} : {})}>
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '3%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        width: '100%'
+                    }}>
+                        <Button
+                            color='secondary'
+                            onClick={() => scrollToRef(howTo)}
+                        >
+                            <DownArrow/> How To Use Diligent <DownArrow/>
+                        </Button>
+                    </div>
+                </Fade>
             </div>
 
-            <div style={{height: '100%'}}>
-                <HowTo />
+            <div ref={howTo} style={{height: '100%'}}>
+                <HowTo/>
             </div>
 
 

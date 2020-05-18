@@ -24,8 +24,8 @@ const HowTo = () => {
                 How To Use Diligent
             </h1>
             <p style={{fontSize: 'larger'}}>
-                {/*TODO: Write this*/}
-                Diligent is ..., and this is how you create a configuration, download the configuration and install the plugin.
+                Diligent is an IntelliJ plugin which helps you to improve your coding practices. The steps below detail
+                how to create a configuration, download a configuration and install the plugin.
             </p>
 
             {/*STEP ONE: CREATE*/}
@@ -36,8 +36,10 @@ const HowTo = () => {
                 Step One: Create Your Configuration
             </h1>
             <p style={{fontSize: 'larger'}}>
-                {/*TODO: Write this*/}
-                The first step is to create a configuration ...
+                The first step is to create a configuration which is where you select which checks are going to be
+                performed for a particular IntelliJ project. <br/> <br/>
+                From the Diligent home screen, select 'Create a New Configuration'. Drag and drop the checks to where
+                you want them, add details (such as the course name) if you wish and finally, save your configuration.
             </p>
             <div style={{display: 'flex', justifyContent: 'center'}}>
                 <video loop autoPlay muted style={{width: '65%'}}>
@@ -54,8 +56,12 @@ const HowTo = () => {
                 Step Two: Download Your Configuration
             </h1>
             <p style={{fontSize: 'larger'}}>
-                {/*TODO: Write this*/}
-                To use your configuration, you need to download the configuration file (diligent.json) and place this in the top level of your Java project.
+                To use your configuration, you need to download the configuration file (diligent.json). To do this,
+                select
+                'View Your Configurations' from the Diligent home screen and click the 'Download Configuration File'
+                button for the configuration you want to use. <br/> <br/>
+                The diligent.json file which you downloaded must then be placed in the top level of your IntelliJ project.
+                If no Diligent configuration file is found, the plugin will notify you and ask whether you want to use the default configuration.
             </p>
             <div style={{display: 'flex', justifyContent: 'center'}}>
                 <img src={downloadConfig} style={{width: '65%'}} alt={'how to download the config file'}/>
@@ -69,9 +75,20 @@ const HowTo = () => {
                 Step Three: Install the Diligent Plugin
             </h1>
             <p style={{fontSize: 'larger'}}>
-                {/*TODO: Write this*/}
-                {/*TODO think about Linux vs Windows vs Mac*/}
-                This is how you install the Diligent plugin into IntelliJ (or can get from marketplace...)
+                First, you will need to download the plugin. To do so, select 'Download IntelliJ Plugin' from the Diligent home screen. <br/> <br/>
+                To install the plugin in IntelliJ on Windows / Ubuntu: <br/>
+                <ul>
+                    <li>From within IntelliJ, select File > Settings > Plugins</li>
+                    <li>Then select the settings icon on the top bar and 'Install Plugin from Disk' then select the .zip file downloaded from the Diligent home screen. </li>
+                    <li>Finally select OK, Restart IDE and Restart </li>
+                </ul>
+                <br/>
+                To install the plugin in IntelliJ on Mac: <br/>
+                <ul>
+                    <li>From within IntelliJ, select IntelliJ IDEA > Preferences > Plugins</li>
+                    <li>Then select the settings icon on the top bar and 'Install Plugin from Disk' then select the .zip file downloaded from the Diligent home screen. </li>
+                    <li>Finally select OK, Restart IDE and Restart </li>
+                </ul>
             </p>
             <div style={{display: 'flex', justifyContent: 'center'}}>
                 <video loop autoPlay muted style={{width: '65%'}}>

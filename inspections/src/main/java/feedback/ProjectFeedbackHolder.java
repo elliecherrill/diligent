@@ -39,13 +39,17 @@ public class ProjectFeedbackHolder {
         this.project = project;
 
         files = new ConcurrentHashMap<>();
-        priorityCount = new ConcurrentHashMap<>(
-                Map.of(InspectionPriority.HIGH, 0,
-                        InspectionPriority.MEDIUM, 0,
-                        InspectionPriority.LOW, 0));
+        priorityCount = new ConcurrentHashMap<>();
+        initMap();
         projectPath = project.getBasePath();
         isCurrent = true;
         tipHolder = new TipHolder();
+    }
+
+    private void initMap() {
+        priorityCount.put(InspectionPriority.HIGH, 0);
+        priorityCount.put(InspectionPriority.MEDIUM, 0);
+        priorityCount.put(InspectionPriority.LOW, 0);
     }
 
     public void updateReport() {

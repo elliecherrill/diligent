@@ -60,6 +60,6 @@ public class Tip {
             return "Great job! You're" + tipType.getFixedMessage();
         }
 
-        return tipType.getTipMessage() + "being used anywhere in this project.";
+        return tipType.getTipMessage() + "being used " + (tipType.isLookingForAbsence() ? "anywhere" : "somewhere") + " in this project.";
     }
 }

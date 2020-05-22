@@ -488,7 +488,7 @@ public class CodeCloneUtils {
         return false;
     }
 
-    public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> containsBlockClone(Set<Location> clones, int blockIndex) {
+    public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> containsBlockClone(Set<Location> clones, int blockIndex, boolean switchClone) {
         if (clones == null || clones.isEmpty()) {
             return null;
         }
@@ -549,7 +549,7 @@ public class CodeCloneUtils {
             otherEnd = prev + 1;
         }
 
-        if (longestSeq > 1) {
+        if ((switchClone && longestSeq > 0) || longestSeq > 1) {
             return new Pair<>(new Pair<>(seqStart, seqEnd), new Pair<>(otherStart, otherEnd));
         }
 

@@ -42,7 +42,7 @@ public class Location {
 
     @Override
     public String toString() {
-        return "< Code Block:" + codeBlock + ", Line:" + line + ", Statement Count:" + statementCount + ">";
+        return "<" + codeBlock + ", " + line + ">";
     }
 
     public int getStatementCount() {

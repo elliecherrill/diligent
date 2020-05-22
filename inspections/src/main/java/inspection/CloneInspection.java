@@ -122,8 +122,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
             // If we have an entire case where duplicate / similar has been detected for every line in another case
             for (int i = 0; i < cases.length; i++) {
-                //Only consider error when all cases are > 1 in length (excluding break;)
-                if (cases[i].length < 2 || cases[i][0] == null || cases[i][1] == null) {
+                //Only consider error when all cases are > 0 in length (excluding break;)
+                if (cases[i].length < 1 || cases[i][0] == null) {
                     return;
                 }
 
@@ -170,7 +170,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 caseClones.add(i);
 
                 for (int blockIndex : rangeOfCases) {
-                    if (CodeCloneUtils.containsBlockClone(intersection, blockIndex) != null) {
+                    if (CodeCloneUtils.containsBlockClone(intersection, blockIndex, true) != null) {
                         caseClones.add(blockIndex);
                     }
                 }
@@ -300,7 +300,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), Utils.getPointer(codeBlocks[i]), i + "-block-clone", PsiStmtType.BLOCK, line);
                     }
 
-                    Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> cloneSequence = CodeCloneUtils.containsBlockClone(intersection, blockIndex);
+                    Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> cloneSequence = CodeCloneUtils.containsBlockClone(intersection, blockIndex, false);
                     if (cloneSequence != null) {
                         Feedback feedback = new Feedback(line,
                                 filename,
@@ -579,7 +579,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 }
 
                 // Must be a clone of the following block
-                if (CodeCloneUtils.containsBlockClone(intersection, i + 1) == null) {
+                //TODO: should we pass true here?
+                if (CodeCloneUtils.containsBlockClone(intersection, i + 1, false) == null) {
                     return false;
                 }
             }
@@ -658,7 +659,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 }
 
                 int otherBlock = i == 0 ? 1 : 0;
-                if (CodeCloneUtils.containsBlockClone(intersection, otherBlock) != null) {
+                //TODO: true here?
+                if (CodeCloneUtils.containsBlockClone(intersection, otherBlock, false) != null) {
                     return true;
                 }
             }
@@ -905,6 +907,10 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
         private void inspectPolyadicExpressions(PsiClass aClass) {
             PsiPolyadicExpression[] polyExprs = CodeCloneUtils.getAllPolyadicExpressions(aClass);
+            if (polyExprs.length <= 1) {
+                return;
+            }
+
             Map<PsiPolyadicExpression, String[]> polyadicMap = new HashMap<>();
             Map<PsiPolyadicExpression, Integer> polyadicLocationMap = new HashMap<>();
 

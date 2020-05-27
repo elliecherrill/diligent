@@ -2,6 +2,7 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -78,14 +79,14 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                 String filename = block.getContainingFile().getName();
 
                 for (PsiStatement stat : block.getStatements()) {
+                    int line = Utils.getLineNumber(stat);
+
                     if (stat instanceof PsiExpressionStatement) {
                         PsiExpressionStatement exprStat = (PsiExpressionStatement) stat;
-
                         PsiExpression expr = exprStat.getExpression();
 
                         if (expr instanceof PsiAssignmentExpression) {
                             PsiAssignmentExpression assExpr = (PsiAssignmentExpression) expr;
-                            int line = Utils.getLineNumber(stat);
 
                             FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(assExpr), "this-" + line, PsiStmtType.LEFT_THIS_EXPR, line);
                             PsiExpression leftExpr = assExpr.getLExpression();
@@ -94,6 +95,21 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                             feedbackId = new FeedbackIdentifier(Utils.getPointer(assExpr), "this-" + line, PsiStmtType.RIGHT_THIS_EXPR, line);
                             PsiExpression rightExpr = assExpr.getRExpression();
                             inspectThisExpression(rightExpr, block, stat, filename, feedbackId);
+                        }
+                    } else if (stat instanceof PsiDeclarationStatement) {
+                        PsiDeclarationStatement declExpr = (PsiDeclarationStatement) stat;
+                        PsiElement[] elems = declExpr.getDeclaredElements();
+
+                        for (PsiElement e : elems) {
+                            if (e instanceof PsiLocalVariable) {
+                                PsiLocalVariable localVar = (PsiLocalVariable) e;
+                                if (localVar.hasInitializer()) {
+                                    PsiExpression initializer = localVar.getInitializer();
+                                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(localVar), "this-" + line, PsiStmtType.RIGHT_THIS_EXPR, line);
+                                    inspectThisExpression(initializer, block, stat, filename, feedbackId);
+
+                                }
+                            }
                         }
                     }
                 }
@@ -114,6 +130,8 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                                     Utils.getMethodName(stat),
                                     FeedbackType.REDUNDANT_THIS);
                             feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                            holder.registerProblem(stat, "this", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
                         } else {
                             feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                         }

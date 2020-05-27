@@ -219,6 +219,17 @@ public final class Utils {
     }
 
     public static PsiThisExpression getThisExpression(PsiExpression expression) {
+        if (expression instanceof PsiPolyadicExpression) {
+            PsiPolyadicExpression polyExpr = (PsiPolyadicExpression) expression;
+            PsiExpression[] operands = polyExpr.getOperands();
+            for (PsiExpression e : operands) {
+                PsiThisExpression thisExpression = getThisExpression(e);
+                if (thisExpression != null) {
+                    return thisExpression;
+                }
+            }
+        }
+
         if (expression instanceof PsiReferenceExpression) {
             PsiReferenceExpression refExpr = (PsiReferenceExpression) expression;
 

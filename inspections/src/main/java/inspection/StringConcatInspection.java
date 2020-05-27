@@ -2,6 +2,7 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import util.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public final class StringConcatInspection extends AbstractBaseJavaLocalInspectionTool {
@@ -143,6 +145,37 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                 reportStringConcatFeedback(stringConcats.getFirst(), stringConcats.getSecond(), filename);
             }
 
+            private List<PsiStatement> getAllStatements(PsiCodeBlock codeBlock) {
+                PsiStatement[] statements = codeBlock.getStatements();
+                List<PsiStatement> allStatements = new ArrayList<>(Arrays.asList(statements));
+
+                for (PsiStatement stat : statements) {
+                    if (stat instanceof PsiLoopStatement) {
+                        PsiLoopStatement loopStat = (PsiLoopStatement) stat;
+                        PsiStatement bodyStat = loopStat.getBody();
+                        if (bodyStat instanceof PsiBlockStatement) {
+                            PsiBlockStatement blockStat = (PsiBlockStatement) bodyStat;
+                            allStatements.addAll(getAllStatements(blockStat.getCodeBlock()));
+                        }
+                    } else if (stat instanceof PsiIfStatement) {
+                        PsiIfStatement ifStat = (PsiIfStatement) stat;
+                        PsiStatement thenBranch = ifStat.getThenBranch();
+                        if (thenBranch instanceof PsiBlockStatement) {
+                            PsiBlockStatement thenBlockStat = (PsiBlockStatement) thenBranch;
+                            allStatements.addAll(getAllStatements(thenBlockStat.getCodeBlock()));
+                        }
+
+                        PsiStatement elseBranch = ifStat.getElseBranch();
+                        if (elseBranch instanceof PsiBlockStatement) {
+                            PsiBlockStatement elseBlockStat = (PsiBlockStatement) elseBranch;
+                            allStatements.addAll(getAllStatements(elseBlockStat.getCodeBlock()));
+                        }
+                    }
+                }
+
+                return allStatements;
+            }
+
             private Pair<List<PsiStatement>, List<PsiStatement>> getStringConcatInBody(PsiStatement body) {
                 if (!(body instanceof PsiBlockStatement)) {
                     return null;
@@ -153,7 +186,7 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
 
                 PsiBlockStatement blockStat = (PsiBlockStatement) body;
                 PsiCodeBlock codeBlock = blockStat.getCodeBlock();
-                PsiStatement[] stats = codeBlock.getStatements();
+                List<PsiStatement> stats = getAllStatements(codeBlock);
 
                 for (PsiStatement stat : stats) {
                     if (!(stat instanceof PsiExpressionStatement)) {
@@ -234,6 +267,7 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                             FeedbackType.STRING_CONCAT);
                     FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT, line);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                    holder.registerProblem(stat, "string-concat", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                 }
 
                 for (PsiStatement stat : fixStatements) {

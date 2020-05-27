@@ -98,7 +98,7 @@ public class ProjectFeedbackHolder {
                 }
 
                 String browserLink = "http://localhost:63342/" + project.getName() + "/" + FILEPATH;
-                NOTIFIER.notify(project, "Diligent", "Updated <a href=\"" + browserLink + "\">Diligent Feedback Report</a>");
+                NOTIFIER.notify(project, "Diligent", "Updated Feedback Report. <a style=\"cursor: pointer;\" href=\"" + browserLink + "\">Click Here to View</a>");
 
                 isCurrent = true;
             } catch (IOException | IndexOutOfBoundsException e) {

@@ -393,11 +393,63 @@ public class CodeCloneUtils {
         return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
     }
 
+    public static boolean conditionPartial(String[] first, String[] second) {
+        String[] firstCond = Arrays.copyOfRange(first, getStartIndex("IF-COND", first) + 1, getStartIndex("IF-THEN", first));
+        String[] secondCond = Arrays.copyOfRange(second, getStartIndex("IF-COND", second) + 1, getStartIndex("IF-THEN", second));
+
+
+        List<Pair<Integer, Integer>> firstBinExpr = getAllBinExpr(firstCond);
+        List<Pair<Integer, Integer>> secondBinExpr = getAllBinExpr(secondCond);
+
+        for (Pair<Integer, Integer> firstIndex : firstBinExpr) {
+            for (Pair<Integer, Integer> secondIndex : secondBinExpr) {
+                if (equalWithCondVar(firstCond, firstIndex, secondCond, secondIndex)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean equalWithCondVar(String[] first, Pair<Integer, Integer> firstIndex, String[] second, Pair<Integer, Integer> secondIndex) {
+        int length = firstIndex.getSecond() - firstIndex.getFirst();
+
+        if (length != secondIndex.getSecond() - secondIndex.getFirst()) {
+            return false;
+        }
+
+        for (int i = 0; i < length; i++) {
+                if (!first[firstIndex.getFirst() + i].equals(second[secondIndex.getFirst() + i]) &&
+                        !first[firstIndex.getFirst() + i].startsWith("CONDVAR") &&
+                        !second[secondIndex.getFirst() + i].startsWith("CONDVAR")) {
+                    return false;
+                }
+
+        }
+
+        return true;
+    }
+
+    private static List<Pair<Integer, Integer>> getAllBinExpr(String[] arr) {
+        List<Pair<Integer, Integer>> allBinExpr = new ArrayList<>();
+        Stack<Integer> startIndexes = new Stack<>();
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i].equals("BINEXPR")) {
+                startIndexes.push(i);
+            } else if (arr[i].equals("END-BINEXPR")) {
+                assert !startIndexes.empty() : "Stack empty, no corresponding start token " +print(arr);
+                allBinExpr.add(new Pair<>(startIndexes.pop(), i + 1));
+            }
+        }
+
+        return allBinExpr;
+    }
+
     public static boolean sameIfBody(String[] first, String[] second) {
         int firstThenIndex = getStartIndex("IF-THEN", first);
         int secondThenIndex = getStartIndex("IF-THEN", second);
 
-        return Arrays.equals(first, firstThenIndex, first.length, second, secondThenIndex, second.length);
+        return equalWithCondVar(first, new Pair<>(firstThenIndex, first.length), second, new Pair<>(secondThenIndex, second.length));
     }
 
     public static boolean sameForSetup(String[] first, String[] second) {
@@ -488,7 +540,7 @@ public class CodeCloneUtils {
         return false;
     }
 
-    public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> containsBlockClone(Set<Location> clones, int blockIndex, boolean switchClone) {
+    public static Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> containsBlockClone(Set<Location> clones, int blockIndex, boolean innerBlock) {
         if (clones == null || clones.isEmpty()) {
             return null;
         }
@@ -549,7 +601,7 @@ public class CodeCloneUtils {
             otherEnd = prev + 1;
         }
 
-        if ((switchClone && longestSeq > 0) || longestSeq > 1) {
+        if ((innerBlock && longestSeq > 0) || longestSeq > 1) {
             return new Pair<>(new Pair<>(seqStart, seqEnd), new Pair<>(otherStart, otherEnd));
         }
 

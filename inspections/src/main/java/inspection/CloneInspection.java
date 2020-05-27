@@ -2,6 +2,7 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -191,6 +192,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         Utils.getMethodName(statement),
                         FeedbackType.SWITCH_CLONE);
                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                holder.registerProblem(statement, "switch-clone", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
             } else {
                 feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
             }
@@ -310,6 +313,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 methodName,
                                 FeedbackType.CLONE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                        holder.registerProblem(codeBlocks[i], "block-clone with " +blockIndex, ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
                         hasClone = true;
                         //TODO: remove this after testing
                         try {
@@ -422,6 +427,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                             if (CodeCloneUtils.conditionChangeInLhs(entryStringRep, otherEntryStringRep)) {
                                 update = true;
                             } else if (CodeCloneUtils.conditionChangeInRhs(entryStringRep, otherEntryStringRep)) {
+                                update = true;
+                            } else if (CodeCloneUtils.conditionPartial(entryStringRep, otherEntryStringRep)) {
                                 update = true;
                             }
                         }
@@ -579,8 +586,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 }
 
                 // Must be a clone of the following block
-                //TODO: should we pass true here?
-                if (CodeCloneUtils.containsBlockClone(intersection, i + 1, false) == null) {
+                if (CodeCloneUtils.containsBlockClone(intersection, i + 1, true) == null) {
                     return false;
                 }
             }
@@ -659,8 +665,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                 }
 
                 int otherBlock = i == 0 ? 1 : 0;
-                //TODO: true here?
-                if (CodeCloneUtils.containsBlockClone(intersection, otherBlock, false) != null) {
+                if (CodeCloneUtils.containsBlockClone(intersection, otherBlock, true) != null) {
                     return true;
                 }
             }
@@ -955,6 +960,8 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 aClass.getName(),
                                 methodName,
                                 FeedbackType.EXPR_CLONE);
+                        holder.registerProblem(exprKey, "polyadic-clone", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

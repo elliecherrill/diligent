@@ -451,6 +451,7 @@ public class TokeniseUtils {
 
     private static List<String> getBinExprAsString(PsiBinaryExpression binExpr) {
         List<String> binExprAsString = new ArrayList<>();
+        binExprAsString.add("BINEXPR");
 
         binExprAsString.add("BINEXPRLHS");
         PsiExpression leftExpr = binExpr.getLOperand();
@@ -465,6 +466,7 @@ public class TokeniseUtils {
         binExprAsString.addAll(getExprAsString(rightExpr));
         binExprAsString.add("END-BINEXPRRHS");
 
+        binExprAsString.add("END-BINEXPR");
         return binExprAsString;
     }
 

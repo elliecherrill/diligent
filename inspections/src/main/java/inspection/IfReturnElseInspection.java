@@ -2,6 +2,7 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -18,7 +19,8 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
         return "Redundant 'else' (due to return in 'if')";
     }
 
-    public IfReturnElseInspection() {}
+    public IfReturnElseInspection() {
+    }
 
     @Override
     @NotNull
@@ -41,9 +43,10 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder,"redundant-else");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, "redundant-else");
         if (priority == InspectionPriority.NONE) {
-            return new JavaElementVisitor() {};
+            return new JavaElementVisitor() {
+            };
         }
 
         return new JavaElementVisitor() {
@@ -75,16 +78,22 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
 
                 // Check if there is an else case
                 if (statement.getElseBranch() != null) {
-                    PsiBlockStatement thenStmt = (PsiBlockStatement) statement.getThenBranch();
-                    PsiCodeBlock thenBody = thenStmt.getCodeBlock();
-                    PsiStatement[] stmts = thenBody.getStatements();
-
                     boolean endsWithReturn = false;
-                    for (PsiStatement stmt : stmts) {
-                        if (stmt instanceof PsiReturnStatement) {
-                            endsWithReturn = true;
-                            break;
+
+                    PsiStatement thenStmt = statement.getThenBranch();
+                    if (thenStmt instanceof PsiBlockStatement) {
+                        PsiBlockStatement blockStat = (PsiBlockStatement) thenStmt;
+                        PsiCodeBlock thenBody = blockStat.getCodeBlock();
+                        PsiStatement[] stmts = thenBody.getStatements();
+
+                        for (PsiStatement stmt : stmts) {
+                            if (stmt instanceof PsiReturnStatement) {
+                                endsWithReturn = true;
+                                break;
+                            }
                         }
+                    } else if (thenStmt instanceof PsiReturnStatement) {
+                        endsWithReturn = true;
                     }
 
                     if (endsWithReturn) {
@@ -96,6 +105,8 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                                 Utils.getMethodName(statement),
                                 FeedbackType.REDUNDANT_ELSE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                        holder.registerProblem(statement, "redundant-else", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }

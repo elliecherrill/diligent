@@ -76,7 +76,18 @@ public class TokeniseUtils {
             return getThrowStmtAsString((PsiThrowStatement) stmt);
         }
 
+        if (stmt instanceof PsiContinueStatement) {
+            return getContinueStmtAsString((PsiContinueStatement) stmt);
+        }
+
         return null;
+    }
+
+    private static List<String> getContinueStmtAsString(PsiContinueStatement stmt) {
+        List<String> continueStmtAsString = new ArrayList<>();
+        continueStmtAsString.add("CONTINUE");
+
+        return continueStmtAsString;
     }
 
     private static List<String> getThrowStmtAsString(PsiThrowStatement stmt) {

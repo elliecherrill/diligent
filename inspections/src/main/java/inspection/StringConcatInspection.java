@@ -218,29 +218,20 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                                 continue;
                             } else {
                                 PsiExpression rhsExpr = assExpr.getRExpression();
-                                if (rhsExpr instanceof PsiBinaryExpression) {
-                                    PsiBinaryExpression binRhsExpr = (PsiBinaryExpression) rhsExpr;
+                                if (rhsExpr instanceof PsiPolyadicExpression) {
+                                    PsiPolyadicExpression polyRhsExpr = (PsiPolyadicExpression) rhsExpr;
+                                    PsiExpression[] operands = polyRhsExpr.getOperands();
 
-                                    if (binRhsExpr.getOperationTokenType().equals(JavaTokenType.PLUS)) {
-                                        // Appending via = .. + ..
-                                        // Are we appending to the variable we are assigning?
-                                        if (binRhsExpr.getLOperand() instanceof PsiReferenceExpression) {
-                                            PsiReferenceExpression refExpr = (PsiReferenceExpression) binRhsExpr.getLOperand();
-                                            boolean equalsLhs = refExpr.getText().equals(lhsVar);
+                                    if (polyRhsExpr.getOperationTokenType().equals(JavaTokenType.PLUS)) {
+                                        for (PsiExpression op : operands) {
+                                            if (op instanceof PsiReferenceExpression) {
+                                                PsiReferenceExpression refExpr = (PsiReferenceExpression) op;
+                                                boolean equalsLhs = refExpr.getText().equals(lhsVar);
 
-                                            if (equalsLhs) {
-                                                errorStats.add(stat);
-                                                continue;
-                                            }
-                                        }
-
-                                        if (binRhsExpr.getROperand() instanceof PsiReferenceExpression) {
-                                            PsiReferenceExpression refExpr = (PsiReferenceExpression) binRhsExpr.getROperand();
-                                            boolean equalsLhs = refExpr.getText().equals(lhsVar);
-
-                                            if (equalsLhs) {
-                                                errorStats.add(stat);
-                                                continue;
+                                                if (equalsLhs) {
+                                                    errorStats.add(stat);
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
@@ -265,14 +256,14 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                             Utils.getClassName(stat),
                             Utils.getMethodName(stat),
                             FeedbackType.STRING_CONCAT);
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT, line);
+                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat), "string-concat", PsiStmtType.STATEMENT, line);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     holder.registerProblem(stat, "string-concat", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                 }
 
                 for (PsiStatement stat : fixStatements) {
                     int line = Utils.getLineNumber(stat);
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat),"string-concat", PsiStmtType.STATEMENT, line);
+                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat), "string-concat", PsiStmtType.STATEMENT, line);
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }
             }

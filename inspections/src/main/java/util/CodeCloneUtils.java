@@ -381,6 +381,10 @@ public class CodeCloneUtils {
         int firstRhsIndex = getStartIndex("BINEXPRRHS", first);
         int secondRhsIndex = getStartIndex("BINEXPRRHS", second);
 
+        if (firstRhsIndex == -1 || secondRhsIndex == -1) {
+            return false;
+        }
+
         return Arrays.equals(first, 0, firstRhsIndex, second, 0, secondRhsIndex);
     }
 
@@ -389,6 +393,10 @@ public class CodeCloneUtils {
         // LHS different
         int firstOpIndex = getStartIndex("BINEXPROP", first);
         int secondOpIndex = getStartIndex("BINEXPROP", second);
+
+        if (firstOpIndex == -1 || secondOpIndex == -1) {
+            return false;
+        }
 
         return Arrays.equals(first, firstOpIndex, first.length, second, secondOpIndex, second.length);
     }

@@ -28,6 +28,14 @@ public final class Utils {
         return prev;
     }
 
+    public static PsiElement removeWhitespaceUntilNext(PsiElement next) {
+        do {
+            next = next.getNextSibling();
+        } while (next instanceof PsiWhiteSpace || next instanceof PsiComment);
+
+        return next;
+    }
+
     public static boolean isCamelCase(String name) {
         return name.matches(CAMEL_CASE);
     }

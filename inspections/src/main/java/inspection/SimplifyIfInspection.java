@@ -2,6 +2,7 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -82,12 +83,21 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
                 int line = Utils.getLineNumber(statement);
                 FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "simplify-if", PsiStmtType.IF, line);
 
+                int elseRes;
                 if (thenStat == null || elseStat == null) {
-                    feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
-                    return;
+                    PsiElement next = Utils.removeWhitespaceUntilNext(statement);
+                    if (next instanceof PsiReturnStatement) {
+                        elseRes = getStatResult((PsiReturnStatement) next);
+                    } else {
+                        feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
+                        return;
+                    }
+                } else {
+                    elseRes = getBranchResult(elseStat);
                 }
 
-                if (getBranchResult(thenStat) + getBranchResult(elseStat) == 1) {
+
+                if (getBranchResult(thenStat) + elseRes == 1) {
                     Feedback feedback = new Feedback(line,
                             filename,
                             line + "-simplify-if",
@@ -96,6 +106,8 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
                             Utils.getMethodName(statement),
                             FeedbackType.SIMPLIFY_IF);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                    holder.registerProblem(statement, "simplify-if", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }
@@ -108,15 +120,21 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
 
                     if (block.getStatementCount() == 1) {
                         PsiStatement s = block.getStatements()[0];
+                        return getStatResult(s);
 
-                        if (Utils.containsLiteral(s, JavaTokenType.TRUE_KEYWORD)) {
-                            return 1;
-                        }
-
-                        if (Utils.containsLiteral(s, JavaTokenType.FALSE_KEYWORD)) {
-                            return 0;
-                        }
                     }
+                }
+
+                return -1;
+            }
+
+            private int getStatResult(PsiStatement stat) {
+                if (Utils.containsLiteral(stat, JavaTokenType.TRUE_KEYWORD)) {
+                    return 1;
+                }
+
+                if (Utils.containsLiteral(stat, JavaTokenType.FALSE_KEYWORD)) {
+                    return 0;
                 }
 
                 return -1;

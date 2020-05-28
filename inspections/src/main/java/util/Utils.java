@@ -218,30 +218,7 @@ public final class Utils {
         return null;
     }
 
-    public static PsiThisExpression getThisExpression(PsiExpression expression) {
-        if (expression instanceof PsiPolyadicExpression) {
-            PsiPolyadicExpression polyExpr = (PsiPolyadicExpression) expression;
-            PsiExpression[] operands = polyExpr.getOperands();
-            for (PsiExpression e : operands) {
-                PsiThisExpression thisExpression = getThisExpression(e);
-                if (thisExpression != null) {
-                    return thisExpression;
-                }
-            }
-        }
-
-        if (expression instanceof PsiReferenceExpression) {
-            PsiReferenceExpression refExpr = (PsiReferenceExpression) expression;
-
-            if (refExpr.getQualifierExpression() instanceof PsiThisExpression) {
-                return (PsiThisExpression) refExpr.getQualifierExpression();
-            }
-        }
-
-        return null;
-    }
-
-    public static boolean isInScope(String var, PsiCodeBlock block) {
+    public static boolean isInScope(String var, PsiElement block) {
         PsiMethod method = getContainingMethod(block);
 
         if (method == null) {
@@ -266,7 +243,7 @@ public final class Utils {
         return containsLocalVariable(var, body);
     }
 
-    private static PsiMethod getContainingMethod(PsiCodeBlock block) {
+    private static PsiMethod getContainingMethod(PsiElement block) {
         PsiElement parent = block.getParent();
         do {
             if (parent instanceof PsiMethod) {

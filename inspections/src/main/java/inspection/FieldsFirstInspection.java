@@ -2,8 +2,10 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
+import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
+import com.intellij.psi.tree.IElementType;
 import feedback.Feedback;
 import feedback.FeedbackHolder;
 import feedback.FeedbackIdentifier;
@@ -84,7 +86,9 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
                 if (!(prev instanceof PsiField)) {
                     if (prev instanceof PsiJavaToken) {
                         PsiJavaToken prevToken = (PsiJavaToken) prev;
-                        if (!(prevToken.getTokenType().equals(JavaTokenType.LBRACE))) {
+                        IElementType tokenType = prevToken.getTokenType();
+                        if (!tokenType.equals(JavaTokenType.LBRACE) &&
+                                !tokenType.equals(JavaTokenType.COMMA)) {
                             registerProblem = true;
                         }
                     } else {
@@ -105,6 +109,8 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
                             Utils.getClassName(field),
                             FeedbackType.FIELDS_FIRST);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+                    holder.registerProblem(field, "fields-first", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
+
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }

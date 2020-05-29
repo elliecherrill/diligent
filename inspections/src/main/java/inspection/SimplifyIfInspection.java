@@ -2,7 +2,6 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -106,8 +105,6 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
                             Utils.getMethodName(statement),
                             FeedbackType.SIMPLIFY_IF);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                    holder.registerProblem(statement, "simplify-if", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
                 } else {
                     feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                 }
@@ -123,6 +120,8 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
                         return getStatResult(s);
 
                     }
+                } else if (stat instanceof PsiReturnStatement) {
+                    return getStatResult(stat);
                 }
 
                 return -1;

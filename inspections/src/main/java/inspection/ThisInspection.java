@@ -2,7 +2,6 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -95,8 +94,6 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                                 Utils.getMethodName(thisExpr),
                                 FeedbackType.REDUNDANT_THIS);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                        holder.registerProblem(thisExpr, "this", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }

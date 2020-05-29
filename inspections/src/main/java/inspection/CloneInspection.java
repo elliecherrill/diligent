@@ -2,7 +2,6 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -192,8 +191,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                         Utils.getMethodName(statement),
                         FeedbackType.SWITCH_CLONE);
                 feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                holder.registerProblem(statement, "switch-clone", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
             } else {
                 feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
             }
@@ -313,8 +310,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 methodName,
                                 FeedbackType.CLONE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                        holder.registerProblem(codeBlocks[i], "block-clone with " +blockIndex, ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
                         hasClone = true;
                         //TODO: remove this after testing
                         try {
@@ -960,8 +955,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 aClass.getName(),
                                 methodName,
                                 FeedbackType.EXPR_CLONE);
-                        holder.registerProblem(exprKey, "polyadic-clone", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);

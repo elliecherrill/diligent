@@ -2,7 +2,6 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -258,7 +257,6 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                             FeedbackType.STRING_CONCAT);
                     FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat), "string-concat", PsiStmtType.STATEMENT, line);
                     feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                    holder.registerProblem(stat, "string-concat", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
                 }
 
                 for (PsiStatement stat : fixStatements) {

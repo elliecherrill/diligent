@@ -2,7 +2,6 @@ package inspection;
 
 import com.intellij.codeInsight.daemon.GroupNames;
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool;
-import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.psi.*;
 import feedback.Feedback;
@@ -10,7 +9,10 @@ import feedback.FeedbackHolder;
 import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.FeedbackType;
+import util.InspectionPriority;
+import util.PsiStmtType;
+import util.Utils;
 
 public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectionTool {
     @Override
@@ -105,8 +107,6 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                                 Utils.getMethodName(statement),
                                 FeedbackType.REDUNDANT_ELSE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                        holder.registerProblem(statement, "redundant-else", ProblemHighlightType.GENERIC_ERROR_OR_WARNING);
-
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }

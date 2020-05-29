@@ -10,7 +10,10 @@ import feedback.FeedbackIdentifier;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import util.*;
+import util.FeedbackType;
+import util.InspectionPriority;
+import util.PsiStmtType;
+import util.Utils;
 
 public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectionTool {
 

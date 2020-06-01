@@ -11,14 +11,20 @@ import {
 } from '@material-ui/icons'
 
 const SearchBar = ({searchBy, updateSearchText, searching, searchResults, stopSearching, moveToTop}) => {
+    const ENTER = 13
 
     return (
-        <Paper component='form' style={{display: 'flex', margin: '0.5%'}}>
+        <Paper style={{display: 'flex', margin: '0.5%'}}>
             <InputBase
                 style={{marginLeft: '1%', flex: '1'}}
                 placeholder='Search'
                 value={searchBy}
                 onChange={(e) => updateSearchText(e)}
+                onKeyDown={(e) => {
+                    if (e.keyCode === ENTER) {
+                        moveToTop()
+                    }
+                }}
             />
             {searching &&
             <Divider orientation='vertical' flexItem style={{margin: '0.5%'}}/>

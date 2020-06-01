@@ -1,10 +1,13 @@
 package util;
 
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.tree.IElementType;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -12,13 +15,20 @@ import org.json.simple.parser.ParseException;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.*;
 
 public final class Utils {
 
     private static final String CAMEL_CASE = "([a-z]+[0-9]*[A-Z]*[^\\W_]*)+";
     private static final String UPPER_SNAKE_CASE = "([A-Z]+_?)+";
     private static final Notifier NOTIFIER = new Notifier();
-    private static boolean configNotFound = false;
+
+    private static final List<Project> configsNotFound = new ArrayList<>();
+    private static final List<Project> usingDefault = new ArrayList<>();
+    //TODO: decide on default configuration
+    private static final List<String> highDefaultConfig = Arrays.asList("simplify-if", "and here");
+    private static final List<String> mediumDefaultConfig = Arrays.asList("add here", "and here");
+    private static final List<String> lowDefaultConfig = Arrays.asList("add here", "and here");
 
     public static PsiElement removeWhitespaceUntilPrev(PsiElement prev) {
         while (prev instanceof PsiWhiteSpace || prev instanceof PsiComment) {
@@ -89,7 +99,15 @@ public final class Utils {
     }
 
     public static InspectionPriority getInspectionPriority(ProblemsHolder holder, String inspectionName) {
-        String projectPath = holder.getProject().getBasePath();
+        Project project = holder.getProject();
+        if (configsNotFound.contains(project)) {
+            if (usingDefault.contains(project)) {
+                return getInspectionPriorityInDefault(inspectionName);
+            }
+            return InspectionPriority.NONE;
+        }
+
+        String projectPath = project.getBasePath();
         try {
             Object obj = new JSONParser().parse(new FileReader(projectPath + "/diligent.json"));
             JSONObject jo = (JSONObject) obj;
@@ -119,11 +137,40 @@ public final class Utils {
             }
 
         } catch (IOException | ParseException e) {
-            if (!configNotFound) {
-                NOTIFIER.notifyError(holder.getProject(), "Diligent", "No configuration file found at '" + projectPath + "/diligent.json'");
-            }
-            configNotFound = true;
-            return InspectionPriority.NONE;
+            AnAction defaultAction = new AnAction("Use Default Configuration") {
+                @Override
+                public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+                    usingDefault.add(project);
+                }
+            };
+            AnAction updateAction = new AnAction("Look Again For Configuration File") {
+                @Override
+                public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+                    configsNotFound.remove(project);
+                    usingDefault.remove(project);
+                }
+            };
+            NOTIFIER.notifyErrorWithAction(holder.getProject(),
+                    "Diligent",
+                    "No configuration file found at '" + projectPath + "/diligent.json'.",
+                    Arrays.asList(defaultAction, updateAction));
+            configsNotFound.add(project);
+        }
+
+        return InspectionPriority.NONE;
+    }
+
+    private static InspectionPriority getInspectionPriorityInDefault(String inspectionToFind) {
+        if (highDefaultConfig.contains(inspectionToFind)) {
+            return InspectionPriority.HIGH;
+        }
+
+        if (mediumDefaultConfig.contains(inspectionToFind)) {
+            return InspectionPriority.MEDIUM;
+        }
+
+        if (lowDefaultConfig.contains(inspectionToFind)) {
+            return InspectionPriority.LOW;
         }
 
         return InspectionPriority.NONE;

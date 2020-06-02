@@ -25,10 +25,10 @@ public final class Utils {
 
     private static final List<Project> configsNotFound = new ArrayList<>();
     private static final List<Project> usingDefault = new ArrayList<>();
-    //TODO: decide on default configuration
-    private static final List<String> highDefaultConfig = Arrays.asList("simplify-if", "and here");
-    private static final List<String> mediumDefaultConfig = Arrays.asList("add here", "and here");
-    private static final List<String> lowDefaultConfig = Arrays.asList("add here", "and here");
+
+    private static final List<String> highDefaultConfig = Arrays.asList("string-comparison", "string-concat", "simplify-if");
+    private static final List<String> mediumDefaultConfig = Arrays.asList("camelcase", "screaming-snake-case", "this");
+    private static final List<String> lowDefaultConfig = Arrays.asList("single-char-name", "method-length");
 
     public static PsiElement removeWhitespaceUntilPrev(PsiElement prev) {
         while (prev instanceof PsiWhiteSpace || prev instanceof PsiComment) {

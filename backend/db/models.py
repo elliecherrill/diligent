@@ -49,7 +49,7 @@ class User:
 
 class Configuration:
 
-    def __init__(self, title, creator, high, medium, low, courseCode, exerciseNum):
+    def __init__(self, title, creator, high, medium, low, courseCode, exerciseNum, diligentType):
         self.title = title
         self.creator = creator
         self.high = high
@@ -57,6 +57,7 @@ class Configuration:
         self.low = low
         self.courseCode = courseCode
         self.exerciseNum = exerciseNum
+        self.diligentType = diligentType
 
     def save(self):
         """Save instance to DB"""
@@ -67,12 +68,13 @@ class Configuration:
             "medium": self.medium,
             "low": self.low,
             "courseCode": self.courseCode,
-            "exerciseNum": self.exerciseNum
+            "exerciseNum": self.exerciseNum,
+            "type": self.diligentType
         })
 
     @classmethod
-    def find_configs_by_username(cls, username):
-        return db.find("configuration", {"creator": username})
+    def find_configs_by_username_with_type(cls, username, diligentType):
+        return db.find("configuration", {"creator": username, "type": diligentType})
 
     @classmethod
     def find_config_by_id(cls, config_id):
@@ -83,7 +85,7 @@ class Configuration:
         return db.delete("configuration", {"_id": config_id})
 
     @classmethod
-    def find_config_by_title(cls, username, title):
-        return db.find("configuration", {"creator": username, "title": title})
+    def find_config_by_title(cls, username, title, diligentType):
+        return db.find("configuration", {"creator": username, "title": title, "type": diligentType})
 
 

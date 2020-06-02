@@ -54,8 +54,9 @@ def create_new_config():
 
     courseCode = json["courseCode"]
     exerciseNum = json["exerciseNum"]
+    diligentType = json["type"]
 
-    existingWithTitle = Configuration.find_config_by_title(creator, title)
+    existingWithTitle = Configuration.find_config_by_title(creator, title, diligentType)
     if (existingWithTitle.count() > 0):
         return Response({"success": False}, 409, mimetype="application/json")
 
@@ -65,16 +66,17 @@ def create_new_config():
                            medium=medium,
                            low=low,
                            courseCode=courseCode,
-                           exerciseNum=exerciseNum).save()
+                           exerciseNum=exerciseNum,
+                           diligentType=diligentType).save()
 
     return Response({"success": True}, 200, mimetype="application/json")
 
 
-@bp.route("/get_my_configs", methods=["GET"])
+@bp.route("/get_my_configs/<diligentType>", methods=["GET"])
 @jwt_required
-def get_my_configs():
+def get_my_configs(diligentType):
     username = get_jwt_identity()
-    configs = Configuration.find_configs_by_username(username)
+    configs = Configuration.find_configs_by_username_with_type(username, diligentType)
 
     titles = []
     for config in configs:
@@ -95,29 +97,29 @@ def get_checks_for_download(config_id):
     checks = {"high": list(), "medium": list(), "low": list()}
 
     forFile = {
-        'config-1': 'string-comparison',
-        'config-2': 'inheritance',
-        'config-3': 'no-inheritance',
-        'config-4': 'interfaces',
-        'config-5': 'no-interfaces',
-        'config-6': 'streams',
-        'config-7': 'no-streams',
-        'config-8': 'for-loops',
-        'config-9': 'no-for-loops',
-        'config-10': 'while-loops',
-        'config-11': 'no-while-loops',
-        'config-12': 'camelcase',
-        'config-13': 'screaming-snake-case',
-        'config-14': 'redundant-else',
-        'config-15': 'single-char-name',
-        'config-16': 'method-length',
-        'config-17': 'clone',
-        'config-18': 'fields-first',
-        'config-19': 'this',
-        'config-20': 'shorthand-assignment',
-        'config-21': 'string-concat',
-        'config-22': 'simplify-if',
-        'config-23': 'constructors-first'
+        "config-1": "string-comparison",
+        "config-2": "inheritance",
+        "config-3": "no-inheritance",
+        "config-4": "interfaces",
+        "config-5": "no-interfaces",
+        "config-6": "streams",
+        "config-7": "no-streams",
+        "config-8": "for-loops",
+        "config-9": "no-for-loops",
+        "config-10": "while-loops",
+        "config-11": "no-while-loops",
+        "config-12": "camelcase",
+        "config-13": "screaming-snake-case",
+        "config-14": "redundant-else",
+        "config-15": "single-char-name",
+        "config-16": "method-length",
+        "config-17": "clone",
+        "config-18": "fields-first",
+        "config-19": "this",
+        "config-20": "shorthand-assignment",
+        "config-21": "string-concat",
+        "config-22": "simplify-if",
+        "config-23": "constructors-first"
     }
 
     for highCheck in config["high"]:
@@ -131,6 +133,28 @@ def get_checks_for_download(config_id):
 
     return jsonify(checks)
 
+@bp.route("/get_python_checks_for_download/<config_id>", methods=["GET"])
+def get_python_checks_for_download(config_id):
+    config = Configuration.find_config_by_id(ObjectId(config_id))
+
+    checks = {"high": list(), "medium": list(), "low": list()}
+
+    forFile = {
+        "config-1": "snake-case",
+        "config-2": "method-length",
+        "config-3": "unused-var"
+    }
+
+    for highCheck in config["high"]:
+        checks["high"].append(forFile[highCheck["check"]])
+
+    for mediumCheck in config["medium"]:
+        checks["medium"].append(forFile[mediumCheck["check"]])
+
+    for lowCheck in config["low"]:
+        checks["low"].append(forFile[lowCheck["check"]])
+
+    return jsonify(checks)
 
 @bp.route("/get_checks/<config_id>", methods=["GET"])
 def get_checks(config_id):

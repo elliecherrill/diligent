@@ -87,12 +87,12 @@ const Home = (props) => {
                     </div>
                 </section>
                 <Fade in={loaded} {...(loaded ? {timeout: 2000} : {})}>
-                    <div style={{display: 'flex', justifyContent: 'center'}}>
+                    <div style={{display: 'flex', justifyContent: 'center', flexWrap: 'wrap'}}>
                         <Button
                             variant='outlined'
                             color='secondary'
                             onClick={() => setGoToNewConfig(true)}
-                            style={{marginRight: '1.5%'}}
+                            style={{margin: '1.5%'}}
                         >
                             Create A New Configuration
                         </Button>
@@ -101,7 +101,7 @@ const Home = (props) => {
                             variant='outlined'
                             color='secondary'
                             onClick={() => setGoToViewsConfigs(true)}
-                            style={{marginLeft: '1.5%', marginRight: '1.5%'}}
+                            style={{margin: '1.5%'}}
                         >
                             View Your Configurations
                         </Button>
@@ -110,7 +110,7 @@ const Home = (props) => {
                             variant='outlined'
                             color='secondary'
                             onClick={() => downloadPlugin()}
-                            style={{marginLeft: '1.5%'}}
+                            style={{margin: '1.5%'}}
                         >
                             Download IntelliJ Plugin
                         </Button>

@@ -42,3 +42,24 @@ export const initialConfigs = {
 export const allConfigs = ['config-1', 'config-2', 'config-3', 'config-4', 'config-5', 'config-6', 'config-7', 'config-8',
     'config-9', 'config-10', 'config-11', 'config-12', 'config-13', 'config-14', 'config-15', 'config-16', 'config-17',
     'config-18', 'config-19', 'config-20', 'config-21', 'config-22', 'config-23']
+
+export const initialPythonConfigs = {
+    configs: {
+        'config-1': {id: 'config-1', content: 'Use of snake_case (as default)'},
+        'config-2': {id: 'config-2', content: 'No methods longer than 20 statements'},
+        'config-3': {id: 'config-3', content: 'Use of \'_\' when unpacking'}
+    },
+    categories: {
+        'category-1': {id: 'category-1', title: 'High Priority', configIds: []},
+        'category-2': {id: 'category-2', title: 'Medium Priority', configIds: []},
+        'category-3': {id: 'category-3', title: 'Low Priority', configIds: []},
+        'category-4': {
+            id: 'category-4',
+            title: 'Don\'t Check',
+            configIds: ['config-1', 'config-2', 'config-3']
+        },
+    },
+    columnOrder: ['category-4', 'category-3', 'category-2', 'category-1']
+}
+
+export const allPythonConfigs = ['config-1', 'config-2', 'config-3']

@@ -23,13 +23,12 @@ import useStyles from './style'
 import routes from '../../../constants/routes'
 import {Redirect} from 'react-router-dom'
 import * as API from '../../../api'
-import {initialConfigs} from '../../../constants/config'
 
 const getInitialAnchors = (configs) => {
     return configs.map(c => null)
 }
 
-const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpenDeleteAlert}) => {
+const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpenDeleteAlert, initialConfigs, editRoute}) => {
     const classes = useStyles()
     const [editConfig, setEditConfig] = useState(null)
     const [anchorEl, setAnchorEl] = useState(getInitialAnchors(configs))
@@ -166,7 +165,7 @@ const ConfigTable = ({configs, createFile, setDeleted, setCurrentConfig, setOpen
                 </TableContainer>
             </Slide>
 
-            {editConfig !== null && <Redirect push to={routes.EDIT_CONFIG + '/' + editConfig['_id']['$oid']}/>}
+            {editConfig !== null && <Redirect push to={editRoute + '/' + editConfig['_id']['$oid']}/>}
 
         </div>
     )

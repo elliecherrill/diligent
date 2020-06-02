@@ -13,14 +13,15 @@ function getHeaders() {
     }
 }
 
-export function create_new_config(title, highPriorityChecks, mediumPriorityChecks, lowPriorityChecks, courseCode, exerciseNum) {
+export function create_new_config(title, highPriorityChecks, mediumPriorityChecks, lowPriorityChecks, courseCode, exerciseNum, type) {
     let config = {
         'title': title,
         'high': highPriorityChecks.map(check => formatCheck(check)),
         'medium': mediumPriorityChecks.map(check => formatCheck(check)),
         'low': lowPriorityChecks.map(check => formatCheck(check)),
         'courseCode': courseCode,
-        'exerciseNum': exerciseNum
+        'exerciseNum': exerciseNum,
+        'type': type
     }
 
     return axios.post('/api/configuration/new_config', config, {headers: getHeaders()})
@@ -32,12 +33,16 @@ function formatCheck(check) {
     }
 }
 
-export function get_my_configs() {
-    return axios.get('/api/configuration/get_my_configs', {headers: getHeaders()}).then(resp => resp.data)
+export function get_my_configs(type) {
+    return axios.get('/api/configuration/get_my_configs/' + type, {headers: getHeaders()}).then(resp => resp.data)
 }
 
 export function get_checks_for_download(config_id) {
     return axios.get('/api/configuration/get_checks_for_download/' + config_id, {headers: getHeaders()}).then(resp => resp.data)
+}
+
+export function get_python_checks_for_download(config_id) {
+    return axios.get('/api/configuration/get_python_checks_for_download/' + config_id, {headers: getHeaders()}).then(resp => resp.data)
 }
 
 export function get_checks(config_id) {
@@ -52,6 +57,18 @@ export function get_plugin() {
         method: 'GET'
     }).then(resp => {
         fileDownload(resp.data, 'diligent-1.0.0.zip')
+        return true
+    }).catch(() => false)
+}
+
+export function get_python_plugin() {
+    return axios({
+        url: '/api/plugin/download_python',
+        responseType: 'blob',
+        headers: getHeaders(),
+        method: 'GET'
+    }).then(resp => {
+        fileDownload(resp.data, 'diligent-for-python-1.0.0.zip')
         return true
     }).catch(() => false)
 }

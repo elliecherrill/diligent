@@ -12,6 +12,9 @@ import PageNotFound from '../routes/404/PageNotFound'
 import ViewConfigs from '../routes/viewConfigs/ViewConfigs'
 import EditConfig from '../routes/editConfig/EditConfig'
 import Python from '../routes/python/Python'
+import NewPythonConfig from '../routes/newPythonConfig/NewPythonConfig'
+import EditPythonConfig from "../routes/editPythonConfig/EditPythonConfig";
+import ViewPythonConfigs from "../routes/viewPythonConfigs/ViewPythonConfigs";
 
 const Frame = props => {
 
@@ -52,9 +55,9 @@ const Frame = props => {
                             <Route
                                 exact
                                 path={routes.PYTHON}
-                                render={() => {
+                                render={routeProps => {
                                     window.scrollTo(0, 0)
-                                    return <Python setGoToPython={setGoToPython} />
+                                    return <Python setGoToPython={setGoToPython} {...routeProps} />
                                 }}
                             />
                             <Route
@@ -79,6 +82,30 @@ const Frame = props => {
                                 render={() => {
                                     window.scrollTo(0, 0)
                                     return <EditConfig />
+                                }}
+                            />
+                            <Route
+                                exact
+                                path={routes.NEW_PYTHON_CONFIG}
+                                render={() => {
+                                    window.scrollTo(0, 0)
+                                    return <NewPythonConfig />
+                                }}
+                            />
+                            <Route
+                                exact
+                                path={routes.VIEW_PYTHON_CONFIGS}
+                                render={() => {
+                                    window.scrollTo(0, 0)
+                                    return <ViewPythonConfigs />
+                                }}
+                            />
+                            <Route
+                                exact
+                                path={routes.EDIT_PYTHON_CONFIG + '/:id'}
+                                render={() => {
+                                    window.scrollTo(0, 0)
+                                    return <EditPythonConfig />
                                 }}
                             />
                             <Route

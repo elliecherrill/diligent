@@ -138,7 +138,7 @@ const EditConfig = () => {
         }
 
         const finishConfigIds = Array.from(finish.configIds)
-        finishConfigIds.splice(source.index, 0, draggableId)
+        finishConfigIds.splice(destination.index, 0, draggableId)
         const newFinish = {
             ...finish,
             configIds: finishConfigIds

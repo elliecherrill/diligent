@@ -33,7 +33,7 @@ const ViewFrame = ({type, createFile, initialConfigs, editRoute}) => {
             setConfigs(r)
             setRefresh(false)
         })
-    }, [refresh])
+    }, [refresh, type])
 
     const deleteCurrConfig = () => {
         API.delete_config(currentConfig['_id']['$oid']).then(response => {

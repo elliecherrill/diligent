@@ -20,7 +20,6 @@ import {
     Visibility as ViewIcon,
 } from '@material-ui/icons'
 import useStyles from './style'
-import routes from '../../../constants/routes'
 import {Redirect} from 'react-router-dom'
 import * as API from '../../../api'
 

@@ -69,10 +69,8 @@ public class FileFeedbackHolder {
     }
 
     public Map<InspectionPriority, Integer> updateDeleted() {
-        Map<InspectionPriority, Integer> changeToPriorities = new HashMap<>(
-                Map.of(InspectionPriority.HIGH, 0,
-                        InspectionPriority.MEDIUM, 0,
-                        InspectionPriority.LOW, 0));
+        Map<InspectionPriority, Integer> changeToPriorities = new HashMap<>();
+        initMap(changeToPriorities);
 
         for (Map.Entry<FeedbackIdentifier, Feedback> entry : feedback.entrySet()) {
             Feedback f = entry.getValue();
@@ -93,6 +91,12 @@ public class FileFeedbackHolder {
         }
 
         return changeToPriorities;
+    }
+
+    private void initMap(Map<InspectionPriority, Integer> map) {
+        map.put(InspectionPriority.HIGH, 0);
+        map.put(InspectionPriority.MEDIUM, 0);
+        map.put(InspectionPriority.LOW, 0);
     }
 
     public String getFeedbackAsHTMLString(List<InspectionPriority> priorities) {

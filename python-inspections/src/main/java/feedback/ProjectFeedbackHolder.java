@@ -36,12 +36,16 @@ public class ProjectFeedbackHolder {
         this.project = project;
 
         files = new ConcurrentHashMap<>();
-        priorityCount = new ConcurrentHashMap<>(
-                Map.of(InspectionPriority.HIGH, 0,
-                        InspectionPriority.MEDIUM, 0,
-                        InspectionPriority.LOW, 0));
+        priorityCount = new ConcurrentHashMap<>();
+        initMap(priorityCount);
         projectPath = project.getBasePath();
         isCurrent = true;
+    }
+
+    private void initMap(Map<InspectionPriority, Integer> map) {
+        map.put(InspectionPriority.HIGH, 0);
+        map.put(InspectionPriority.MEDIUM, 0);
+        map.put(InspectionPriority.LOW, 0);
     }
 
     public void updateReport() {
@@ -77,7 +81,7 @@ public class ProjectFeedbackHolder {
                 }
 
                 String browserLink = "http://localhost:63342/" + project.getName() + "/" + FILEPATH;
-                NOTIFIER.notify(project, "Diligent", "Updated <a href=\"" + browserLink + "\"> Diligent Feedback Report </a>");
+                NOTIFIER.notify(project, "Diligent for Python", "Updated Feedback Report. <a style=\"cursor: pointer;\" href=\"" + browserLink + "\">Click Here to View</a>");
 
                 isCurrent = true;
             } catch (IOException | IndexOutOfBoundsException e) {
@@ -216,7 +220,7 @@ public class ProjectFeedbackHolder {
                 "    <meta name=\"theme-color\" content=\"#34558b\">\n" +
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=Roboto:300,400,500\">\n" +
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\">\n" +
-                "    <title>Diligent</title>\n" +
+                "    <title>Diligent for Python</title>\n" +
                 "    <style>\n" +
                 "        .material-icons {\n" +
                 "            font-family: 'Material Icons';\n" +
@@ -327,7 +331,7 @@ public class ProjectFeedbackHolder {
                 "<div id=\"root\" style=\"height: 100%;\">\n" +
                 "    <div id=\"topbar\">\n" +
                 "        <h1 id=\"topbartitle\">\n" +
-                "            Diligent\n" +
+                "            Diligent for Python\n" +
                 "        </h1>\n" +
                 "        <i class=\"material-icons\" id=\"homeicon\" onClick=\"location.href = './diligent.html'\">home</i>\n" +
                 "    </div>\n" +
@@ -384,7 +388,7 @@ public class ProjectFeedbackHolder {
                 "    <meta name=\"theme-color\" content=\"#34558b\">\n" +
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=Roboto:300,400,500\">\n" +
                 "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\">\n" +
-                "    <title>Diligent</title>\n" +
+                "    <title>Diligent for Python</title>\n" +
                 "    <style>\n" +
                 "        .material-icons {\n" +
                 "            font-family: 'Material Icons';\n" +
@@ -473,7 +477,7 @@ public class ProjectFeedbackHolder {
                 "<div id=\"root\" style=\"height: 100%;\">\n" +
                 "    <div id=\"topbar\">\n" +
                 "        <h1 id=\"topbartitle\">\n" +
-                "            Diligent\n" +
+                "            Diligent for Python\n" +
                 "        </h1>\n" +
                 "        <i class=\"material-icons\" id=\"homeicon\" onClick=\"location.href = './diligent.html'\">home</i>\n" +
                 "    </div>\n" +

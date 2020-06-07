@@ -14,6 +14,9 @@ import util.Utils;
 
 public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String POS_INSPECTION_NAME = "inheritance";
+    private static final String NEG_INSPECTION_NAME = "no-" + POS_INSPECTION_NAME;
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -44,11 +47,11 @@ public final class UsingInheritanceInspection extends AbstractBaseJavaLocalInspe
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
 
-        if (Utils.getInspectionPriority(holder, "inheritance") != InspectionPriority.NONE) {
+        if (Utils.getInspectionPriority(holder, POS_INSPECTION_NAME) != InspectionPriority.NONE) {
             return new InheritanceVisitor(holder, true);
         }
 
-        if (Utils.getInspectionPriority(holder, "no-inheritance") != InspectionPriority.NONE) {
+        if (Utils.getInspectionPriority(holder, NEG_INSPECTION_NAME) != InspectionPriority.NONE) {
             return new InheritanceVisitor(holder, false);
         }
 

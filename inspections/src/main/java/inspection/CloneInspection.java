@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
+
+    private static final String INSPECTION_NAME = "clone";
+
     @Override
     @NotNull
     public String getDisplayName() {
@@ -50,7 +53,7 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "clone");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority != InspectionPriority.NONE) {
             return new CloneVisitor(holder, priority);
         }
@@ -180,12 +183,12 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
 
             String filename = statement.getContainingFile().getName();
             int line = Utils.getLineNumber(statement);
-            FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), line + "switch-clone", PsiStmtType.SWITCH, line);
+            FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), line + "switch-" + INSPECTION_NAME, PsiStmtType.SWITCH, line);
 
             if (CodeCloneUtils.transitiveClosureOfClones(clones, rangeOfCases)) {
                 Feedback feedback = new Feedback(line,
                         filename,
-                        line + "-switch-clone",
+                        line + "-switch-" + INSPECTION_NAME,
                         priority,
                         Utils.getClassName(statement),
                         Utils.getMethodName(statement),
@@ -293,18 +296,18 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     if (i > blockIndex) {
                         line = Utils.getLineNumber(codeBlocks[i]);
                         methodName = Utils.getMethodName(codeBlocks[i]);
-                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[i]), Utils.getPointer(codeBlocks[blockIndex]), blockIndex + "-block-clone", PsiStmtType.BLOCK, line);
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[i]), Utils.getPointer(codeBlocks[blockIndex]), blockIndex + "-block-" + INSPECTION_NAME, PsiStmtType.BLOCK, line);
                     } else {
                         line = Utils.getLineNumber(codeBlocks[blockIndex]);
                         methodName = Utils.getMethodName(codeBlocks[blockIndex]);
-                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), Utils.getPointer(codeBlocks[i]), i + "-block-clone", PsiStmtType.BLOCK, line);
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(codeBlocks[blockIndex]), Utils.getPointer(codeBlocks[i]), i + "-block-" + INSPECTION_NAME, PsiStmtType.BLOCK, line);
                     }
 
                     Pair<Pair<Integer, Integer>, Pair<Integer, Integer>> cloneSequence = CodeCloneUtils.containsBlockClone(intersection, blockIndex, false);
                     if (cloneSequence != null) {
                         Feedback feedback = new Feedback(line,
                                 filename,
-                                line + "-block-clone",
+                                line + "-block-" + INSPECTION_NAME,
                                 priority,
                                 aClass.getName(),
                                 methodName,
@@ -940,17 +943,17 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                     if (polyadicLocationMap.get(exprKey) > polyadicLocationMap.get(otherExprKey)) {
                         line = Utils.getLineNumber(exprKey);
                         methodName = Utils.getMethodName(exprKey);
-                        feedbackId = new FeedbackIdentifier(Utils.getPointer(exprKey), Utils.getPointer(otherExprKey), polyadicLocationMap.get(otherExprKey) + "-polyadic-clone", PsiStmtType.POLYADIC_EXPR, line);
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(exprKey), Utils.getPointer(otherExprKey), polyadicLocationMap.get(otherExprKey) + "-polyadic-" + INSPECTION_NAME, PsiStmtType.POLYADIC_EXPR, line);
                     } else {
                         line = Utils.getLineNumber(otherExprKey);
                         methodName = Utils.getMethodName(otherExprKey);
-                        feedbackId = new FeedbackIdentifier(Utils.getPointer(otherExprKey), Utils.getPointer(exprKey), polyadicLocationMap.get(exprKey) + "-polyadic-clone", PsiStmtType.POLYADIC_EXPR, line);
+                        feedbackId = new FeedbackIdentifier(Utils.getPointer(otherExprKey), Utils.getPointer(exprKey), polyadicLocationMap.get(exprKey) + "-polyadic-" + INSPECTION_NAME, PsiStmtType.POLYADIC_EXPR, line);
                     }
 
                     if (Arrays.equals(exprStringRep, otherExprStringRep)) {
                         Feedback feedback = new Feedback(line,
                                 filename,
-                                line + "-polyadic-clone",
+                                line + "-polyadic-" + INSPECTION_NAME,
                                 priority,
                                 aClass.getName(),
                                 methodName,

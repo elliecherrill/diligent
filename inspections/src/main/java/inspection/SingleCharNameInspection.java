@@ -17,6 +17,8 @@ import util.Utils;
 
 public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "single-char-name";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -46,7 +48,7 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder,"single-char-name");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {};
         }
@@ -76,12 +78,12 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                 String filename = field.getContainingFile().getName();
                 int line = Utils.getLineNumber(field);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "single-char-name", PsiStmtType.FIELD, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), INSPECTION_NAME, PsiStmtType.FIELD, line);
 
                 if (field.getName().length() == 1) {
                     Feedback feedback = new Feedback(line,
                             filename,
-                            line + "-" + field.getName() + "-single-char-name",
+                            line + "-" + field.getName() + INSPECTION_NAME,
                             priority,
                             Utils.getClassName(field),
                             FeedbackType.SINGLE_CHAR_NAME);
@@ -109,13 +111,13 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
 
                         String filename = statement.getContainingFile().getName();
                         int line = Utils.getLineNumber(localElement);
-                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(localElement), "single-char-name", PsiStmtType.LOCAL_VAR, line);
+                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(localElement), INSPECTION_NAME, PsiStmtType.LOCAL_VAR, line);
 
                         if (!(statement.getParent() instanceof PsiForeachStatement || statement.getParent() instanceof PsiForStatement)) {
                             if (localElement.getName().length() == 1) {
                                 Feedback feedback = new Feedback(line,
                                         filename,
-                                        line + "-" + index + "-single-char-name",
+                                        line + "-" + index + INSPECTION_NAME,
                                         priority,
                                         Utils.getClassName(statement),
                                         Utils.getMethodName(statement),
@@ -143,12 +145,12 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 String filename = method.getContainingFile().getName();
                 int line = Utils.getLineNumber(method);
                 String className = Utils.getClassName(method);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "single-char-name", PsiStmtType.METHOD, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), INSPECTION_NAME, PsiStmtType.METHOD, line);
 
                 if (method.getName().length() == 1) {
                     Feedback feedback = new Feedback(line,
                             filename,
-                            line + "-single-char-name",
+                            line + INSPECTION_NAME,
                             priority,
                             className,
                             FeedbackType.SINGLE_CHAR_NAME);
@@ -164,12 +166,12 @@ public final class SingleCharNameInspection extends AbstractBaseJavaLocalInspect
                 int index = 0;
                 for (PsiParameter p : params) {
                     line = Utils.getLineNumber(p);
-                    feedbackId = new FeedbackIdentifier(Utils.getPointer(p), "single-char-name", PsiStmtType.PARAMETER, line);
+                    feedbackId = new FeedbackIdentifier(Utils.getPointer(p), INSPECTION_NAME, PsiStmtType.PARAMETER, line);
 
                     if (p.getName().length() == 1) {
                         Feedback feedback = new Feedback(line,
                                 filename,
-                                line + "-" + index + "-single-char-name",
+                                line + "-" + index + INSPECTION_NAME,
                                 priority,
                                 className,
                                 FeedbackType.SINGLE_CHAR_NAME);

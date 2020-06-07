@@ -14,6 +14,9 @@ import util.Utils;
 
 public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String POS_INSPECTION_NAME = "interfaces";
+    private static final String NEG_INSPECTION_NAME = "no-" + POS_INSPECTION_NAME;
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -43,15 +46,16 @@ public final class UsingInterfacesInspection extends AbstractBaseJavaLocalInspec
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        if (Utils.getInspectionPriority(holder,"interfaces") != InspectionPriority.NONE) {
+        if (Utils.getInspectionPriority(holder, POS_INSPECTION_NAME) != InspectionPriority.NONE) {
             return new InterfacesVisitor(holder, true);
         }
 
-        if (Utils.getInspectionPriority(holder,"no-interfaces") != InspectionPriority.NONE) {
+        if (Utils.getInspectionPriority(holder, NEG_INSPECTION_NAME) != InspectionPriority.NONE) {
             return new InterfacesVisitor(holder, false);
         }
 
-        return new JavaElementVisitor() {};
+        return new JavaElementVisitor() {
+        };
     }
 
     private static class InterfacesVisitor extends JavaElementVisitor {

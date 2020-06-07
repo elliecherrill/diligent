@@ -15,6 +15,8 @@ import util.*;
 
 public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "fields-first";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -44,7 +46,7 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "fields-first");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {};
         }
@@ -98,12 +100,12 @@ public final class FieldsFirstInspection extends AbstractBaseJavaLocalInspection
 
                 String filename = field.getContainingFile().getName();
                 int line = Utils.getLineNumber(field);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "fields-first", PsiStmtType.FIELD, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), INSPECTION_NAME, PsiStmtType.FIELD, line);
 
                 if (registerProblem) {
                     Feedback feedback = new Feedback(line,
                             filename,
-                            line + "-" + field.getName() + "-fields-first",
+                            line + "-" + field.getName() + INSPECTION_NAME,
                             priority,
                             Utils.getClassName(field),
                             FeedbackType.FIELDS_FIRST);

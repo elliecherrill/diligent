@@ -18,6 +18,8 @@ import util.Utils;
 
 public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "shorthand-assignment";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -47,7 +49,7 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "shorthand-assignment");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -78,7 +80,7 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
 
                 String filename = expression.getContainingFile().getName();
                 int line = Utils.getLineNumber(expression);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "shorthand-assignment", PsiStmtType.BIN_EXPR, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), INSPECTION_NAME, PsiStmtType.BIN_EXPR, line);
 
                 IElementType op = expression.getOperationTokenType();
                 if (!op.equals(JavaTokenType.EQ)) {
@@ -123,7 +125,7 @@ public final class ShorthandInspection extends AbstractBaseJavaLocalInspectionTo
                 if (registerProblem) {
                     Feedback feedback = new Feedback(line,
                             filename,
-                            line + "-shorthand-assignment",
+                            line + INSPECTION_NAME,
                             priority,
                             Utils.getClassName(expression),
                             Utils.getMethodName(expression),

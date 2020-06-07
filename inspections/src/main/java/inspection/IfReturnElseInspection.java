@@ -15,6 +15,9 @@ import util.PsiStmtType;
 import util.Utils;
 
 public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectionTool {
+
+    private static final String INSPECTION_NAME = "redundant-else";
+
     @Override
     @NotNull
     public String getDisplayName() {
@@ -45,7 +48,7 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "redundant-else");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -76,7 +79,7 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
 
                 String filename = statement.getContainingFile().getName();
                 int line = Utils.getLineNumber(statement);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "redundant-else", PsiStmtType.IF, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), INSPECTION_NAME, PsiStmtType.IF, line);
 
                 // Check if there is an else case
                 if (statement.getElseBranch() != null) {
@@ -101,7 +104,7 @@ public final class IfReturnElseInspection extends AbstractBaseJavaLocalInspectio
                     if (endsWithReturn) {
                         Feedback feedback = new Feedback(line,
                                 filename,
-                                line + "-redundant-else",
+                                line + INSPECTION_NAME,
                                 priority,
                                 Utils.getClassName(statement),
                                 Utils.getMethodName(statement),

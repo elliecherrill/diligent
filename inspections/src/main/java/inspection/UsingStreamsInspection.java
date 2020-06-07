@@ -17,6 +17,9 @@ import util.Utils;
 
 public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String POS_INSPECTION_NAME = "streams";
+    private static final String NEG_INSPECTION_NAME = "no-" + POS_INSPECTION_NAME;
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -46,15 +49,16 @@ public final class UsingStreamsInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        if (Utils.getInspectionPriority(holder, "streams") != InspectionPriority.NONE) {
+        if (Utils.getInspectionPriority(holder, POS_INSPECTION_NAME) != InspectionPriority.NONE) {
             return new StreamVisitor(holder, true);
         }
 
-        if (Utils.getInspectionPriority(holder, "no-streams") != InspectionPriority.NONE) {
+        if (Utils.getInspectionPriority(holder, NEG_INSPECTION_NAME) != InspectionPriority.NONE) {
             return new StreamVisitor(holder, false);
         }
 
-        return new JavaElementVisitor() {};
+        return new JavaElementVisitor() {
+        };
     }
 
     private class StreamVisitor extends JavaElementVisitor {

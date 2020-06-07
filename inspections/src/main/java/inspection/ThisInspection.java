@@ -17,6 +17,8 @@ import util.Utils;
 
 public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "this";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -46,7 +48,7 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "this");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -77,7 +79,7 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
 
                 String filename = expression.getContainingFile().getName();
                 int line = Utils.getLineNumber(expression);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "this-" + line, PsiStmtType.THIS_EXPR, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), INSPECTION_NAME + line, PsiStmtType.THIS_EXPR, line);
                 inspectThisExpression(expression, filename, feedbackId);
             }
 
@@ -88,7 +90,7 @@ public final class ThisInspection extends AbstractBaseJavaLocalInspectionTool {
                         int line = Utils.getLineNumber(thisExpr);
                         Feedback feedback = new Feedback(line,
                                 filename,
-                                line + "-this",
+                                line + INSPECTION_NAME,
                                 priority,
                                 Utils.getClassName(thisExpr),
                                 Utils.getMethodName(thisExpr),

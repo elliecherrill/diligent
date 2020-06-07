@@ -18,6 +18,8 @@ import util.Utils;
 
 public final class StringComparisonInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "string-comparison";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -47,7 +49,7 @@ public final class StringComparisonInspection extends AbstractBaseJavaLocalInspe
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "string-comparison");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -79,7 +81,7 @@ public final class StringComparisonInspection extends AbstractBaseJavaLocalInspe
 
                 String filename = expression.getContainingFile().getName();
                 int line = Utils.getLineNumber(expression);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), "string-comparison", PsiStmtType.BIN_EXPR, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(expression), INSPECTION_NAME, PsiStmtType.BIN_EXPR, line);
 
                 if ((expression.getROperand() != null) && (expression.getLOperand().getType() != null) && (expression.getROperand().getType() != null)) {
                     IElementType op = expression.getOperationTokenType();
@@ -87,7 +89,7 @@ public final class StringComparisonInspection extends AbstractBaseJavaLocalInspe
                         if (Utils.isString(expression.getLOperand().getType()) && Utils.isString(expression.getROperand().getType())) {
                             Feedback feedback = new Feedback(line,
                                     filename,
-                                    line + "-string-comparison",
+                                    line + INSPECTION_NAME,
                                     priority,
                                     Utils.getClassName(expression),
                                     Utils.getMethodName(expression),

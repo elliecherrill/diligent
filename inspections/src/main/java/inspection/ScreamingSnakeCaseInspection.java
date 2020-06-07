@@ -14,6 +14,8 @@ import util.*;
 
 public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "screaming-snake-case";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -43,7 +45,7 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "screaming-snake-case");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -80,12 +82,12 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                     if (field instanceof PsiEnumConstant) {
                         PsiEnumConstant enumConstant = (PsiEnumConstant) field;
                         int line = Utils.getLineNumber(enumConstant);
-                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(enumConstant), "screaming-snake-case", PsiStmtType.ENUM, line);
+                        FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(enumConstant), INSPECTION_NAME, PsiStmtType.ENUM, line);
 
                         if (!Utils.isUpperSnakeCase(enumConstant.getName())) {
                             Feedback feedback = new Feedback(line,
                                     filename,
-                                    line + "-" + index + "-screaming-snake-case",
+                                    line + "-" + index + INSPECTION_NAME,
                                     priority,
                                     aClass.getName(),
                                     FeedbackType.SCREAMING_SNAKE_CASE);
@@ -116,13 +118,13 @@ public final class ScreamingSnakeCaseInspection extends AbstractBaseJavaLocalIns
                     }
 
                     int line = Utils.getLineNumber(field);
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), "screaming-snake-case", PsiStmtType.FIELD, line);
+                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(field), INSPECTION_NAME, PsiStmtType.FIELD, line);
                     String filename = field.getContainingFile().getName();
 
                     if (modifierList.hasModifierProperty(PsiModifier.FINAL) && modifierList.hasModifierProperty(PsiModifier.STATIC) && !Utils.isUpperSnakeCase(field.getName())) {
                         Feedback feedback = new Feedback(line,
                                 filename,
-                                line + "-" + field.getName() + "-screaming-snake-case",
+                                line + "-" + field.getName() + INSPECTION_NAME,
                                 priority,
                                 Utils.getClassName(field),
                                 FeedbackType.SCREAMING_SNAKE_CASE);

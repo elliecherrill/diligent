@@ -17,6 +17,7 @@ import util.Utils;
 
 public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "method-length";
     private static final int MAX_METHOD_LENGTH = 20;
 
     @Override
@@ -48,7 +49,7 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "method-length");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -81,12 +82,12 @@ public final class MethodLengthInspection extends AbstractBaseJavaLocalInspectio
 
                 String filename = method.getContainingFile().getName();
                 int line = Utils.getLineNumber(method);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), "method-length", PsiStmtType.METHOD, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(method), INSPECTION_NAME, PsiStmtType.METHOD, line);
 
                 if (body != null && body.getStatementCount() >= MAX_METHOD_LENGTH) {
                     Feedback feedback = new Feedback(line,
                             filename,
-                            line + "-method-length",
+                            line + INSPECTION_NAME,
                             priority,
                             Utils.getClassName(method),
                             FeedbackType.METHOD_LENGTH);

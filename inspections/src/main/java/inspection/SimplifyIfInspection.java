@@ -17,6 +17,8 @@ import util.Utils;
 
 public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "simplify-if";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -46,7 +48,7 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "simplify-if");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -80,7 +82,7 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
 
                 String filename = statement.getContainingFile().getName();
                 int line = Utils.getLineNumber(statement);
-                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), "simplify-if", PsiStmtType.IF, line);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(statement), INSPECTION_NAME, PsiStmtType.IF, line);
 
                 int elseRes;
                 if (thenStat == null || elseStat == null) {
@@ -99,7 +101,7 @@ public final class SimplifyIfInspection extends AbstractBaseJavaLocalInspectionT
                 if (getBranchResult(thenStat) + elseRes == 1) {
                     Feedback feedback = new Feedback(line,
                             filename,
-                            line + "-simplify-if",
+                            line + INSPECTION_NAME,
                             priority,
                             Utils.getClassName(statement),
                             Utils.getMethodName(statement),

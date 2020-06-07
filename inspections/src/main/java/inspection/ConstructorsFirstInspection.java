@@ -17,6 +17,8 @@ import util.Utils;
 
 public final class ConstructorsFirstInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "constructors-first";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -46,7 +48,7 @@ public final class ConstructorsFirstInspection extends AbstractBaseJavaLocalInsp
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "constructors-first");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -84,12 +86,12 @@ public final class ConstructorsFirstInspection extends AbstractBaseJavaLocalInsp
 
                 for (PsiMethod m : methods) {
                     int line = Utils.getLineNumber(m);
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(m), "constructors-first", PsiStmtType.METHOD, line);
+                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(m), INSPECTION_NAME, PsiStmtType.METHOD, line);
 
                     if (isClassConstructor(m, className) && !prevIsCons) {
                         Feedback feedback = new Feedback(line,
                                 filename,
-                                line + "-constructors-first",
+                                line + INSPECTION_NAME,
                                 priority,
                                 className,
                                 FeedbackType.CONSTRUCTORS_FIRST);

@@ -18,6 +18,8 @@ import java.util.List;
 
 public final class StringConcatInspection extends AbstractBaseJavaLocalInspectionTool {
 
+    private static final String INSPECTION_NAME = "string-concat";
+
     @Override
     public boolean isEnabledByDefault() {
         return true;
@@ -47,7 +49,7 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
     @NotNull
     @Override
     public PsiElementVisitor buildVisitor(@NotNull final ProblemsHolder holder, boolean isOnTheFly) {
-        InspectionPriority priority = Utils.getInspectionPriority(holder, "string-concat");
+        InspectionPriority priority = Utils.getInspectionPriority(holder, INSPECTION_NAME);
         if (priority == InspectionPriority.NONE) {
             return new JavaElementVisitor() {
             };
@@ -72,76 +74,28 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
             public void visitWhileStatement(PsiWhileStatement statement) {
                 super.visitWhileStatement(statement);
 
-                if (Utils.hasErrorsInFile(statement)) {
-                    return;
-                }
-
-                PsiStatement body = statement.getBody();
-                Pair<List<PsiStatement>, List<PsiStatement>> stringConcats = getStringConcatInBody(body);
-
-                if (stringConcats == null) {
-                    return;
-                }
-
-                String filename = statement.getContainingFile().getName();
-                reportStringConcatFeedback(stringConcats.getFirst(), stringConcats.getSecond(), filename);
+                detectStringConcatInLoop(statement);
             }
 
             @Override
             public void visitDoWhileStatement(PsiDoWhileStatement statement) {
                 super.visitDoWhileStatement(statement);
 
-                if (Utils.hasErrorsInFile(statement)) {
-                    return;
-                }
-
-                PsiStatement body = statement.getBody();
-                Pair<List<PsiStatement>, List<PsiStatement>> stringConcats = getStringConcatInBody(body);
-
-                if (stringConcats == null) {
-                    return;
-                }
-
-                String filename = statement.getContainingFile().getName();
-                reportStringConcatFeedback(stringConcats.getFirst(), stringConcats.getSecond(), filename);
+                detectStringConcatInLoop(statement);
             }
 
             @Override
             public void visitForStatement(PsiForStatement statement) {
                 super.visitForStatement(statement);
 
-                if (Utils.hasErrorsInFile(statement)) {
-                    return;
-                }
-
-                PsiStatement body = statement.getBody();
-                Pair<List<PsiStatement>, List<PsiStatement>> stringConcats = getStringConcatInBody(body);
-
-                if (stringConcats == null) {
-                    return;
-                }
-
-                String filename = statement.getContainingFile().getName();
-                reportStringConcatFeedback(stringConcats.getFirst(), stringConcats.getSecond(), filename);
+                detectStringConcatInLoop(statement);
             }
 
             @Override
             public void visitForeachStatement(PsiForeachStatement statement) {
                 super.visitForeachStatement(statement);
 
-                if (Utils.hasErrorsInFile(statement)) {
-                    return;
-                }
-
-                PsiStatement body = statement.getBody();
-                Pair<List<PsiStatement>, List<PsiStatement>> stringConcats = getStringConcatInBody(body);
-
-                if (stringConcats == null) {
-                    return;
-                }
-
-                String filename = statement.getContainingFile().getName();
-                reportStringConcatFeedback(stringConcats.getFirst(), stringConcats.getSecond(), filename);
+                detectStringConcatInLoop(statement);
             }
 
             private List<PsiStatement> getAllStatements(PsiCodeBlock codeBlock) {
@@ -175,13 +129,18 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                 return allStatements;
             }
 
-            private Pair<List<PsiStatement>, List<PsiStatement>> getStringConcatInBody(PsiStatement body) {
-                if (!(body instanceof PsiBlockStatement)) {
-                    return null;
+            private void detectStringConcatInLoop(PsiLoopStatement loopStat) {
+                if (Utils.hasErrorsInFile(loopStat)) {
+                    return;
                 }
 
-                List<PsiStatement> errorStats = new ArrayList<>();
-                List<PsiStatement> fixStats = new ArrayList<>();
+                PsiStatement body = loopStat.getBody();
+
+                if (!(body instanceof PsiBlockStatement)) {
+                    return;
+                }
+
+                String filename = body.getContainingFile().getName();
 
                 PsiBlockStatement blockStat = (PsiBlockStatement) body;
                 PsiCodeBlock codeBlock = blockStat.getCodeBlock();
@@ -189,7 +148,7 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
 
                 for (PsiStatement stat : stats) {
                     if (!(stat instanceof PsiExpressionStatement)) {
-                        fixStats.add(stat);
+                        fixFeedback(filename, stat);
                         continue;
                     }
 
@@ -197,7 +156,7 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                     PsiExpression expr = exprStat.getExpression();
 
                     if (!(expr instanceof PsiAssignmentExpression)) {
-                        fixStats.add(stat);
+                        fixFeedback(filename, stat);
                         continue;
                     }
 
@@ -213,7 +172,7 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
 
                             if (assExpr.getOperationTokenType().equals(JavaTokenType.PLUSEQ)) {
                                 // Appending via .. += ..
-                                errorStats.add(stat);
+                                addFeedback(filename, stat);
                                 continue;
                             } else {
                                 PsiExpression rhsExpr = assExpr.getRExpression();
@@ -228,7 +187,7 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                                                 boolean equalsLhs = refExpr.getText().equals(lhsVar);
 
                                                 if (equalsLhs) {
-                                                    errorStats.add(stat);
+                                                    addFeedback(filename, stat);
                                                     break;
                                                 }
                                             }
@@ -239,31 +198,27 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                         }
                     }
 
-                    fixStats.add(stat);
+                    fixFeedback(filename, stat);
                 }
-
-                return new Pair<>(errorStats, fixStats);
             }
 
-            private void reportStringConcatFeedback(List<PsiStatement> errorStatements, List<PsiStatement> fixStatements, String filename) {
-                for (PsiStatement stat : errorStatements) {
-                    int line = Utils.getLineNumber(stat);
-                    Feedback feedback = new Feedback(line,
-                            filename,
-                            line + "-string-concat",
-                            priority,
-                            Utils.getClassName(stat),
-                            Utils.getMethodName(stat),
-                            FeedbackType.STRING_CONCAT);
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat), "string-concat", PsiStmtType.STATEMENT, line);
-                    feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
-                }
+            private void addFeedback(String filename, PsiStatement stat) {
+                int line = Utils.getLineNumber(stat);
+                Feedback feedback = new Feedback(line,
+                        filename,
+                        line + INSPECTION_NAME,
+                        priority,
+                        Utils.getClassName(stat),
+                        Utils.getMethodName(stat),
+                        FeedbackType.STRING_CONCAT);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat), INSPECTION_NAME, PsiStmtType.STATEMENT, line);
+                feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
+            }
 
-                for (PsiStatement stat : fixStatements) {
-                    int line = Utils.getLineNumber(stat);
-                    FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat), "string-concat", PsiStmtType.STATEMENT, line);
-                    feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
-                }
+            private void fixFeedback(String filename, PsiStatement stat) {
+                int line = Utils.getLineNumber(stat);
+                FeedbackIdentifier feedbackId = new FeedbackIdentifier(Utils.getPointer(stat), INSPECTION_NAME, PsiStmtType.STATEMENT, line);
+                feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
             }
         };
     }

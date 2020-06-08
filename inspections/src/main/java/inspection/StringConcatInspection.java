@@ -174,24 +174,20 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
                                 // Appending via .. += ..
                                 addFeedback(filename, stat);
                                 continue;
-                            } else {
+                            } else if (assExpr.getOperationTokenType().equals(JavaTokenType.EQ)) {
                                 PsiExpression rhsExpr = assExpr.getRExpression();
+
                                 if (rhsExpr instanceof PsiPolyadicExpression) {
-                                    PsiPolyadicExpression polyRhsExpr = (PsiPolyadicExpression) rhsExpr;
-                                    PsiExpression[] operands = polyRhsExpr.getOperands();
-
-                                    if (polyRhsExpr.getOperationTokenType().equals(JavaTokenType.PLUS)) {
-                                        for (PsiExpression op : operands) {
-                                            if (op instanceof PsiReferenceExpression) {
-                                                PsiReferenceExpression refExpr = (PsiReferenceExpression) op;
-                                                boolean equalsLhs = refExpr.getText().equals(lhsVar);
-
-                                                if (equalsLhs) {
-                                                    addFeedback(filename, stat);
-                                                    break;
-                                                }
-                                            }
-                                        }
+                                    // Look for appending via .. = .. + ..
+                                    if (inspectRhsPolyadic((PsiPolyadicExpression) rhsExpr, lhsVar)) {
+                                        addFeedback(filename, stat);
+                                        continue;
+                                    }
+                                } else if (rhsExpr instanceof PsiMethodCallExpression) {
+                                    // Look for appending via .. = .. .concat(..)
+                                    if (inspectRhsMethod((PsiMethodCallExpression) rhsExpr, lhsVar, false)) {
+                                        addFeedback(filename, stat);
+                                        continue;
                                     }
                                 }
                             }
@@ -200,6 +196,46 @@ public final class StringConcatInspection extends AbstractBaseJavaLocalInspectio
 
                     fixFeedback(filename, stat);
                 }
+            }
+
+            private boolean inspectRhsPolyadic(PsiPolyadicExpression polyExpr, String lhsVar) {
+                PsiExpression[] operands = polyExpr.getOperands();
+
+                if (polyExpr.getOperationTokenType().equals(JavaTokenType.PLUS)) {
+                    for (PsiExpression op : operands) {
+                        if (op instanceof PsiReferenceExpression) {
+                            PsiReferenceExpression refExpr = (PsiReferenceExpression) op;
+                            if (refExpr.getText().equals(lhsVar)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            private boolean inspectRhsMethod(PsiMethodCallExpression methodCallExpr, String lhsVar, boolean concatFound) {
+                PsiReferenceExpression refExpr = methodCallExpr.getMethodExpression();
+                boolean concatFoundNow = false;
+                if (refExpr.getReferenceName() != null && refExpr.getReferenceName().equals("concat")) {
+                    concatFoundNow = true;
+                }
+
+                if (refExpr.getQualifierExpression() != null) {
+                    PsiExpression qualifierExpr = refExpr.getQualifierExpression();
+                    if (qualifierExpr.getText().equals(lhsVar) && (concatFound || concatFoundNow)) {
+                        return true;
+                    }
+                }
+
+                PsiExpression qualifierExpr = refExpr.getQualifierExpression();
+                if (qualifierExpr instanceof PsiMethodCallExpression) {
+                    PsiMethodCallExpression innerMethodCallExpr = (PsiMethodCallExpression) qualifierExpr;
+                    return inspectRhsMethod(innerMethodCallExpr, lhsVar, concatFound || concatFoundNow);
+                }
+
+                return false;
             }
 
             private void addFeedback(String filename, PsiStatement stat) {

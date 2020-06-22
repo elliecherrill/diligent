@@ -42,7 +42,7 @@ const HowTo = () => {
                 you want them, add details (such as the course name) if you wish and finally, save your configuration.
             </p>
             <div style={{display: 'flex', justifyContent: 'center'}}>
-                <video loop autoPlay muted style={{width: '65%'}}>
+                <video loop autoPlay muted playsinline style={{width: '110vh'}}>
                     <source src={createConfig} type='video/mp4'/>
                     Your browser does not support the video tag.
                 </video>
@@ -64,7 +64,7 @@ const HowTo = () => {
                 If no Diligent configuration file is found, the plugin will notify you and ask whether you want to use the default configuration.
             </p>
             <div style={{display: 'flex', justifyContent: 'center'}}>
-                <img src={downloadConfig} style={{width: '65%'}} alt={'how to download the config file'}/>
+                <img src={downloadConfig} style={{width: '110vh'}} alt={'how to download the config file'}/>
             </div>
 
             {/*STEP THREE: USE*/}
@@ -91,7 +91,7 @@ const HowTo = () => {
                 </ul>
             </p>
             <div style={{display: 'flex', justifyContent: 'center'}}>
-                <video loop autoPlay muted style={{width: '65%'}}>
+                <video loop autoPlay muted playsinline style={{width: '110vh'}}>
                     <source src={useDiligent} type='video/mp4'/>
                     Your browser does not support the video tag.
                 </video>

@@ -41,8 +41,8 @@ const HowTo = () => {
                 From the Diligent home screen, select 'Create a New Configuration'. Drag and drop the checks to where
                 you want them, add details (such as the course name) if you wish and finally, save your configuration.
             </p>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-                <video loop autoPlay muted playsinline style={{width: '110vh'}}>
+            <div style={{textAlign: 'center'}}>
+                <video loop autoPlay muted playsinline style={{width: '65%'}}>
                     <source src={createConfig} type='video/mp4'/>
                     Your browser does not support the video tag.
                 </video>
@@ -63,8 +63,8 @@ const HowTo = () => {
                 The diligent.json file which you downloaded must then be placed in the top level of your IntelliJ project.
                 If no Diligent configuration file is found, the plugin will notify you and ask whether you want to use the default configuration.
             </p>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-                <img src={downloadConfig} style={{width: '110vh'}} alt={'how to download the config file'}/>
+            <div style={{textAlign: 'center'}}>
+                <img src={downloadConfig} style={{width: '65%'}} alt={'how to download the config file'}/>
             </div>
 
             {/*STEP THREE: USE*/}
@@ -90,8 +90,8 @@ const HowTo = () => {
                     <li>Finally select OK, Restart IDE and Restart </li>
                 </ul>
             </p>
-            <div style={{display: 'flex', justifyContent: 'center'}}>
-                <video loop autoPlay muted playsinline style={{width: '110vh'}}>
+            <div style={{textAlign: 'center'}}>
+                <video loop autoPlay muted playsinline style={{width: '65%'}}>
                     <source src={useDiligent} type='video/mp4'/>
                     Your browser does not support the video tag.
                 </video>

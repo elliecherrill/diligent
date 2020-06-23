@@ -314,14 +314,6 @@ public final class CloneInspection extends AbstractBaseJavaLocalInspectionTool {
                                 FeedbackType.CLONE);
                         feedbackHolder.addFeedback(holder.getProject(), filename, feedbackId, feedback);
                         hasClone = true;
-                        //TODO: remove this after testing
-                        try {
-                            FileUtils.writeStringToFile(new File("clones.txt"),
-                                    "CODE BLOCK CLONE >> \n " + CodeCloneUtils.printCodeBlock(codeBlocks[i], cloneSequence.getFirst()) + " \n >> \n" + CodeCloneUtils.printCodeBlock(codeBlocks[blockIndex], cloneSequence.getSecond()) + "\n",
-                                    StandardCharsets.UTF_8, true);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
                     } else {
                         feedbackHolder.fixFeedback(holder.getProject(), filename, feedbackId);
                     }
